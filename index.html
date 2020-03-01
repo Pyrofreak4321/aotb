@@ -83,7 +83,7 @@
             w = new Worker("./worker.js");
         }
         // tell worker piece pool
-        w.postMessage([6,10,10,0,0,0,0]);
+        w.postMessage([6,6,6,0,0,0,0]);
         w.onmessage = function(event){
           goodTracks = event.data;
           working = false;
@@ -158,13 +158,9 @@
       <input type="button" class="_roundtop _roundbottom" name="" value="N"/>
       <input type="button" class="_roundtop _roundbottom" name="" value="C"/>
       <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="G"/>
-      <br>
-      Use <i>Start-Process "chrome.exe" "--allow-file-access-from-files"</i> from Windows powershell with all browsers closed
-      <br>
-      or run from server (node/php/apache)
     </span>
-    <span class="_floatingButton" style="top:10px; right:10px; text-align:center;">
-      <div class="_diamond">
+    <span class="_floatingButton" style="top:10px; right:10px; text-align:right;">
+      <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
         <div class="">
           <button type="button" class="" name="" style=""><span>&uarr;</span></button>
           <button type="button" class="" name="" style=""><span>&rarr;</span></button>
