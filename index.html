@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ANKI Track builder</title>
+  </head>
+  <script type="text/javascript">
+    var gridSize = 20;
+    var halfGrid = gridSize/2;
+
+    var context;
+    var canvas;
+    var body;
+    var goodTracks;
+    var trackIndex = 0;
+    var trackInterval;
+
+    var drawing = false;
+    var working = false;
+
+    //initalize
+    function onload(){
+      body = document.getElementById('body');
+      var h = body.clientHeight;
+      var w = body.clientWidth;
+      canvas = document.getElementById('canvas');
+      canvas.height = h;
+      canvas.width = w;
+      context = canvas.getContext('2d');
+      drawgrid();
+    }
+
+    //draw grid
+    function drawgrid(){
+      var h = body.clientHeight;
+      var w = body.clientWidth;
+
+      context.fillStyle = "#FFFFFF";
+
+      context.strokeStyle = "#AAAAAA";
+
+      context.fillRect(0,0,w,h);
+
+      context.beginPath();
+      for(var x = 0; x < w; x+=gridSize){
+        context.moveTo(x,0);
+        context.lineTo(x,h);
+      }
+      for(var y = 0; y < h; y+=gridSize){
+        context.moveTo(0,y);
+        context.lineTo(w,y);
+      }
+      context.stroke();
+    }
+
+    //draw track
+    function draw(track){
+      drawgrid()
+      offsetx = (canvas.width/2);
+      offsety = (canvas.height/2);
+      offsetx -= offsetx%gridSize;
+      offsety -= offsety%gridSize;
+      for(var i = 0; i < track.pieces.length; i++){
+        context.beginPath();
+        if(track.pieces[i].type == -1){
+          context.fillStyle = "#00FF00";
+        } else {
+          context.fillStyle = "rgb(256,"+(256-(track.pieces[i].type*50))+","+(256-(track.pieces[i].type*50))+")";
+        }
+        context.strokeStyle = "rgb(0,0,0)";
+        context.fillRect(offsetx+(track.pieces[i].pos[0]*gridSize),offsety+(track.pieces[i].pos[1]*gridSize),gridSize,gridSize);
+        context.moveTo(offsetx+(track.pieces[i].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[i].pos[1]*gridSize)+halfGrid);
+        context.lineTo(offsetx+(track.pieces[i].pos[0]*gridSize)+((track.pieces[i].dir[0]*halfGrid)+halfGrid),offsety+(track.pieces[i].pos[1]*gridSize)+((track.pieces[i].dir[1]*halfGrid))+halfGrid);
+        context.stroke();
+      }
+    }
+
+    //run track generation
+    function threadGen(){
+      if(!working){
+        working = true;
+        if (typeof(w) == "undefined") {
+            w = new Worker("./worker.js");
+        }
+        // tell worker piece pool
+        w.postMessage([6,10,10,0,0,0,0]);
+        w.onmessage = function(event){
+          goodTracks = event.data;
+          working = false;
+          //loop drawing good tracks
+          trackInterval = setInterval(function () {
+            if(!drawing){
+              drawing = true;
+              if(trackIndex < goodTracks.length) draw(goodTracks[trackIndex]);
+              trackIndex++;
+              if(trackIndex >= goodTracks.length){
+                trackIndex = 0;
+              }
+              drawing = false
+            }
+          }, 200);
+        };
+      }
+    }
+  </script>
+  <style media="screen">
+    body{
+      height: 100vh;
+      width: 100vw;
+      padding: 0;
+      margin: 0;
+    }
+    ._floatingButton{
+      position:fixed;
+    }
+
+    ._diamond {
+      transform: rotate(45deg);
+    }
+    ._diamond button{
+      padding: 0;
+      margin: 0 -2px;
+    }
+    ._diamond div {
+      height: 40px;
+    }
+    ._diamond span{
+      position: fixed;
+      transform: rotate(-45deg) translate(0px, -20px);
+      height: 40px;
+      width: 40px;
+    }
+
+    ._floatingButton input, ._floatingButton button{
+      background-color: orange;
+      border: none;
+      font-weight: bold;
+      font-size: 20px;
+      min-width: 40px;
+      min-height: 40px;
+      border-radius: 5px;
+    }
+
+    ._roundtop {
+      border-top-left-radius:50% !important;
+      border-top-right-radius:50% !important;
+    }
+    ._roundbottom {
+        border-bottom-left-radius:50% !important;
+        border-bottom-right-radius:50% !important;
+    }
+  </style>
+  <body id="body" onload="onload();">
+    <canvas id="canvas"></canvas>
+    <span class="_floatingButton" style="top:10px; left:10px;">
+      <input type="button" class="_roundtop _roundbottom" name="" value="S"/>
+      <input type="button" class="_roundtop _roundbottom" name="" value="L"/>
+      <input type="button" class="_roundtop _roundbottom" name="" value="N"/>
+      <input type="button" class="_roundtop _roundbottom" name="" value="C"/>
+      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="G"/>
+      <br>
+      Use <i>Start-Process "chrome.exe" "--allow-file-access-from-files"</i> from Windows powershell with all browsers closed
+      <br>
+      or run from server (node/php/apache)
+    </span>
+    <span class="_floatingButton" style="top:10px; right:10px; text-align:center;">
+      <div class="_diamond">
+        <div class="">
+          <button type="button" class="" name="" style=""><span>&uarr;</span></button>
+          <button type="button" class="" name="" style=""><span>&rarr;</span></button>
+        </div>
+        <div class="">
+          <button type="button" class="" name="" style=""><span>&larr;</span></button>
+          <button type="button" class="" name="" style=""><span>&darr;</span></button>
+        </div>
+      </div>
+      <input type="button" name="" class="_roundtop" value="+"/><br>
+      <input type="button" name="" class="_roundbottom" value="-"/><br>
+      <input type="button" name="" class="_roundtop _roundbottom" value="L"/><br>
+    </span>
+</body>
+</html>
