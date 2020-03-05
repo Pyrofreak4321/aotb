@@ -11,7 +11,7 @@
     var context;
     var canvas;
     var body;
-    var goodTracks;
+    var goodTracks = [];
     var trackIndex = 0;
     var trackInterval;
 
@@ -64,11 +64,26 @@
         context.beginPath();
         if(track.pieces[i].type == -1){
           context.fillStyle = "#00FF00";
+        } else if(track.pieces[i].type == 0){
+          context.fillStyle = "#FFFFFF";
+        } else if(track.pieces[i].type == 1){
+          context.fillStyle = "#ffa0a0";
+        } else if(track.pieces[i].type == 2){
+          context.fillStyle = "#ff5a5a";
+        } else if(track.pieces[i].type == 4){
+          context.fillStyle = "#FF00FF";
+        } else if(track.pieces[i].type == 6){
+          context.fillStyle = "#FFFF00";
         } else {
-          context.fillStyle = "rgb(256,"+(256-(track.pieces[i].type*50))+","+(256-(track.pieces[i].type*50))+")";
+          context.fillStyle = "#FFFFFF";
         }
+
         context.strokeStyle = "rgb(0,0,0)";
+
         context.fillRect(offsetx+(track.pieces[i].pos[0]*gridSize),offsety+(track.pieces[i].pos[1]*gridSize),gridSize,gridSize);
+        if(track.pieces[i].type == 4){
+          context.fillRect(offsetx+((track.pieces[i].pos[0]-track.pieces[i].dir[0])*gridSize),offsety+((track.pieces[i].pos[1]-track.pieces[i].dir[1])*gridSize),gridSize,gridSize);
+        }
         context.moveTo(offsetx+(track.pieces[i].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[i].pos[1]*gridSize)+halfGrid);
         context.lineTo(offsetx+(track.pieces[i].pos[0]*gridSize)+((track.pieces[i].dir[0]*halfGrid)+halfGrid),offsety+(track.pieces[i].pos[1]*gridSize)+((track.pieces[i].dir[1]*halfGrid))+halfGrid);
         context.stroke();
@@ -77,29 +92,87 @@
 
     //run track generation
     function threadGen(){
+      var time;
       if(!working){
         working = true;
+        if(trackInterval)clearInterval(trackInterval);
+        time = Date.now();
         if (typeof(w) == "undefined") {
-            w = new Worker("./worker.js");
+            w = new Worker("./generator.js");
         }
-        // tell worker piece pool
-        w.postMessage([6,6,6,0,0,0,0]);
-        w.onmessage = function(event){
-          goodTracks = event.data;
-          working = false;
-          //loop drawing good tracks
-          trackInterval = setInterval(function () {
-            if(!drawing){
-              drawing = true;
-              if(trackIndex < goodTracks.length) draw(goodTracks[trackIndex]);
-              trackIndex++;
-              if(trackIndex >= goodTracks.length){
-                trackIndex = 0;
-              }
-              drawing = false
+
+        function filter(track){
+          var good = true;
+          var path = track.path+track.path;
+          for(var y = 0; y < goodTracks.length && good; y++){
+            if(path.includes(goodTracks[y].path) && goodTracks[y].path.length == track.path.length){
+              good = false;
             }
-          }, 200);
-        };
+          }
+          if(good) {
+            goodTracks.push(track);
+          }
+        }
+        function stringify(p){
+          var s=' ';
+          switch (p.type) {
+            case -1:
+              s = 's';
+              break;
+            case 0:
+              s = 's';
+              break;
+            case 1:
+              s = 'c';
+              break;
+            case 2:
+              s = 'c';
+              break;
+            case 4:
+              s = 'j';
+              break;
+            case 6:
+              s = 'b';
+              break;
+          }
+          return s;
+        }
+        function drawGoodTracks(){
+          if(!drawing){
+            drawing = true;
+            if(trackIndex < goodTracks.length) draw(goodTracks[trackIndex]);
+            trackIndex++;
+            if(trackIndex >= goodTracks.length){
+              trackIndex = 0;
+            }
+            drawing = false
+          }
+        }
+
+        // tell worker piece pool
+        console.log('start');
+               //      S  L  R  r j i s
+        w.postMessage([10,10,10,0,0,0,0]);
+
+        w.onmessage = function(event){
+          if(event.data.type == 0){
+            for(var i = 0; i < event.data.track.pieces.length; i++){
+              event.data.track.path += stringify(event.data.track.pieces[i]);
+            }
+            filter(event.data.track);
+          }
+          else if(event.data.type == 1){
+            console.log('stop');
+            goodTracks = event.data.tracks;
+            console.log('time :' + (Date.now()-time));
+            console.log('tracks :' + goodTracks.length);
+
+            working = false;
+            // //loop drawing good tracks
+            if(trackInterval)clearInterval(trackInterval);
+            trackInterval = setInterval(drawGoodTracks, 100);
+          };
+        }
       }
     }
   </script>
