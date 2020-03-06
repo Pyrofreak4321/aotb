@@ -58,6 +58,7 @@ function testDir(track){
   return result;
 }
 
+
 function testRange(track){
   var dist = Math.abs(track.pieces[track.pieces.length-1].pos[0])+Math.abs(track.pieces[track.pieces.length-1].pos[1])-1;
   var range = 0;

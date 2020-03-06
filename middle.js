@@ -1,4 +1,4 @@
-var goodTracks, newTracks;
+var goodTracks, newTracks, garbage;
 var time;
 var working;
 
@@ -11,31 +11,33 @@ function filter(track){
     }
   }
   if(good) {
-    goodTracks.push(track);
-    newTracks.push(track);
+    goodTracks.push({path:track.path});
+    newTracks.push(JSON.stringify(track));
+  } else {
+    garbage++;
   }
 }
 function stringify(p){
   var s=' ';
-  switch (p.type) {
-    case -1:
-      s = 's';
-      break;
-    case 0:
-      s = 's';
-      break;
-    case 1:
-      s = 'c';
-      break;
-    case 2:
-      s = 'c';
-      break;
-    case 4:
-      s = 'j';
-      break;
-    case 6:
-      s = 'b';
-      break;
+    switch (p.type) {
+      case -1:
+        s = 's';
+        break;
+      case 0:
+        s = 's';
+        break;
+      case 1:
+        s = 'c';
+        break;
+      case 2:
+        s = 'c';
+        break;
+      case 4:
+        s = 'j';
+        break;
+      case 6:
+        s = 'b';
+        break;
   }
   return s;
 }
@@ -45,6 +47,7 @@ onmessage = function(e) {
   if(!working){
     var passtimer = Date.now();
     var delay = 1000;
+    garbage = 0;
     goodTracks = [];
     newTracks = [];
     working = true;
@@ -66,7 +69,9 @@ onmessage = function(e) {
         filter(event.data.track);
         if((Date.now()-passtimer) > delay){
             postMessage({type: 0, tracks: newTracks});
+            console.log('trash :'+garbage);
             newTracks = [];
+            garbage = 0;
             passtimer = Date.now();
             delay=5000;
         }

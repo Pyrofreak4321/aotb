@@ -7,10 +7,6 @@
   <script type="text/javascript">
     var gridSize = 30;
     var halfGrid = gridSize/2;
-
-    var context;
-    var canvas;
-    var body;
     var goodTracks = [];
     var trackIndex = 0;
     var trackInterval;
@@ -20,20 +16,22 @@
 
     //initalize
     function onload(){
-      body = document.getElementById('body');
+      var body = document.getElementById('body');
       var h = body.clientHeight;
       var w = body.clientWidth;
-      canvas = document.getElementById('canvas');
+      var canvas = document.getElementById('canvas');
       canvas.height = h;
       canvas.width = w;
-      context = canvas.getContext('2d');
       drawgrid();
     }
 
     //draw grid
     function drawgrid(){
+      var body = document.getElementById('body');
       var h = body.clientHeight;
       var w = body.clientWidth;
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
 
       context.fillStyle = "#FFFFFF";
 
@@ -46,6 +44,8 @@
         context.moveTo(x,0);
         context.lineTo(x,h);
       }
+      context.stroke();
+      context.beginPath();
       for(var y = 0; y < h; y+=gridSize){
         context.moveTo(0,y);
         context.lineTo(w,y);
@@ -55,6 +55,11 @@
 
     //draw track
     function draw(track){
+      var body = document.getElementById('body');
+      var h = body.clientHeight;
+      var w = body.clientWidth;
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
       drawgrid()
       offsetx = (canvas.width/2);
       offsety = (canvas.height/2);
@@ -96,59 +101,23 @@
       if(!working){
         goodTracks = [];
         working = true;
-        if(trackInterval)clearInterval(trackInterval);
-        trackInterval = setInterval(drawGoodTracks, 500);
+        // if(trackInterval)clearInterval(trackInterval);
+        // trackInterval = setInterval(drawGoodTracks, 500);
 
         time = Date.now();
         if (typeof(w) == "undefined") {
             w = new Worker("./middle.js");
         }
 
-        function filter(track){
-          var good = true;
-          var path = track.path+track.path;
-          for(var y = 0; y < goodTracks.length && good; y++){
-            if(path.includes(goodTracks[y].path) && goodTracks[y].path.length == track.path.length){
-              good = false;
-            }
-          }
-          if(good) {
-            goodTracks.push(track);
-          }
-        }
-        function stringify(p){
-          var s=' ';
-          switch (p.type) {
-            case -1:
-              s = 's';
-              break;
-            case 0:
-              s = 's';
-              break;
-            case 1:
-              s = 'c';
-              break;
-            case 2:
-              s = 'c';
-              break;
-            case 4:
-              s = 'j';
-              break;
-            case 6:
-              s = 'b';
-              break;
-          }
-          return s;
-        }
         function drawGoodTracks(){
           if(!drawing){
             drawing = true;
-            if(trackIndex < goodTracks.length) draw(goodTracks[trackIndex]);
+            if(trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
             trackIndex++;
             if(trackIndex >= goodTracks.length){
               trackIndex = 0;
             }
-            drawing = false
+            drawing = false;
           }
         }
 
@@ -160,7 +129,9 @@
         w.onmessage = function(event){
           if(event.data.type == 0){
             goodTracks = goodTracks.concat(event.data.tracks);
-            console.log('tracks :' + event.data.tracks.length);
+            console.log('tracks :' + event.data.tracks.length+'/'+goodTracks.length);
+            trackIndex = goodTracks.length-1;
+            drawGoodTracks()
           }
           else if(event.data.type == 1){
           //  goodTracks = event.data.tracks;
