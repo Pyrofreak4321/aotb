@@ -175,11 +175,11 @@ function storeTrack(track){
     pieces: JSON.parse(JSON.stringify(track.pieces)),
     path:'',
   };
-  for(var i = 0; i < item.pieces.length; i++){
-    item.path += stringify(item.pieces[i]);
-  }
-  filter(item);
-  // postMessage({type: 0, track: item});
+  // for(var i = 0; i < item.pieces.length; i++){
+  //   item.path += stringify(item.pieces[i]);
+  // }
+  //filter(item);
+  postMessage({type: 0, track: item});
 }
 
 //adds peoce to track
@@ -290,5 +290,5 @@ onmessage = function(e) {
   }while(doGenRes >= 0);
 
   //send good tracks back
-  postMessage({type: 1, tracks: goodTracks});
+  postMessage({type: 1});
 };
