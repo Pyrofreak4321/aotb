@@ -1,5 +1,6 @@
-
+var dead, dupe;
 var goodTracks = [];
+var newTracks = [];
 var ready = true;
 
 //rotate left
@@ -57,7 +58,6 @@ function testDir(track){
   }
   return result;
 }
-
 
 function testRange(track){
   var dist = Math.abs(track.pieces[track.pieces.length-1].pos[0])+Math.abs(track.pieces[track.pieces.length-1].pos[1])-1;
@@ -159,28 +159,33 @@ function stringify(p){
 
 function filter(item){
   var good = true;
-  var path = item.path+item.path;
+  var itemPath = '';
+  for(var i = 0; i < item.pieces.length; i++){
+    itemPath += stringify(item.pieces[i]);
+  }
+  var path = itemPath+itemPath;
   for(var y = 0; y < goodTracks.length && good; y++){
-    if(goodTracks[y].path.length == item.path.length && path.includes(goodTracks[y].path) ){
+    if(goodTracks[y].length == itemPath.length && path.includes(goodTracks[y]) ){
       good = false;
     }
   }
   if(good){
-    goodTracks.push(item);
+    goodTracks.push(itemPath);
+    newTracks.push(JSON.stringify({pieces: item.pieces}));
     //postMessage({type: 0, tracks: item});
+  }else {
+    dupe++;
   }
 }
 
 function storeTrack(track){
-  var item = {
-    pieces: JSON.parse(JSON.stringify(track.pieces)),
-    path:'',
-  };
-  // for(var i = 0; i < item.pieces.length; i++){
-  //   item.path += stringify(item.pieces[i]);
-  // }
-  //filter(item);
-  postMessage({type: 0, track: item});
+  filter(track);
+  if(newTracks.length >= 1000){
+    postMessage({type: 0, tracks: newTracks});
+    newTracks = [];
+    console.log('invalid : ' + dead);
+    console.log('dupes : ' + dupe);
+  }
 }
 
 //adds peoce to track
@@ -230,6 +235,7 @@ function addPiece(track, type){
     return nextPiece(track,-1);
   }
   else{
+    dead++;
     return -1;
   }
 }
@@ -275,7 +281,9 @@ var doGenRes = 0;
 //when the worker gets the pool
 onmessage = function(e) {
   goodTracks = [];
-
+  newTracks = [];
+  dupe = 0; dead = 0;
+  
   var newTrack = {
     pool : e.data,
     pieces:[{
@@ -291,5 +299,7 @@ onmessage = function(e) {
   }while(doGenRes >= 0);
 
   //send good tracks back
-  postMessage({type: 1});
+  postMessage({type: 1, tracks: newTracks});
+  console.log('invalid : ' + dead);
+  console.log('dupes : ' + dupe);
 };
