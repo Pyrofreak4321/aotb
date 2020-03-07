@@ -7,6 +7,12 @@ var trackInterval;
 var drawing = false;
 var working = false;
 
+var STRAIGHT = 2;
+var LEFT = 1;
+var RIGHT = 0;
+var JUMP = 3;
+var BOOST = 4;
+
 //initalize
 function onload(){
   var body = document.getElementById('body');
@@ -67,22 +73,22 @@ function draw(track){
 
     if(track.pieces[i].type == -1){
       context.fillStyle = "#00FF00";
-    } else if(track.pieces[i].type == 0){
+    } else if(track.pieces[i].type == STRAIGHT){
       context.fillStyle = "#FFFFFF";
-    } else if(track.pieces[i].type == 1){
+    } else if(track.pieces[i].type == LEFT){
       context.fillStyle = "#ffa0a0";
-    } else if(track.pieces[i].type == 2){
+    } else if(track.pieces[i].type == RIGHT){
       context.fillStyle = "#ff5a5a";
-    } else if(track.pieces[i].type == 4){
+    } else if(track.pieces[i].type == JUMP){
       context.fillStyle = "#FF00FF";
-    } else if(track.pieces[i].type == 6){
+    } else if(track.pieces[i].type == BOOST){
       context.fillStyle = "#FFFF00";
     } else {
       context.fillStyle = "#FFFFFF";
     }
 
     context.fillRect(offsetx+(track.pieces[i].pos[0]*gridSize),offsety+(track.pieces[i].pos[1]*gridSize),gridSize,gridSize);
-    if(track.pieces[i].type == 4){
+    if(track.pieces[i].type == JUMP){
       context.fillRect(offsetx+((track.pieces[i].pos[0]-track.pieces[i].dir[0])*gridSize),offsety+((track.pieces[i].pos[1]-track.pieces[i].dir[1])*gridSize),gridSize,gridSize);
     }
   }
@@ -130,8 +136,8 @@ function threadGen(){
 
     // tell worker piece pool
     console.log('start');
-    //             S L  R  r j i s
     w.postMessage([8,8,8,0,4,0,0]);
+    //             L R S J B //r j i s
 
     w.onmessage = function(event){
       if(event.data.type == 0){

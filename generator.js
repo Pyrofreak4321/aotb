@@ -2,6 +2,13 @@ var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
 var ready = true;
+var consecStraight = 0;
+
+var STRAIGHT = 2;
+var LEFT = 0;
+var RIGHT = 1;
+var JUMP = 3;
+var BOOST = 4;
 
 //rotate left
 function left(dir){
@@ -78,12 +85,12 @@ function testRange(track){
 
 function testHit(piece, type, pos, dir){
   var hit = 1;
-  if((piece.pos[0] == pos[0] && piece.pos[1] == pos[1]) || (piece.type == 4 && ((piece.pos[0]-piece.dir[0]) == pos[0] && (piece.pos[1]-piece.dir[1]) == pos[1]))){
+  if((piece.pos[0] == pos[0] && piece.pos[1] == pos[1]) || (piece.type == JUMP && ((piece.pos[0]-piece.dir[0]) == pos[0] && (piece.pos[1]-piece.dir[1]) == pos[1]))){
     hit = 0;
-    if(type != 4 && (piece.type == -1 && piece.dir[0] == dir[0] && piece.dir[1] == dir[1])){
+    if(type != JUMP && (piece.type == -1 && piece.dir[0] == dir[0] && piece.dir[1] == dir[1])){
       hit = -1;
     }
-    else if(((piece.type == 4 && type != 4)||(piece.type != 4 && type == 4)) && ((piece.dir[0]==0 && dir[0] != 0)||(piece.dir[1]==0 && dir[1] != 0))){
+    else if(((piece.type == JUMP && type != JUMP)||(piece.type != JUMP && type == JUMP)) && ((piece.dir[0]==0 && dir[0] != 0)||(piece.dir[1]==0 && dir[1] != 0))){
       hit = 1;
     }
   }
@@ -100,7 +107,7 @@ function posOpen(track, type){
      hit = testHit(track.pieces[i], type, pos, lastpiece.dir);
   }
 
-  if(type == 4 && hit == 1){
+  if(type == JUMP && hit == 1){
     pos[0] += lastpiece.dir[0];
     pos[1] += lastpiece.dir[1];
     for(var ii = 0; ii < track.pieces.length && hit==1; ii++){
@@ -143,19 +150,19 @@ function stringify(p){
     case -1:
       s = 's';
       break;
-    case 0:
+    case STRAIGHT:
       s = 's';
       break;
-    case 1:
+    case LEFT:
       s = 'c';
       break;
-    case 2:
+    case RIGHT:
       s = 'c';
       break;
-    case 4:
+    case JUMP:
       s = 'j';
       break;
-    case 6:
+    case BOOST:
       s = 'b';
       break;
   }
@@ -188,8 +195,6 @@ function storeTrack(track){
   if(newTracks.length >= 1000){
     postMessage({type: 0, tracks: newTracks});
     newTracks = [];
-    console.log('invalid : ' + dead);
-    console.log('dupes : ' + dupe);
   }
 }
 
@@ -198,7 +203,8 @@ function addPiece(track, type){
   var result = posOpen(track,type);
   if(result==1){
     var lastpiece = track.pieces[track.pieces.length-1];
-    if(type == 0 || type == 6){
+    if(type == STRAIGHT){
+      consecStraight++;
       track.pieces.push({
         type:type,
         pos:[lastpiece.pos[0]+lastpiece.dir[0],lastpiece.pos[1]+lastpiece.dir[1]],
@@ -206,25 +212,28 @@ function addPiece(track, type){
       });
       track.pool[type]--;
     }
-    else if(type == 1){
+    else if(type == LEFT){
+      consecStraight = 0;
       track.pieces.push({
         type:type,
         pos:[lastpiece.pos[0]+lastpiece.dir[0],lastpiece.pos[1]+lastpiece.dir[1]],
         dir: left(lastpiece.dir),
       });
-      track.pool[type]--;
-      track.pool[type+1]--;
+      track.pool[LEFT]--;
+      track.pool[RIGHT]--;
     }
-    else if(type == 2){
+    else if(type == RIGHT){
+      consecStraight = 0;
       track.pieces.push({
         type:type,
         pos:[lastpiece.pos[0]+lastpiece.dir[0],lastpiece.pos[1]+lastpiece.dir[1]],
         dir: right(lastpiece.dir),
       });
-      track.pool[type]--;
-      track.pool[type-1]--;
+      track.pool[LEFT]--;
+      track.pool[RIGHT]--;
     }
-    else if(type == 4){
+    else if(type == JUMP){
+      consecStraight = 0;
       track.pieces.push({
         type:type,
         pos:[lastpiece.pos[0]+(lastpiece.dir[0]*2),lastpiece.pos[1]+(lastpiece.dir[1]*2)],
@@ -250,10 +259,10 @@ function pop(track){
   var piece = track.pieces.pop();
   track.pool[piece.type]++;
   //acount for corners
-  if(piece.type==1){
-    track.pool[piece.type+1]++;
-  } else if(piece.type == 2){
-    track.pool[piece.type-1]++;
+  if(piece.type==LEFT){
+    track.pool[RIGHT]++;
+  } else if(piece.type == RIGHT){
+    track.pool[LEFT]++;
   }
   var type = nextPiece(track, piece.type);
   if(type < track.pool.length && track.pool[type] > 0){
@@ -285,6 +294,7 @@ var doGenRes = 0;
 
 //when the worker gets the pool
 onmessage = function(e) {
+  consecStraight = 0;
   goodTracks = [];
   newTracks = [];
   dupe = 0; dead = 0;
@@ -304,7 +314,5 @@ onmessage = function(e) {
   }while(doGenRes >= 0);
 
   //send good tracks back
-  postMessage({type: 1, tracks: newTracks});
-  console.log('invalid : ' + dead);
-  console.log('dupes : ' + dupe);
+  postMessage({type: 1, tracks: newTracks, dupes:dupe, invalid: dead});
 };
