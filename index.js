@@ -118,6 +118,37 @@ function drawGoodTracks(){
   }
 }
 
+
+var pools = [];
+
+for(var j = 0; j <= 2; j++){
+  for(var s = 3; s <= 11; s+=2){
+    for(var c = 4; c <= 12; c+=2){
+      pools.push([c,c,s,j,0,0,0]);
+    }
+    c = 4;
+  }
+  s = 3;
+}
+
+var poolIndex = 0;
+var csv = 'Corners,Straights,Jumps,Boosts,Intersections,Ramps,Tracks,Duplicates,Invalids,Time (sec)\n';
+var csvTime = 0;
+var lastSave = 0;
+
+setInterval(function(){
+    if(lastSave!=poolIndex){
+      lastSave = poolIndex;
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+      element.setAttribute('download', 'results-run-'+poolIndex+'.csv');
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+}, 60000);
+
 //run track generation
 function threadGen(){
   var time;
@@ -136,8 +167,8 @@ function threadGen(){
 
     // tell worker piece pool
     console.log('start');
-    w.postMessage([8,8,8,0,4,0,0]);
     //             L R S J B //r j i s
+    w.postMessage(pools[poolIndex]);
 
     w.onmessage = function(event){
       if(event.data.type == 0){
@@ -148,10 +179,37 @@ function threadGen(){
       else if(event.data.type == 1){
         goodTracks = goodTracks.concat(event.data.tracks);
         console.log('stop');
-        console.log('time :' + (Date.now()-time));
-        console.log('tracks :' + goodTracks.length);
+        console.log('pieces: '+pools[poolIndex].slice(1).join(','));
+        console.log('time: ' + (Date.now()-time));
+        console.log('tracks: ' + goodTracks.length);
+
+        csv += pools[poolIndex].slice(1).join(',')+',';
+        csv += goodTracks.length+',';
+        csv += event.data.dupes+',';
+        csv += event.data.invalid/1000+'k,';
+        csv += ((Date.now()-time)/1000)+'\n';
+
+        if((Date.now()-csvTime) > 10000){
+          lastSave = poolIndex;
+          var element = document.createElement('a');
+          element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+          element.setAttribute('download', 'results-run-'+poolIndex+'.csv');
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+          csvTime = Date.now();
+        }
+
 
         working = false;
+
+        poolIndex++;
+        setTimeout(function () {
+          if(poolIndex < pools.length) {
+            threadGen();
+          }
+        }, 100);
         //loop drawing good tracks
         // if(trackInterval)clearInterval(trackInterval);
         // trackInterval = setInterval(drawGoodTracks, 500);
