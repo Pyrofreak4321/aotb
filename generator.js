@@ -3,6 +3,7 @@ var goodTracks = [];
 var newTracks = [];
 var ready = true;
 var consecStraight = 0;
+var imAlive = 0;
 
 var STRAIGHT = 2;
 var LEFT = 0;
@@ -195,6 +196,7 @@ function storeTrack(track){
   if(newTracks.length >= 1000){
     postMessage({type: 0, tracks: newTracks});
     newTracks = [];
+    imAlive = Date.now();
   }
 }
 
@@ -279,6 +281,11 @@ function doGen(track,type){
   if(result >= 0 && type < track.pool.length && track.pool[result] > 0){
     return result;
   } else {
+    if((Date.now() - imAlive) > 30000)
+    {
+      console.log('i\'m Alive');
+      imAlive = Date.now();
+    }
     do{
       result = pop(track);
     }while(result < 0 && track.pieces.length > 0);
@@ -294,6 +301,7 @@ var doGenRes = 0;
 
 //when the worker gets the pool
 onmessage = function(e) {
+  imAlive = Date.now();
   consecStraight = 0;
   goodTracks = [];
   newTracks = [];
