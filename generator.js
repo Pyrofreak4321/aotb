@@ -76,30 +76,35 @@ function testRange(track){
   }
 }
 
+function testHit(piece, type, pos, dir){
+  var hit = 1;
+  if((piece.pos[0] == pos[0] && piece.pos[1] == pos[1]) || (piece.type == 4 && ((piece.pos[0]-piece.dir[0]) == pos[0] && (piece.pos[1]-piece.dir[1]) == pos[1]))){
+    hit = 0;
+    if(type != 4 && (piece.type == -1 && piece.dir[0] == dir[0] && piece.dir[1] == dir[1])){
+      hit = -1;
+    }
+    else if(((piece.type == 4 && type != 4)||(piece.type != 4 && type == 4)) && ((piece.dir[0]==0 && dir[0] != 0)||(piece.dir[1]==0 && dir[1] != 0))){
+      hit = 1;
+    }
+  }
+  return hit;
+}
+
 //check if slot is open
 function posOpen(track, type){
   var lastpiece = track.pieces[track.pieces.length-1];
   var hit = 1;
   var pos = [lastpiece.pos[0]+lastpiece.dir[0],lastpiece.pos[1]+lastpiece.dir[1]];
+
   for(var i = 0; i < track.pieces.length && hit==1; i++){
-    if(track.pieces[i].pos[0] == pos[0] && track.pieces[i].pos[1] == pos[1]){
-      hit = 0;
-      //check if is start piece
-      if(type != 4 && (track.pieces[i].type == -1 && track.pieces[i].dir[0] == lastpiece.dir[0] && track.pieces[i].dir[1] == lastpiece.dir[1])){
-        hit = -1;
-      }
-    } else if(track.pieces[i].type == 4 && ((track.pieces[i].pos[0]-track.pieces[i].dir[0])== pos[0] && (track.pieces[i].pos[1]-track.pieces[i].dir[1]) == pos[1])){
-      hit = 0;
-    }
+     hit = testHit(track.pieces[i], type, pos, lastpiece.dir);
   }
 
   if(type == 4 && hit == 1){
     pos[0] += lastpiece.dir[0];
     pos[1] += lastpiece.dir[1];
     for(var ii = 0; ii < track.pieces.length && hit==1; ii++){
-      if(track.pieces[ii].pos[0] == pos[0] && track.pieces[ii].pos[1] == pos[1]){
-        hit = 0;
-      }
+      hit = testHit(track.pieces[ii], type, pos, lastpiece.dir);
     }
   }
 
@@ -283,7 +288,7 @@ onmessage = function(e) {
   goodTracks = [];
   newTracks = [];
   dupe = 0; dead = 0;
-  
+
   var newTrack = {
     pool : e.data,
     pieces:[{

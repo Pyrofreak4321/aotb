@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
     <title>ANKI Track builder</title>
   </head>
-  <script type="text/javascript" src="index.js"></script>
   <style media="screen">
     body{
       height: 100vh;
@@ -52,7 +51,7 @@
         border-bottom-right-radius:50% !important;
     }
   </style>
-  <body id="body" onload="onload();">
+  <body id="body" onload="onload();" onkeydown="shift(event)">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:10px; left:10px;">
       <input type="button" class="_roundtop _roundbottom" name="" value="S"/>
@@ -76,5 +75,8 @@
       <input type="button" name="" class="_roundbottom" value="-"/><br>
       <input type="button" name="" class="_roundtop _roundbottom" value="L"/><br>
     </span>
-</body>
+  </body>
+
+  <script type="text/javascript" src="index.js"></script>
+  <script type="text/javascript" src="generator.js"></script>
 </html>

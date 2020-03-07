@@ -59,7 +59,12 @@ function draw(track){
   offsetx -= offsetx%gridSize;
   offsety -= offsety%gridSize;
   context.beginPath();
+  context.strokeStyle = "#000000";
+  context.lineWidth = 5;
+  context.lineCap = "round";
+  context.globalAlpha = 0.5;
   for(var i = 0; i < track.pieces.length; i++){
+
     if(track.pieces[i].type == -1){
       context.fillStyle = "#00FF00";
     } else if(track.pieces[i].type == 0){
@@ -76,30 +81,33 @@ function draw(track){
       context.fillStyle = "#FFFFFF";
     }
 
-    context.strokeStyle = "rgb(0,0,0)";
-
     context.fillRect(offsetx+(track.pieces[i].pos[0]*gridSize),offsety+(track.pieces[i].pos[1]*gridSize),gridSize,gridSize);
     if(track.pieces[i].type == 4){
       context.fillRect(offsetx+((track.pieces[i].pos[0]-track.pieces[i].dir[0])*gridSize),offsety+((track.pieces[i].pos[1]-track.pieces[i].dir[1])*gridSize),gridSize,gridSize);
     }
+  }
+  context.globalAlpha = 1;
+
+  context.beginPath();
+  for(var i = 0; i < track.pieces.length; i++){
     context.moveTo(offsetx+(track.pieces[i].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[i].pos[1]*gridSize)+halfGrid);
-    context.lineTo(offsetx+(track.pieces[i].pos[0]*gridSize)+((track.pieces[i].dir[0]*halfGrid)+halfGrid),offsety+(track.pieces[i].pos[1]*gridSize)+((track.pieces[i].dir[1]*halfGrid))+halfGrid);
+    context.lineTo(offsetx+(track.pieces[i].pos[0]*gridSize)+((track.pieces[i].dir[0]*gridSize)+halfGrid),offsety+(track.pieces[i].pos[1]*gridSize)+((track.pieces[i].dir[1]*gridSize))+halfGrid);
   }
   context.stroke();
+  context.lineWidth = 1;
 
 }
 
 function drawGoodTracks(){
   if(!drawing){
+    drawing = true;
     if(trackIndex < 0){
       trackIndex = 0;
     }
-    drawing = true;
-    if(trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
-    trackIndex++;
     if(trackIndex >= goodTracks.length){
       trackIndex = 0;
     }
+    if(trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
     drawing = false;
   }
 }
@@ -110,8 +118,10 @@ function threadGen(){
   if(!working){
     goodTracks = [];
     working = true;
+    trackIndex = 0;
+
     if(trackInterval)clearInterval(trackInterval);
-    trackInterval = setInterval(drawGoodTracks, 200);
+    trackInterval = setInterval(function(){drawGoodTracks(); trackIndex++;}, 100);
 
     time = Date.now();
     if (typeof(w) == "undefined") {
@@ -120,12 +130,12 @@ function threadGen(){
 
     // tell worker piece pool
     console.log('start');
-    //             S  L  R  r j i s
-    w.postMessage([6,10,10,0,2,0,0]);
+    //             S L  R  r j i s
+    w.postMessage([8,8,8,0,4,0,0]);
 
     w.onmessage = function(event){
       if(event.data.type == 0){
-        trackIndex = goodTracks.length-1;
+        //trackIndex = goodTracks.length-1;
         goodTracks = goodTracks.concat(event.data.tracks);
         console.log('tracks :' + goodTracks.length);
       }
@@ -137,9 +147,35 @@ function threadGen(){
 
         working = false;
         //loop drawing good tracks
-        if(trackInterval)clearInterval(trackInterval);
-        trackInterval = setInterval(drawGoodTracks, 100);
+        // if(trackInterval)clearInterval(trackInterval);
+        // trackInterval = setInterval(drawGoodTracks, 500);
       }
     };
+  }
+}
+
+function shift(event){
+  var x = event.keyCode;
+  if(x == 37){
+    if(trackInterval){
+      clearInterval(trackInterval);
+      trackInterval = null;
+    }
+    trackIndex--;
+    drawGoodTracks();
+  } else if (x == 39){
+    if(trackInterval){
+      clearInterval(trackInterval);
+      trackInterval = null;
+    }
+    trackIndex++;
+    drawGoodTracks();
+  } else if (x == 32){
+    if(trackInterval){
+      clearInterval(trackInterval);
+      trackInterval = null;
+    }
+    else
+      trackInterval = setInterval(function(){drawGoodTracks(); trackIndex++;}, 100);
   }
 }
