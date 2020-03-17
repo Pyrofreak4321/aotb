@@ -11,7 +11,9 @@ var STRAIGHT = 2;
 var LEFT = 1;
 var RIGHT = 0;
 var JUMP = 3;
-var BOOST = 4;
+var RAMP = 4;
+var INTERSECTION = 5;
+var BOOST = 6;
 
 //initalize
 function onload(){
@@ -64,44 +66,55 @@ function draw(track){
   offsety = (canvas.height/2);
   offsetx -= offsetx%gridSize;
   offsety -= offsety%gridSize;
-  context.beginPath();
-  context.strokeStyle = "#000000";
-  context.lineWidth = 5;
-  context.lineCap = "round";
-  context.globalAlpha = 0.5;
-  for(var i = 0; i < track.pieces.length; i++){
 
-    if(track.pieces[i].type == -1){
-      context.fillStyle = "#00FF00";
-    } else if(track.pieces[i].type == STRAIGHT){
-      context.fillStyle = "#FFFFFF";
-    } else if(track.pieces[i].type == LEFT){
-      context.fillStyle = "#ffa0a0";
-    } else if(track.pieces[i].type == RIGHT){
-      context.fillStyle = "#ff5a5a";
-    } else if(track.pieces[i].type == JUMP){
-      context.fillStyle = "#FF00FF";
-    } else if(track.pieces[i].type == BOOST){
-      context.fillStyle = "#FFFF00";
-    } else {
-      context.fillStyle = "#FFFFFF";
+  for (var i = 0; i <= 1; i++) {
+    context.lineWidth = 5;
+    context.lineCap = "round";
+    context.globalAlpha = 0.5;
+    for(var s = 0; s < track.pieces.length; s++){
+      if(track.pieces[s].pos[2]==i){
+        if(track.pieces[s].type == -1){
+          context.fillStyle = "#00FF00";
+        } else if(track.pieces[s].type == STRAIGHT){
+          context.fillStyle = "#FFFFFF";
+        } else if(track.pieces[s].type == LEFT){
+          context.fillStyle = "#ffa0a0";
+        } else if(track.pieces[s].type == RIGHT){
+          context.fillStyle = "#ff5a5a";
+        } else if(track.pieces[s].type == JUMP){
+          context.fillStyle = "#FF00FF";
+        } else if(track.pieces[s].type == RAMP){
+          context.fillStyle = "#0000FF";
+        } else if(track.pieces[s].type == BOOST){
+          context.fillStyle = "#FFFF00";
+        } else if(track.pieces[s].type == INTERSECTION){
+          context.fillStyle = "#606060";
+        } else {
+          context.fillStyle = "#FFFFFF";
+        }
+
+        context.fillRect(offsetx+(track.pieces[s].pos[0]*gridSize),offsety+(track.pieces[s].pos[1]*gridSize),gridSize,gridSize);
+        if(track.pieces[s].type == JUMP){
+          context.fillRect(offsetx+((track.pieces[s].pos[0]-track.pieces[s].dir[0])*gridSize),offsety+((track.pieces[s].pos[1]-track.pieces[s].dir[1])*gridSize),gridSize,gridSize);
+        }
+      }
     }
-
-    context.fillRect(offsetx+(track.pieces[i].pos[0]*gridSize),offsety+(track.pieces[i].pos[1]*gridSize),gridSize,gridSize);
-    if(track.pieces[i].type == JUMP){
-      context.fillRect(offsetx+((track.pieces[i].pos[0]-track.pieces[i].dir[0])*gridSize),offsety+((track.pieces[i].pos[1]-track.pieces[i].dir[1])*gridSize),gridSize,gridSize);
+    context.globalAlpha = 1;
+    for(var l = 0; l < track.pieces.length; l++){
+      if(track.pieces[l].pos[2]==i){
+        context.beginPath();
+        if(track.pieces[l].pos[2]==1){
+          context.strokeStyle = "#0000af";
+        } else {
+          context.strokeStyle = "#000000";
+        }
+        context.moveTo(offsetx+(track.pieces[l].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[l].pos[1]*gridSize)+halfGrid);
+        context.lineTo(offsetx+(track.pieces[l].pos[0]*gridSize)+((track.pieces[l].dir[0]*gridSize)+halfGrid),offsety+(track.pieces[l].pos[1]*gridSize)+((track.pieces[l].dir[1]*gridSize))+halfGrid);
+        context.stroke();
+      }
     }
+    context.lineWidth = 1;
   }
-  context.globalAlpha = 1;
-
-  context.beginPath();
-  for(var i = 0; i < track.pieces.length; i++){
-    context.moveTo(offsetx+(track.pieces[i].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[i].pos[1]*gridSize)+halfGrid);
-    context.lineTo(offsetx+(track.pieces[i].pos[0]*gridSize)+((track.pieces[i].dir[0]*gridSize)+halfGrid),offsety+(track.pieces[i].pos[1]*gridSize)+((track.pieces[i].dir[1]*gridSize))+halfGrid);
-  }
-  context.stroke();
-  context.lineWidth = 1;
-
 }
 
 function drawGoodTracks(){
@@ -136,8 +149,8 @@ function threadGen(){
 
     // tell worker piece pool
     console.log('start');
-    w.postMessage([8,8,8,0,4,0,0]);
-    //             L R S J B //r j i s
+    w.postMessage([10,10,10,2,4,2,0]);
+    //             L R S J R X B
 
     w.onmessage = function(event){
       if(event.data.type == 0){
