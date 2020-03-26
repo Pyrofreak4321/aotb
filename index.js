@@ -107,7 +107,7 @@ function draw(track){
         }
       }
     }
-    context.globalAlpha = 1;
+    //context.globalAlpha = 1;
     for(var l = 0; l < track.pieces.length; l++){
       if(track.pieces[l].pos[2]==i){
         if(i == (focusLayer - 1)) 
