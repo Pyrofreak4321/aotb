@@ -15,6 +15,8 @@ var RAMP = 4;
 var INTERSECTION = 5;
 var BOOST = 6;
 
+var focusLayer = 0;
+
 //initalize
 function onload(){
   var body = document.getElementById('body');
@@ -34,6 +36,8 @@ function drawgrid(){
   var canvas = document.getElementById('canvas');
   var context = canvas.getContext('2d');
 
+  context.globalAlpha = 1;
+  
   context.fillStyle = "#FFFFFF";
 
   context.strokeStyle = "#AAAAAA";
@@ -70,9 +74,13 @@ function draw(track){
   for (var i = 0; i <= 1; i++) {
     context.lineWidth = 5;
     context.lineCap = "round";
-    context.globalAlpha = 0.5;
+    //context.globalAlpha = 0.5;
     for(var s = 0; s < track.pieces.length; s++){
       if(track.pieces[s].pos[2]==i){
+        if(i == (focusLayer - 1)) 
+          context.globalAlpha = 0.125;
+        else
+          context.globalAlpha = 0.5;
         if(track.pieces[s].type == -1){
           context.fillStyle = "#00FF00";
         } else if(track.pieces[s].type == STRAIGHT){
@@ -102,6 +110,10 @@ function draw(track){
     context.globalAlpha = 1;
     for(var l = 0; l < track.pieces.length; l++){
       if(track.pieces[l].pos[2]==i){
+        if(i == (focusLayer - 1)) 
+          context.globalAlpha = 0.25;
+        else
+          context.globalAlpha = 1;
         context.beginPath();
         if(track.pieces[l].pos[2]==1){
           context.strokeStyle = "#0000af";
@@ -129,6 +141,21 @@ function drawGoodTracks(){
     if(trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
     drawing = false;
   }
+}
+
+function switchLayer(){
+	/* 
+	* fL 0 = No focused layer
+	* fL 1 = Darken first layer
+	* fL 2 = Darken second layer
+	* 
+  * Adding 2 and using modulus to make button order:
+	* First press = first layer focus
+	* Second press = second layer focus
+	* Third press = no focus
+  * Repeat
+	*/
+	focusLayer = (focusLayer + 2) % 3;
 }
 
 //run track generation
