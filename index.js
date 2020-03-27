@@ -18,6 +18,8 @@ var BOOST = 6;
 
 var focusLayer = 0;
 var scale = 1;
+var panX = 0;
+var panY = 0;
 
 //initalize
 function onload(){
@@ -118,9 +120,9 @@ function draw(track){
           context.fillStyle = "#FFFFFF";
         }
 
-        context.fillRect(offsetx+(track.pieces[s].pos[0]*gridSize),offsety+(track.pieces[s].pos[1]*gridSize),gridSize,gridSize);
+        context.fillRect(offsetx+(track.pieces[s].pos[0]*gridSize)+panX,offsety+(track.pieces[s].pos[1]*gridSize)+panY,gridSize,gridSize);
         if(track.pieces[s].type == JUMP){
-          context.fillRect(offsetx+((track.pieces[s].pos[0]-track.pieces[s].dir[0])*gridSize),offsety+((track.pieces[s].pos[1]-track.pieces[s].dir[1])*gridSize),gridSize,gridSize);
+          context.fillRect(offsetx+((track.pieces[s].pos[0]-track.pieces[s].dir[0])*gridSize)+panX,offsety+((track.pieces[s].pos[1]-track.pieces[s].dir[1])*gridSize)+panY,gridSize,gridSize);
         }
       }
     }
@@ -137,8 +139,8 @@ function draw(track){
         } else {
           context.strokeStyle = "#000000";
         }
-        context.moveTo(offsetx+(track.pieces[l].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[l].pos[1]*gridSize)+halfGrid);
-        context.lineTo(offsetx+(track.pieces[l].pos[0]*gridSize)+((track.pieces[l].dir[0]*gridSize)+halfGrid),offsety+(track.pieces[l].pos[1]*gridSize)+((track.pieces[l].dir[1]*gridSize))+halfGrid);
+        context.moveTo(offsetx+(track.pieces[l].pos[0]*gridSize)+halfGrid+panX,offsety+(track.pieces[l].pos[1]*gridSize)+halfGrid+panY);
+        context.lineTo(offsetx+(track.pieces[l].pos[0]*gridSize)+((track.pieces[l].dir[0]*gridSize)+halfGrid)+panX,offsety+(track.pieces[l].pos[1]*gridSize)+((track.pieces[l].dir[1]*gridSize))+halfGrid+panY);
         context.stroke();
       }
     }
@@ -189,6 +191,24 @@ function mouseTracking(e) { // Currently draws circles on click & drag until mou
 	context.arc(e.clientX, e.clientY, 10, 0, 2*Math.PI);
 	context.fillStyle = "#000000";
 	context.fill();
+}
+
+function pan(x,y){
+  panX += x;
+  panY += y;
+  drawgrid();
+  drawGoodTracks();
+}
+
+function panButton(num){
+  /* 
+  * Cosine functions return X-axis values, Sine functions return Y-axis values
+  * Taking advantage of this, assigning numbers corresponding to unit circle directions to each button 
+  * allows this one function to pan in each direction
+  *
+  * The pan is also multiplied by current grid size to take scale into account
+  */
+  pan(Math.cos((Math.PI/2)*num)*gridSize, Math.sin((Math.PI/2)*num)*gridSize);
 }
 
 function modScale(interval){
