@@ -281,9 +281,9 @@ function doGen(track,type){
   if(result >= 0 && type < track.pool.length && track.pool[result] > 0){
     return result;
   } else {
-    if((Date.now() - imAlive) > 30000)
+    if((Date.now() - imAlive) > 60000)
     {
-      console.log('i\'m Alive');
+      console.log('i\'m Alive - '+dupe +' / '+dead);
       imAlive = Date.now();
     }
     do{

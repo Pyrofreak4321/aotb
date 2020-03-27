@@ -119,17 +119,17 @@ function drawGoodTracks(){
 }
 
 
-var pools = [];
+var pools = [[10,10,9,2,0,0,0]];
 
-for(var j = 0; j <= 2; j++){
-  for(var s = 3; s <= 11; s+=2){
-    for(var c = 4; c <= 12; c+=2){
-      pools.push([c,c,s,j,0,0,0]);
-    }
-    c = 4;
-  }
-  s = 3;
-}
+// for(var j = 0; j <= 2; j++){
+//   for(var s = 1; s <= (11 - j); s+=2){
+//     for(var c = 4; c <= (12 - j); c+=2){
+//       pools.push([c,c,s,j,0,0,0]);
+//     }
+//     c = 4;
+//   }
+//   s = 1;
+// }
 
 var poolIndex = 0;
 var csv = 'Corners,Straights,Jumps,Boosts,Intersections,Ramps,Tracks,Duplicates,Invalids,Time (sec)\n';
@@ -190,14 +190,16 @@ function threadGen(){
         csv += ((Date.now()-time)/1000)+'\n';
 
         if((Date.now()-csvTime) > 10000){
-          lastSave = poolIndex;
-          var element = document.createElement('a');
-          element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
-          element.setAttribute('download', 'results-run-'+poolIndex+'.csv');
-          element.style.display = 'none';
-          document.body.appendChild(element);
-          element.click();
-          document.body.removeChild(element);
+          if(lastSave!=poolIndex){
+            lastSave = poolIndex;
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+            element.setAttribute('download', 'results-run-'+poolIndex+'.csv');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+          }
           csvTime = Date.now();
         }
 
