@@ -21,6 +21,10 @@ var scale = 1;
 var panX = 0;
 var panY = 0;
 
+// specifically for mouse panning
+var originX = null;
+var originY = null;
+
 //initalize
 function onload(){
   var body = document.getElementById('body');
@@ -43,8 +47,8 @@ function onresize(){
   var canvas = document.getElementById('canvas');
   canvas.height = h;
   canvas.width = w;
-	drawgrid();
-	drawGoodTracks();
+  drawgrid();
+  drawGoodTracks();
 }
 
 //draw grid
@@ -65,14 +69,14 @@ function drawgrid(){
 
   context.beginPath();
   for(var x = 0; x < w; x+=gridSize){
-    context.moveTo(x,0);
-    context.lineTo(x,h);
+    context.moveTo(x + panX,0 + panY);
+    context.lineTo(x + panX,h + panY);
   }
   context.stroke();
   context.beginPath();
   for(var y = 0; y < h; y+=gridSize){
-    context.moveTo(0,y);
-    context.lineTo(w,y);
+    context.moveTo(0 + panX,y + panY);
+    context.lineTo(w + panX,y + panY);
   }
   context.stroke();
 }
@@ -163,34 +167,38 @@ function drawGoodTracks(){
 }
 
 function doMouseDown(e) {
-	var canvas = document.getElementById('canvas');
+  var canvas = document.getElementById('canvas');
   /* old placeholder function for testing - draws circle on click
-	var context = canvas.getContext('2d');
-	context.beginPath();
-	context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
-	context.fillStyle = "#000000";
-	context.fill();*/
-	
-	
+  var context = canvas.getContext('2d');
+  context.beginPath();
+  context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
+  context.fillStyle = "#000000";
+  context.fill();*/
+  originX = e.clientX;
+  originY = e.clientY;
+  
   canvas.addEventListener("mousemove", mouseTracking);
   canvas.addEventListener("mouseup", endTracking);
   canvas.addEventListener("mouseleave", endTracking);
 }
 
 function endTracking(e) {
-	var canvas = document.getElementById('canvas');
+  var canvas = document.getElementById('canvas');
   canvas.removeEventListener("mousemove", mouseTracking);
-	canvas.addEventListener("mouseup", endTracking);
+  canvas.addEventListener("mouseup", endTracking);
   canvas.addEventListener("mouseleave", endTracking);
+  originX = null;
+  originY = null;
 }
 
-function mouseTracking(e) { // Currently draws circles on click & drag until mouse released
-	var canvas = document.getElementById('canvas');
+function mouseTracking(e) { 
+  var canvas = document.getElementById('canvas');
   var context = canvas.getContext('2d');
-	context.beginPath();
-	context.arc(e.clientX, e.clientY, 10, 0, 2*Math.PI);
-	context.fillStyle = "#000000";
-	context.fill();
+  var diffX = e.clientX - originX;
+  var diffY = e.clientY - originY;
+  pan(diffX, diffY);
+  originX = e.clientX;
+  originY = e.clientY;
 }
 
 function pan(x,y){
@@ -212,48 +220,48 @@ function panButton(num){
 }
 
 function modScale(interval){
-	if(scale + interval >= 0.2)
-		scale += interval;
-	else
-		scale = 0.2;
-	gridSize = defaultGridSize * scale;
-	halfGrid = gridSize/2;
-	drawgrid();
-	drawGoodTracks();
+  if(scale + interval >= 0.2)
+    scale += interval;
+  else
+    scale = 0.2;
+  gridSize = defaultGridSize * scale;
+  halfGrid = gridSize/2;
+  drawgrid();
+  drawGoodTracks();
 }
 
 function resetScale(){
-	modScale(1 - scale);
+  modScale(1 - scale);
 }
 
 function wheelZoom(e){
-	/* 
-	* e is of type WheelEvent
-	* WheelEvent has an attribute deltaY which is vertical scroll
-	* Negative deltaY = scroll up
-	* Postitive deltaY = scroll down
-	*/
-	
-	if(e.deltaY > 0)
-		modScale(-0.1);
-	else if(e.deltaY < 0)
-		modScale(0.1);
-	// No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
+  /* 
+  * e is of type WheelEvent
+  * WheelEvent has an attribute deltaY which is vertical scroll
+  * Negative deltaY = scroll up
+  * Postitive deltaY = scroll down
+  */
+  
+  if(e.deltaY > 0)
+    modScale(-0.1);
+  else if(e.deltaY < 0)
+    modScale(0.1);
+  // No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
 }
 
 function switchLayer(){
-	/* 
-	* fL 0 = No focused layer
-	* fL 1 = Darken first layer
-	* fL 2 = Darken second layer
-	* 
+  /* 
+  * fL 0 = No focused layer
+  * fL 1 = Darken first layer
+  * fL 2 = Darken second layer
+  * 
   * Adding 2 and using modulus to make button order:
-	* First press = first layer focus
-	* Second press = second layer focus
-	* Third press = no focus
+  * First press = first layer focus
+  * Second press = second layer focus
+  * Third press = no focus
   * Repeat
-	*/
-	focusLayer = (focusLayer + 2) % 3;
+  */
+  focusLayer = (focusLayer + 2) % 3;
 }
 
 //run track generation
