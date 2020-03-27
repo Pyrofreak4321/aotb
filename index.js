@@ -1,3 +1,4 @@
+var defaultGridSize = 30;
 var gridSize = 30;
 var halfGrid = gridSize/2;
 var goodTracks = [];
@@ -16,6 +17,7 @@ var INTERSECTION = 5;
 var BOOST = 6;
 
 var focusLayer = 0;
+var scale = 1;
 
 //initalize
 function onload(){
@@ -26,6 +28,19 @@ function onload(){
   canvas.height = h;
   canvas.width = w;
   drawgrid();
+}
+
+//update canvas h and w on page resize
+//probably needs a debounce function
+function onresize(){
+  var body = document.getElementById('body');
+  var h = body.clientHeight;
+  var w = body.clientWidth;
+  var canvas = document.getElementById('canvas');
+  canvas.height = h;
+  canvas.width = w;
+	drawgrid();
+	drawGoodTracks();
 }
 
 //draw grid
@@ -72,7 +87,7 @@ function draw(track){
   offsety -= offsety%gridSize;
 
   for (var i = 0; i <= 1; i++) {
-    context.lineWidth = 5;
+    context.lineWidth = 5 * scale;
     context.lineCap = "round";
     //context.globalAlpha = 0.5;
     for(var s = 0; s < track.pieces.length; s++){
@@ -141,6 +156,21 @@ function drawGoodTracks(){
     if(trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
     drawing = false;
   }
+}
+
+function modScale(interval){
+	if(scale + interval >= 0.2)
+		scale += interval;
+	else
+		scale = 0.2;
+	gridSize = defaultGridSize * scale;
+	halfGrid = gridSize/2;
+	drawgrid();
+	drawGoodTracks();
+}
+
+function resetScale(){
+	modScale(1 - scale);
 }
 
 function switchLayer(){
