@@ -28,6 +28,8 @@ function onload(){
   canvas.height = h;
   canvas.width = w;
   drawgrid();
+  canvas.addEventListener("mousedown", doMouseDown);
+  canvas.addEventListener("wheel", wheelZoom);
 }
 
 //update canvas h and w on page resize
@@ -158,6 +160,37 @@ function drawGoodTracks(){
   }
 }
 
+function doMouseDown(e) {
+	var canvas = document.getElementById('canvas');
+  /* old placeholder function for testing - draws circle on click
+	var context = canvas.getContext('2d');
+	context.beginPath();
+	context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
+	context.fillStyle = "#000000";
+	context.fill();*/
+	
+	
+  canvas.addEventListener("mousemove", mouseTracking);
+  canvas.addEventListener("mouseup", endTracking);
+  canvas.addEventListener("mouseleave", endTracking);
+}
+
+function endTracking(e) {
+	var canvas = document.getElementById('canvas');
+  canvas.removeEventListener("mousemove", mouseTracking);
+	canvas.addEventListener("mouseup", endTracking);
+  canvas.addEventListener("mouseleave", endTracking);
+}
+
+function mouseTracking(e) { // Currently draws circles on click & drag until mouse released
+	var canvas = document.getElementById('canvas');
+  var context = canvas.getContext('2d');
+	context.beginPath();
+	context.arc(e.clientX, e.clientY, 10, 0, 2*Math.PI);
+	context.fillStyle = "#000000";
+	context.fill();
+}
+
 function modScale(interval){
 	if(scale + interval >= 0.2)
 		scale += interval;
@@ -171,6 +204,21 @@ function modScale(interval){
 
 function resetScale(){
 	modScale(1 - scale);
+}
+
+function wheelZoom(e){
+	/* 
+	* e is of type WheelEvent
+	* WheelEvent has an attribute deltaY which is vertical scroll
+	* Negative deltaY = scroll up
+	* Postitive deltaY = scroll down
+	*/
+	
+	if(e.deltaY > 0)
+		modScale(-0.1);
+	else if(e.deltaY < 0)
+		modScale(0.1);
+	// No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
 }
 
 function switchLayer(){
