@@ -8,10 +8,10 @@ const START = -1;
 const RIGHT = 0;
 const LEFT = 1;
 const STRAIGHT = 2;
-const JUMP = 3;
+const BOOST = 3;
 const RAMP = 4;
 const INTERSECTION = 5;
-const BOOST = 6;
+const JUMP = 6;
 
 //rotate left
 function left(dir){
