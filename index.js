@@ -69,14 +69,14 @@ function drawgrid(){
 
   context.beginPath();
   for(var x = 0; x < w; x+=gridSize){
-    context.moveTo(x + panX,0 + panY);
-    context.lineTo(x + panX,h + panY);
+    context.moveTo(x + (panX % gridSize),0 + (panY % gridSize));
+    context.lineTo(x + (panX % gridSize),h + (panY % gridSize));
   }
   context.stroke();
   context.beginPath();
   for(var y = 0; y < h; y+=gridSize){
-    context.moveTo(0 + panX,y + panY);
-    context.lineTo(w + panX,y + panY);
+    context.moveTo(0 + (panX % gridSize),y + (panY % gridSize));
+    context.lineTo(w + (panX % gridSize),y + (panY % gridSize));
   }
   context.stroke();
 }
