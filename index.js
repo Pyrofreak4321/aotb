@@ -1,28 +1,21 @@
-var defaultGridSize = 50;
-var gridSize = defaultGridSize;
+var gridSize = 50;
 var halfGrid = gridSize/2;
 var goodTracks = [];
 var trackIndex = 0;
 var trackInterval;
-
 var drawing = false;
 var working = false;
+var curTrack; //for the track being worked with/selected from generation
 
-//changed these to consts and put them in number-order - caused errors, changed back to var
-var START = -1;
-var RIGHT = 0;
-var LEFT = 1;
-var STRAIGHT = 2;
-var BOOST = 3;
-var RAMP = 4;
-var INTERSECTION = 5;
-var JUMP = 6;
-
-//transform controls
-var focusLayer = 0;
-var scale = 1;
-var panX = 0;
-var panY = 0;
+//changed these to consts and put them in number-order
+const START = -1;
+const RIGHT = 0;
+const LEFT = 1;
+const STRAIGHT = 2;
+const BOOST = 3;
+const RAMP = 4;
+const INTERSECTION = 5;
+const JUMP = 6;
 
 //image locations
 const IMAGES = [document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
@@ -31,33 +24,26 @@ document.getElementById("imgJumpLaunch"), document.getElementById("imgJumpCatch"
 
 //initalize
 window.onload = function () {
-    //onclicks for the buttons - already defined in the html file
-    /*document.getElementById("btnGen").onclick = function () {
+    //onclicks for the buttons
+    document.getElementById("btnGen").onclick = function () {
         threadGen();
-    }*/
-    /*document.getElementById("btnSave").onclick = function () {
+    }
+    document.getElementById("btnSave").onclick = function () {
         console.log(JSON.parse(goodTracks[trackIndex]));
-    };*/
-    /*document.getElementById("btnLayer").onclick = function () {
+    };
+    document.getElementById("btnLayer").onclick = function () {
         switchLayer();
-    }*/
+    }
     //handler for when the window's resized
     window.addEventListener('resize', function () {
         drawResize();
     });
     //maximize the canvas size at the start so we don't have resize it (which resets the view to white)
     //this might not work if the user has multiple screens
-    
-    //fixed previous issue, works on multiple screens
-    var body = document.getElementById('body');
-    var h = body.clientHeight;
-    var w = body.clientWidth;
-    var canvas = document.getElementById('canvas');
-    canvas.height = h;
-    canvas.width = w;
-    drawGrid();
-    canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
-    //canvas.addEventListener("mousedown", doMouseDown); - I'll worry about adding click pan after add track
+    let canvas = document.getElementById('canvas');
+    canvas.height = window.screen.availHeight - (window.outerHeight - window.innerHeight);
+    canvas.width = window.screen.availWidth - (window.outerWidth - window.innerWidth);
+    clearTrack();
 }
 
 function clearTrack() {
@@ -70,6 +56,9 @@ function clearTrack() {
     //draw(curTrack);
 }
 
+function switchLayer() {
+    //empty atm
+}
 
 //draw grid
 function drawGrid() {
@@ -79,72 +68,46 @@ function drawGrid() {
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
 
-    // Enforce global alpha of 1 to prevent ghosting
-    context.globalAlpha = 1;
-
     context.fillStyle = "#FFFFFF";
     context.strokeStyle = "#AAAAAA";
     context.fillRect(0, 0, w, h);
 
     context.beginPath();
-    for(var x = 0; x < w; x+=gridSize){
-        // Draw one tile further offscreen so panning doesn't draw blanks
-        context.moveTo(x + (panX % gridSize),0 + (panY % gridSize)-gridSize);
-        context.lineTo(x + (panX % gridSize),h + (panY % gridSize));
+    for (var x = 0; x < w; x += gridSize) {
+        context.moveTo(x, 0);
+        context.lineTo(x, h);
     }
     context.stroke();
     context.beginPath();
-    for(var y = 0; y < h; y+=gridSize){
-        context.moveTo(0 + (panX % gridSize)-gridSize,y + (panY % gridSize));
-        context.lineTo(w + (panX % gridSize),y + (panY % gridSize));
+    for (var y = 0; y < h; y += gridSize) {
+        context.moveTo(0, y);
+        context.lineTo(w, y);
     }
     context.stroke();
 }
 
 //this is like draw grid but it doesn't recolor.
-//minor visual issue: this currently draws lines over pieces of the track - was caused by calling this function AFTER drawing the track pieces
-
-//repurposed to readjust canvas size when resizing browser window as static size caused issues
+//minor visual issue: this currently draws lines over pieces of the track
 function drawResize() {
-    /*let body = document.getElementById('body');
+    let body = document.getElementById('body');
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
 
     let h = body.clientHeight;
     let w = body.clientWidth;
-    context.strokeStyle = "#AAAAAA"; //this isn't "#AAAAAA" since that color was appearing darker than it should've for some reason - Because drawResize wasn't drawing clear rectangles it stacked the lines and made them darker
+    context.strokeStyle = "#D1D1D1"; //this isn't "#AAAAAA" since that color was appearing darker than it should've for some reason
     context.beginPath();
     for (var x = 0; x < w; x += gridSize) {
         context.moveTo(x, 0);
         context.lineTo(x, h);
     }
-    //context.globalAlpha = 1;
-    for(var l = 0; l < track.pieces.length; l++){
-      if(track.pieces[l].pos[2]==i){
-        if(i == (focusLayer - 1)) 
-          context.globalAlpha = 0.25;
-        else
-          context.globalAlpha = 1;
-        context.beginPath();
-        if(track.pieces[l].pos[2]==1){
-          context.strokeStyle = "#0000af";
-        } else {
-          context.strokeStyle = "#000000";
-        }
-        context.moveTo(offsetx+(track.pieces[l].pos[0]*gridSize)+halfGrid,offsety+(track.pieces[l].pos[1]*gridSize)+halfGrid);
-        context.lineTo(offsetx+(track.pieces[l].pos[0]*gridSize)+((track.pieces[l].dir[0]*gridSize)+halfGrid),offsety+(track.pieces[l].pos[1]*gridSize)+((track.pieces[l].dir[1]*gridSize))+halfGrid);
-        context.stroke();
-      }
+    context.stroke();
+    context.beginPath();
+    for (var y = 0; y < h; y += gridSize) {
+        context.moveTo(0, y);
+        context.lineTo(w, y);
     }
-    context.stroke();*/
-    var body = document.getElementById('body');
-    var h = body.clientHeight;
-    var w = body.clientWidth;
-    var canvas = document.getElementById('canvas');
-    canvas.height = h;
-    canvas.width = w;
-    drawGrid();
-    drawGoodTracks();
+    context.stroke();
 }
 
 //need to change this so it draws images
@@ -154,8 +117,8 @@ function draw(track) {
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
     //this should fix the window scaling issues
-    let offsetx = (canvas.width / 2);
-    let offsety = (canvas.width / 2);
+    let offsetx = (body.clientWidth / 2);
+    let offsety = (body.clientHeight / 2);
     offsetx -= offsetx%gridSize;
     offsety -= offsety%gridSize;
     drawGrid();
@@ -167,68 +130,65 @@ function draw(track) {
         for (var s = 0; s < track.pieces.length; s++) {
             //if this is on the layer currently being drawn
             if (track.pieces[s].pos[2] == i) {
-                if(i == (focusLayer - 1)) // Set opacity of image to 20% if not on focused layer 
-                    context.globalAlpha = 0.2;
-                else
-                    context.globalAlpha = 1;
                 switch (track.pieces[s].type) {
                     case START:
-                        context.drawImage(IMAGES[IMAGES.length - 1], offsetx + (track.pieces[s].pos[0] * gridSize) + panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[IMAGES.length - 1], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         //context.fillStyle = '#00FF00'; //light green
                         //get last index for start's number
                         break;
                     case STRAIGHT:
                         //context.fillStyle = '#FFFFFF'; //white
-                        context.drawImage(IMAGES[STRAIGHT], offsetx + (track.pieces[s].pos[0] * gridSize) + panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[STRAIGHT], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case LEFT:
                         //context.fillStyle = '#F08080'; //light coral
-                        context.drawImage(IMAGES[LEFT], offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[LEFT], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case RIGHT:
                         //context.fillStyle = '#FF5A5A'; //red
-                        context.drawImage(IMAGES[RIGHT], offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[RIGHT], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case JUMP:
                         //context.fillStyle = '#DA70D6'; //magenta was bothering my eyes, so I changed it to orchid
                         //if the piece is a jump, fill two squares
-                        context.drawImage(IMAGES[JUMP], offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[JUMP], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         if (track.pieces[s].type == JUMP) {
-                            context.drawImage(IMAGES[JUMP + 1], offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize)+panX, 
-                                offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize)+panY, gridSize, gridSize);
+                            context.drawImage(IMAGES[JUMP + 1], offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), 
+                                offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
                             //context.fillRect(offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
                         }
                         break;
                     case RAMP:
                         //context.fillStyle = '#0000FF'; //blue
-                        context.drawImage(IMAGES[RAMP], offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[RAMP], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case BOOST: //this is still needed, since straights can be upgraded into boosts
                         //context.fillStyle = '#FFFF00'; //yellow
-                        context.drawImage(IMAGES[BOOST], offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[BOOST], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case INTERSECTION:
-                        context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY,
+                        context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         //context.fillStyle = '#FFA500'; //was dark gray, I changed it to orange
                         break;
                     default:
-                        //context.globalAlpha = 0.5;
+                        context.globalAlpha = 0.5;
                         context.fillStyle = '#1A1110'; //the switch should only fall here if a track piece's type is set wrong, so I set it to licorice to make it stand out
-                        context.fillRect(offsetx + (track.pieces[s].pos[0] * gridSize)+panX, offsety + (track.pieces[s].pos[1] * gridSize)+panY, gridSize, gridSize);
-                        //context.globalAlpha = 1;
+                        context.fillRect(offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize), gridSize, gridSize);
+                        context.globalAlpha = 1;
                 }
 
             }
         }
     }
+    drawResize();
 }
 
 function drawGoodTracks() {
@@ -245,84 +205,6 @@ function drawGoodTracks() {
     }
 }
 
-function switchLayer(){
-	/* 
-	* fL 0 = No focused layer
-	* fL 1 = Darken first layer
-	* fL 2 = Darken second layer
-	* 
-  * Adding 2 and using modulus to make button order:
-	* First press = first layer focus
-	* Second press = second layer focus
-	* Third press = no focus
-  * Repeat
-	*/
-	focusLayer = (focusLayer + 2) % 3;
-}
-
-function pan(x,y){
-  panX += x;
-  panY += y;
-  drawGrid();
-  drawGoodTracks();
-}
-
-function panButton(num){
-  /* 
-  * Cosine functions return X-axis values, Sine functions return Y-axis values
-  * Taking advantage of this, assigning numbers corresponding to unit circle directions to each button 
-  * allows this one function to pan in each direction
-  *
-  * The pan is also multiplied by current grid size to take scale into account
-  */
-  pan(Math.cos((Math.PI/2)*num)*gridSize, Math.sin((Math.PI/2)*num)*gridSize);
-}
-
-function modScale(interval){
-  if(scale + interval >= 0.2)
-    scale += interval;
-  else
-    scale = 0.2;
-  gridSize = defaultGridSize * scale;
-  halfGrid = gridSize/2;
-  drawGrid();
-  drawGoodTracks();
-}
-
-function resetScale(){
-  modScale(1 - scale);
-}
-
-function wheelZoom(e){
-  /* 
-  * e is of type WheelEvent
-  * WheelEvent has an attribute deltaY which is vertical scroll
-  * Negative deltaY = scroll up
-  * Postitive deltaY = scroll down
-  */
-  
-  if(e.deltaY > 0)
-    modScale(-0.1);
-  else if(e.deltaY < 0)
-    modScale(0.1);
-  // No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
-}
-
-function switchLayer(){
-  /* 
-  * fL 0 = No focused layer
-  * fL 1 = Darken first layer
-  * fL 2 = Darken second layer
-  * 
-  * Adding 2 and using modulus to make button order:
-  * First press = first layer focus
-  * Second press = second layer focus
-  * Third press = no focus
-  * Repeat
-  */
-  focusLayer = (focusLayer + 2) % 3;
-}
-
 //run track generation
 function threadGen() {
     var time;
@@ -336,7 +218,7 @@ function threadGen() {
 
         time = Date.now();
         if (typeof (w) == "undefined") {
-            w = new Worker("./generator.js");
+            w = new Worker("js/generator.js");
         }
 
         // tell worker piece pool
@@ -366,28 +248,28 @@ function threadGen() {
     }
 }
 
-function shift(event){
-  var x = event.keyCode;
-  if(x == 37){
-    if(trackInterval){
-      clearInterval(trackInterval);
-      trackInterval = null;
+function shift(event) {
+    var x = event.keyCode;
+    if (x == 37) {
+        if (trackInterval) {
+            clearInterval(trackInterval);
+            trackInterval = null;
+        }
+        trackIndex--;
+        drawGoodTracks();
+    } else if (x == 39) {
+        if (trackInterval) {
+            clearInterval(trackInterval);
+            trackInterval = null;
+        }
+        trackIndex++;
+        drawGoodTracks();
+    } else if (x == 32) {
+        if (trackInterval) {
+            clearInterval(trackInterval);
+            trackInterval = null;
+        }
+        else
+            trackInterval = setInterval(function () { drawGoodTracks(); trackIndex++; }, 100);
     }
-    trackIndex--;
-    drawGoodTracks();
-  } else if (x == 39){
-    if(trackInterval){
-      clearInterval(trackInterval);
-      trackInterval = null;
-    }
-    trackIndex++;
-    drawGoodTracks();
-  } else if (x == 32){
-    if(trackInterval){
-      clearInterval(trackInterval);
-      trackInterval = null;
-    }
-    else
-      trackInterval = setInterval(function(){drawGoodTracks(); trackIndex++;}, 100);
-  }
 }
