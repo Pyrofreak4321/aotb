@@ -24,6 +24,10 @@ var scale = 1;
 var panX = 0;
 var panY = 0;
 
+// specifically for mouse panning
+var originX = null;
+var originY = null;
+
 //image locations
 const IMAGES = [document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
 document.getElementById("imgBoost"), document.getElementById("imgRamp"), document.getElementById("imgIntersection"),
@@ -45,10 +49,6 @@ window.onload = function () {
     window.addEventListener('resize', function () {
         drawResize();
     });
-    //maximize the canvas size at the start so we don't have resize it (which resets the view to white)
-    //this might not work if the user has multiple screens
-    
-    //fixed previous issue, works on multiple screens
     var body = document.getElementById('body');
     var h = body.clientHeight;
     var w = body.clientWidth;
@@ -57,7 +57,7 @@ window.onload = function () {
     canvas.width = w;
     drawGrid();
     canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
-    //canvas.addEventListener("mousedown", doMouseDown); - I'll worry about adding click pan after add track
+    canvas.addEventListener("mousedown", doMouseDown);
 }
 
 function clearTrack() {
@@ -87,16 +87,16 @@ function drawGrid() {
     context.fillRect(0, 0, w, h);
 
     context.beginPath();
-    for(var x = 0; x < w; x+=gridSize){
+    for(var x = 0; x <= w+gridSize; x+=gridSize){
         // Draw one tile further offscreen to try to stop panning into blank space
         context.moveTo(x + (panX % gridSize),0 + (panY % gridSize)-gridSize);
-        context.lineTo(x + (panX % gridSize),h + (panY % gridSize));
+        context.lineTo(x + (panX % gridSize),h + (panY % gridSize)+gridSize);
     }
     context.stroke();
     context.beginPath();
-    for(var y = 0; y < h; y+=gridSize){
+    for(var y = 0; y <= h+gridSize; y+=gridSize){
         context.moveTo(0 + (panX % gridSize)-gridSize,y + (panY % gridSize));
-        context.lineTo(w + (panX % gridSize),y + (panY % gridSize));
+        context.lineTo(w + (panX % gridSize)+gridSize,y + (panY % gridSize));
     }
     context.stroke();
 }
@@ -243,6 +243,41 @@ function drawGoodTracks() {
         if (trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
         drawing = false;
     }
+}
+
+function doMouseDown(e) {
+  var canvas = document.getElementById('canvas');
+  /* old placeholder function for testing - draws circle on click
+  var context = canvas.getContext('2d');
+  context.beginPath();
+  context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
+  context.fillStyle = "#000000";
+  context.fill();*/
+  originX = e.clientX;
+  originY = e.clientY;
+  
+  canvas.addEventListener("mousemove", mouseTracking);
+  canvas.addEventListener("mouseup", endTracking);
+  canvas.addEventListener("mouseleave", endTracking);
+}
+
+function endTracking(e) {
+  var canvas = document.getElementById('canvas');
+  canvas.removeEventListener("mousemove", mouseTracking);
+  canvas.removeEventListener("mouseup", endTracking);
+  canvas.removeEventListener("mouseleave", endTracking);
+  originX = null;
+  originY = null;
+}
+
+function mouseTracking(e) { 
+  var canvas = document.getElementById('canvas');
+  var context = canvas.getContext('2d');
+  var diffX = e.clientX - originX;
+  var diffY = e.clientY - originY;
+  pan(diffX, diffY);
+  originX = e.clientX;
+  originY = e.clientY;
 }
 
 function switchLayer(){
