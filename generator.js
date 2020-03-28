@@ -1,17 +1,18 @@
 var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
+var ready = true;
 var consecLimit = [2,2,2,0,0,0,0];
 
-//changed these to const
-const START = -1;
-const RIGHT = 0;
-const LEFT = 1;
-const STRAIGHT = 2;
-const BOOST = 3;
-const RAMP = 4;
-const INTERSECTION = 5;
-const JUMP = 6;
+//changed these to const - caused errors for having same consts in index AND generator
+var START = -1;
+var RIGHT = 0;
+var LEFT = 1;
+var STRAIGHT = 2;
+var BOOST = 3;
+var RAMP = 4;
+var INTERSECTION = 5;
+var JUMP = 6;
 
 //rotate left
 function left(dir){
