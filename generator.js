@@ -4,13 +4,15 @@ var newTracks = [];
 var ready = true;
 var consecLimit = [2,2,2,0,0,0,0];
 
-var STRAIGHT = 2;
-var LEFT = 1;
+//changed these to const - caused errors for having same consts in index AND generator
+var START = -1;
 var RIGHT = 0;
-var JUMP = 3;
+var LEFT = 1;
+var STRAIGHT = 2;
+var BOOST = 3;
 var RAMP = 4;
 var INTERSECTION = 5;
-var BOOST = 6;
+var JUMP = 6;
 
 //rotate left
 function left(dir){
