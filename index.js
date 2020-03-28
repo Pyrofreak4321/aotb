@@ -184,7 +184,6 @@ function draw(track) {
                         context.fillRect(offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize), gridSize, gridSize);
                         context.globalAlpha = 1;
                 }
-
             }
         }
     }
@@ -245,6 +244,32 @@ function threadGen() {
                 // trackInterval = setInterval(drawGoodTracks, 500);
             }
         };
+    }
+}
+
+function shift(event) {
+    var x = event.keyCode;
+    if (x == 37) {
+        if (trackInterval) {
+            clearInterval(trackInterval);
+            trackInterval = null;
+        }
+        trackIndex--;
+        drawGoodTracks();
+    } else if (x == 39) {
+        if (trackInterval) {
+            clearInterval(trackInterval);
+            trackInterval = null;
+        }
+        trackIndex++;
+        drawGoodTracks();
+    } else if (x == 32) {
+        if (trackInterval) {
+            clearInterval(trackInterval);
+            trackInterval = null;
+        }
+        else
+            trackInterval = setInterval(function () { drawGoodTracks(); trackIndex++; }, 100);
     }
 }
 
