@@ -197,4 +197,19 @@ function shift(event){
     else
       trackInterval = setInterval(function(){drawGoodTracks(); trackIndex++;}, 100);
   }
-}
+
+  function uploadTrack(){
+      var fileElem = document.getElementById("fileElem");
+      if (fileElem) {
+        fileElem.click();
+      }
+  }
+
+  function handleFiles(files) {
+        var reader = new FileReader();
+        reader.onload = function(){
+        var text = reader.result;
+        currentTrack = JSON.parse(text);
+      }
+        reader.readAsText(files[0]);
+  }
