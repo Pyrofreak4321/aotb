@@ -4,13 +4,15 @@ var newTracks = [];
 var ready = true;
 var consecLimit = [2,2,2,0,0,0,0];
 
-var STRAIGHT = 2;
-var LEFT = 1;
+//changed these to const - caused errors for having same consts in index AND generator
+var START = -1;
 var RIGHT = 0;
-var JUMP = 3;
+var LEFT = 1;
+var STRAIGHT = 2;
+var BOOST = 3;
 var RAMP = 4;
 var INTERSECTION = 5;
-var BOOST = 6;
+var JUMP = 6;
 
 //rotate left
 function left(dir){
@@ -89,7 +91,7 @@ function testHit(piece, type, pos, dir){
   var hit = 1;
   if((piece.pos[0] == pos[0] && piece.pos[1] == pos[1] && (piece.isRamp || piece.pos[2] == pos[2])) || (piece.type == JUMP && (piece.pos[0]-piece.dir[0]) == pos[0] && (piece.pos[1]-piece.dir[1]) == pos[1])){
     hit = 0;
-    if(type != JUMP && type != RAMP && (piece.type == -1 && piece.dir[0] == dir[0] && piece.dir[1] == dir[1])){
+    if(type != JUMP && type != RAMP && (piece.type == START && piece.dir[0] == dir[0] && piece.dir[1] == dir[1])){
       hit = -1;
     }
     else if(((piece.isRamp && type != JUMP && type != RAMP)||(!piece.isRamp && (type == JUMP || type == RAMP))) && ((piece.dir[0]==0 && dir[0] != 0)||(piece.dir[1]==0 && dir[1] != 0))){
@@ -177,7 +179,7 @@ function print(track){
 function stringify(p){
   var s=' ';
   switch (p.type) {
-    case -1:
+    case START:
       s = 's';
       break;
     case STRAIGHT:
@@ -234,7 +236,7 @@ function storeTrack(track){
   }
 }
 
-//adds peoce to track
+//adds piece to track
 function addPiece(track, type){
   var result = posOpen(track,type);
   if(result>=1){
