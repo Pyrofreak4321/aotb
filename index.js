@@ -293,6 +293,7 @@ function switchLayer(){
     * Repeat
     */
     focusLayer = (focusLayer + 2) % 3;
+    drawGoodTracks();
 }
 
 function pan(x,y){
