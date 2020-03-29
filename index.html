@@ -62,11 +62,11 @@ input.visually-hidden:focus-within + label {
   <body id="body" onload="onload();" onkeydown="shift(event)">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:10px; left:10px;">
-      <input type="button" class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" name="" value="S"/>
-      <input type="button" class="_roundtop _roundbottom" onclick="uploadTrack()" name="" value="L"/>
-      <input type="button" class="_roundtop _roundbottom" name="" value="N"/>
-      <input type="button" class="_roundtop _roundbottom" name="" value="C"/>
-      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="G"/>
+      <input type="button" class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" name="" value="S" id="btnSave" />
+      <input type="button" class="_roundtop _roundbottom" onclick="uploadTrack()" name="" value="L" id="btnLoad" />
+      <input type="button" class="_roundtop _roundbottom" name="" value="N" id="btnNew" />
+      <input type="button" class="_roundtop _roundbottom" name="" value="C" id="btnClean" />
+      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="G" id="btnGen" />
     </span>
     <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
     <span class="_floatingButton" style="top:10px; right:10px; text-align:right;">
