@@ -62,30 +62,30 @@ input.visually-hidden:focus-within + label {
   <body id="body" onload="onload();" onkeydown="shift(event)">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:10px; left:10px;">
-      <input type="button" class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" name="" value="S" id="btnSave" />
-      <input type="button" class="_roundtop _roundbottom" onclick="uploadTrack()" name="" value="L" id="btnLoad" />
-      <input type="button" class="_roundtop _roundbottom" name="" value="N" id="btnNew" />
-      <input type="button" class="_roundtop _roundbottom" name="" value="C" id="btnClean" />
-      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="G" id="btnGen" />
+      <input type="button" class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" name="" value="Save" id="btnSave" />
+      <input type="button" class="_roundtop _roundbottom" onclick="uploadTrack()" name="" value="Load" id="btnLoad" />
+      <input type="button" class="_roundtop _roundbottom" name="" value="New" id="btnNew" />
+      <input type="button" class="_roundtop _roundbottom" name="" value="Clean" id="btnClean" />
+      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="Generate" id="btnGen" />
     </span>
     <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
     <span class="_floatingButton" style="top:10px; right:10px; text-align:right;">
-        <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
-            <div class="">
-                <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><span>&uarr;</span></button>
-                <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><span>&rarr;</span></button>
-            </div>
-            <div class="">
-                <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><span>&larr;</span></button>
-                <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><span>&darr;</span></button>
-            </div>
+      <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
+        <div class="">
+          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><span>&uarr;</span></button>
+          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><span>&rarr;</span></button>
         </div>
-        <input type="button" name="" class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"/><br>
-        <input type="button" name="" class="" onclick="resetScale()" value="=" id="btnZoomReset"/><br>
-        <input type="button" name="" class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"/><br>
-        <input type="button" name="" class="_roundtop _roundbottom" value="L" id="btnLayer" onclick="switchLayer()" /><br>
+        <div class="">
+          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><span>&larr;</span></button>
+          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><span>&darr;</span></button>
+        </div>
+      </div>
+      <input type="button" name="" class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"/><br>
+      <input type="button" name="" class="" onclick="resetScale()" value="=" id="btnZoomReset"/><br>
+      <input type="button" name="" class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"/><br>
+      <input type="button" name="" class="_roundtop _roundbottom" value="L" id="btnLayer" onclick="switchLayer()" /><br>
     </span>
-     <!--Track piece images-->
+    <!--Track piece images-->
     <img src="images/start.png" style="display: none;" id="imgStart" />
     <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
     <img src="images/left corner.png" style="display: none;" id="imgCornerL" />
@@ -95,7 +95,7 @@ input.visually-hidden:focus-within + label {
     <img src="images/intersection.png" style="display: none;" id="imgIntersection" />
     <img src="images/jump1.png" style="display: none;" id="imgJumpLaunch" />
     <img src="images/jump2.png" style="display: none;" id="imgJumpCatch" />
- </body>
+  </body>
 
   <script type="text/javascript" src="index.js"></script>
   <script type="text/javascript" src="generator.js"></script>
