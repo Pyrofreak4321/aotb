@@ -4,7 +4,9 @@ var halfGrid = gridSize/2;
 var goodTracks = [];
 var trackIndex = 0;
 var trackInterval;
+var currentTrack;
 
+var pieMenuOpen = false;
 var drawing = false;
 var working = false;
 
@@ -27,6 +29,8 @@ var panY = 0;
 // specifically for mouse panning
 var originX = null;
 var originY = null;
+var selectedTrackPieceX = null;
+var selectedTrackPieceY = null;
 
 //image locations
 const IMAGES = [document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
@@ -121,7 +125,7 @@ function drawResize() {
     //context.globalAlpha = 1;
     for(var l = 0; l < track.pieces.length; l++){
       if(track.pieces[l].pos[2]==i){
-        if(i == (focusLayer - 1)) 
+        if(i == (focusLayer - 1))
           context.globalAlpha = 0.25;
         else
           context.globalAlpha = 1;
@@ -167,7 +171,7 @@ function draw(track) {
         for (var s = 0; s < track.pieces.length; s++) {
             //if this is on the layer currently being drawn
             if (track.pieces[s].pos[2] == i) {
-                if(i == (focusLayer - 1)) // Set opacity of image to 20% if not on focused layer 
+                if(i == (focusLayer - 1)) // Set opacity of image to 20% if not on focused layer
                     context.globalAlpha = 0.2;
                 else
                     context.globalAlpha = 1;
@@ -199,7 +203,7 @@ function draw(track) {
                         context.drawImage(IMAGES[JUMP], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         // if (track.pieces[s].type == JUMP) { // This if statement is redundant, switch-case already checks for jump
-                        context.drawImage(IMAGES[JUMP + 1], offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), 
+                        context.drawImage(IMAGES[JUMP + 1], offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize),
                             offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
                             //context.fillRect(offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
                         // }
@@ -245,6 +249,45 @@ function drawGoodTracks() {
     }
 }
 
+function addTrackPiece(){
+  pieMenuOpen = true;
+  var canvas = document.getElementById('canvas');
+  var straightButton = document.getElementById('STRIAGHT_button');
+  var rampButton = document.getElementById('RAMP_button');
+  var cornerButton = document.getElementById('CORNER_button');
+  var intersectionButton = document.getElementById('INTERSECTION_button');
+  var boostButton = document.getElementById('BOOST_button');
+  var jumpButton = document.getElementById('JUMP_button');
+  straightButton.style.display = "block";
+  straightButton.style.left = selectedTrackPieceX + 'px';
+  straightButton.style.top = selectedTrackPieceY + 'px';
+  rampButton.style.display = "block";
+  rampButton.style.left = originX + 5 + 'px';
+  rampButton.style.top = originY - 50 + 'px';
+  cornerButton.style.display = "block";
+  cornerButton.style.left = originX - 55 + 'px';
+  cornerButton.style.top = originY - 50 + 'px';
+  intersectionButton.style.display = "block";
+  intersectionButton.style.left = originX - 80 + 'px';
+  intersectionButton.style.top = originY + 'px';
+  boostButton.style.display = "block";
+  boostButton.style.left = originX - 55  + 'px';
+  boostButton.style.top = originY + 50 + 'px';
+  jumpButton.style.display = "block";
+  jumpButton.style.left = originX + 5  + 'px';
+  jumpButton.style.top = originY + 50 + 'px';
+}
+
+function clearPieMenu(){
+  pieMenuOpen = false;
+  document.getElementById('STRIAGHT_button').style.display = "none";
+  document.getElementById('RAMP_button').style.display = "none";
+  document.getElementById('CORNER_button').style.display = "none";
+  document.getElementById('INTERSECTION_button').style.display = "none";
+  document.getElementById('BOOST_button').style.display = "none";
+  document.getElementById('JUMP_button').style.display = "none";
+}
+
 function doMouseDown(e) {
     var canvas = document.getElementById('canvas');
     /* old placeholder function for testing - draws circle on click
@@ -253,9 +296,11 @@ function doMouseDown(e) {
     context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
     context.fillStyle = "#000000";
     context.fill();*/
+    selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) - (panX%gridSize);
+    selectedTrackPieceY = (e.clientY - (e.clientY%gridSize)) - (panY%gridSize);
     originX = e.clientX;
     originY = e.clientY;
-    
+
     canvas.addEventListener("mousemove", mouseTracking);
     canvas.addEventListener("mouseup", endTracking);
     canvas.addEventListener("mouseleave", endTracking);
@@ -266,11 +311,15 @@ function endTracking(e) {
     canvas.removeEventListener("mousemove", mouseTracking);
     canvas.removeEventListener("mouseup", endTracking);
     canvas.removeEventListener("mouseleave", endTracking);
+    if(pieMenuOpen == false)
+      addTrackPiece();
+    else
+      clearPieMenu();
     originX = null;
     originY = null;
 }
 
-function mouseTracking(e) { 
+function mouseTracking(e) {
     var canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
     var diffX = e.clientX - originX;
@@ -281,11 +330,11 @@ function mouseTracking(e) {
 }
 
 function switchLayer(){
-    /* 
+    /*
     * fL 0 = No focused layer
     * fL 1 = Darken first layer
     * fL 2 = Darken second layer
-    * 
+    *
     * Adding 2 and using modulus to make button order:
     * First press = first layer focus
     * Second press = second layer focus
@@ -304,9 +353,9 @@ function pan(x,y){
 }
 
 function panButton(num){
-    /* 
+    /*
     * Cosine functions return X-axis values, Sine functions return Y-axis values
-    * Taking advantage of this, assigning numbers corresponding to unit circle directions to each button 
+    * Taking advantage of this, assigning numbers corresponding to unit circle directions to each button
     * allows this one function to pan in each direction
     *
     * The pan is also multiplied by current grid size to take scale into account
@@ -330,13 +379,13 @@ function resetScale(){
 }
 
 function wheelZoom(e){
-    /* 
+    /*
     * e is of type WheelEvent
     * WheelEvent has an attribute deltaY which is vertical scroll
     * Negative deltaY = scroll up
     * Postitive deltaY = scroll down
     */
-    
+
     if(e.deltaY > 0)
         modScale(-0.1);
     else if(e.deltaY < 0)
@@ -345,11 +394,11 @@ function wheelZoom(e){
 }
 
 function switchLayer(){
-    /* 
+    /*
     * fL 0 = No focused layer
     * fL 1 = Darken first layer
     * fL 2 = Darken second layer
-    * 
+    *
     * Adding 2 and using modulus to make button order:
     * First press = first layer focus
     * Second press = second layer focus

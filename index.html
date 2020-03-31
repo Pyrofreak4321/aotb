@@ -14,6 +14,16 @@
     ._floatingButton{
       position:fixed;
     }
+    ._pieButton{
+      position:absolute;
+      display:none;
+      height: 50px;
+      width: 50px;
+      border-top-left-radius:50% !important;
+      border-top-right-radius:50% !important;
+      border-bottom-left-radius:50% !important;
+      border-bottom-right-radius:50% !important;
+    }
 
     ._diamond {
       transform: rotate(45deg);
@@ -85,6 +95,13 @@ input.visually-hidden:focus-within + label {
       <input type="button" name="" class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"/><br>
       <input type="button" name="" class="_roundtop _roundbottom" value="L" id="btnLayer" onclick="switchLayer()" /><br>
     </span>
+    <input type="image" src="images/straight.png" name="" class="_pieButton" id="STRIAGHT_button"/>
+    <input type="image" src="images/right corner.png" name="" class="_pieButton" id="CORNER_button"/>
+    <input type="image" src="images/boost.png" name="" class="_pieButton" id="BOOST_button"/>
+    <input type="image" src="images/ramp.png" name="" class="_pieButton" id="RAMP_button"/>
+    <input type="image" src="images/intersection.png" name="" class="_pieButton" id="INTERSECTION_button"/>
+    <input type="image" src="images/jump1.png" name="" class="_pieButton" id="JUMP_button"/>
+
     <!--Track piece images-->
     <img src="images/start.png" style="display: none;" id="imgStart" />
     <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
