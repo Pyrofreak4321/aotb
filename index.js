@@ -261,31 +261,33 @@ function addTrackPiece(){
   straightButton.style.display = "block";
   straightButton.style.left = selectedTrackPieceX + 'px';
   straightButton.style.top = selectedTrackPieceY + 'px';
+  /*straightButton.style.left = selectedTrackPieceX + 25 + 'px';
+  straightButton.style.top = selectedTrackPieceY - 25 + 'px';
   rampButton.style.display = "block";
-  rampButton.style.left = originX + 5 + 'px';
-  rampButton.style.top = originY - 50 + 'px';
+  rampButton.style.left = selectedTrackPieceX + 5 + 'px';
+  rampButton.style.top = selectedTrackPieceY - 75 + 'px';
   cornerButton.style.display = "block";
-  cornerButton.style.left = originX - 55 + 'px';
-  cornerButton.style.top = originY - 50 + 'px';
+  cornerButton.style.left = selectedTrackPieceX - 50 + 'px';
+  cornerButton.style.top = selectedTrackPieceY - 75 + 'px';
   intersectionButton.style.display = "block";
-  intersectionButton.style.left = originX - 80 + 'px';
-  intersectionButton.style.top = originY + 'px';
+  intersectionButton.style.left = selectedTrackPieceX - 75 + 'px';
+  intersectionButton.style.top = selectedTrackPieceY - 25 + 'px';
   boostButton.style.display = "block";
-  boostButton.style.left = originX - 55  + 'px';
-  boostButton.style.top = originY + 50 + 'px';
+  boostButton.style.left = selectedTrackPieceX - 50  + 'px';
+  boostButton.style.top = selectedTrackPieceY + 25 + 'px';
   jumpButton.style.display = "block";
-  jumpButton.style.left = originX + 5  + 'px';
-  jumpButton.style.top = originY + 50 + 'px';
+  jumpButton.style.left = selectedTrackPieceX + 5  + 'px';
+  jumpButton.style.top = selectedTrackPieceY + 25 + 'px';*/
 }
 
 function clearPieMenu(){
   pieMenuOpen = false;
   document.getElementById('STRIAGHT_button').style.display = "none";
-  document.getElementById('RAMP_button').style.display = "none";
+  /*document.getElementById('RAMP_button').style.display = "none";
   document.getElementById('CORNER_button').style.display = "none";
   document.getElementById('INTERSECTION_button').style.display = "none";
   document.getElementById('BOOST_button').style.display = "none";
-  document.getElementById('JUMP_button').style.display = "none";
+  document.getElementById('JUMP_button').style.display = "none";*/
 }
 
 function doMouseDown(e) {
@@ -296,8 +298,11 @@ function doMouseDown(e) {
     context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
     context.fillStyle = "#000000";
     context.fill();*/
-    selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) - (panX%gridSize);
-    selectedTrackPieceY = (e.clientY - (e.clientY%gridSize)) - (panY%gridSize);
+    console.log(e.clientX,e.clientY);
+    //selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) + (panX%gridSize);// + (gridSize/2);
+    //selectedTrackPieceY = (e.clientY - (e.clientY%gridSize)) + (panY%gridSize);// + (gridSize/2);
+    console.log(selectedTrackPieceX,selectedTrackPieceY);
+    console.log(panX, panY);
     originX = e.clientX;
     originY = e.clientY;
 
@@ -311,6 +316,11 @@ function endTracking(e) {
     canvas.removeEventListener("mousemove", mouseTracking);
     canvas.removeEventListener("mouseup", endTracking);
     canvas.removeEventListener("mouseleave", endTracking);
+    if((e.clientX%gridSize) > (gridSize/2))
+      selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) + (panX%gridSize);// + (gridSize/2);
+    else
+      selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) + (panX%gridSize)+gridSize;
+    selectedTrackPieceY = (e.clientY - (e.clientY%gridSize)) + (panY%gridSize);// + (gridSize/2);
     if(pieMenuOpen == false)
       addTrackPiece();
     else
