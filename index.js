@@ -32,6 +32,7 @@ var originY = null;
 var selectedTrackPieceX = null;
 var selectedTrackPieceY = null;
 
+
 //image locations
 const IMAGES = [document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
 document.getElementById("imgBoost"), document.getElementById("imgRamp"), document.getElementById("imgIntersection"),
@@ -73,7 +74,6 @@ function clearTrack() {
     //}
     //draw(curTrack);
 }
-
 
 //draw grid
 function drawGrid() {
@@ -259,9 +259,7 @@ function addTrackPiece(){
   var boostButton = document.getElementById('BOOST_button');
   var jumpButton = document.getElementById('JUMP_button');
   straightButton.style.display = "block";
-  straightButton.style.left = selectedTrackPieceX + 'px';
-  straightButton.style.top = selectedTrackPieceY + 'px';
-  /*straightButton.style.left = selectedTrackPieceX + 25 + 'px';
+  straightButton.style.left = selectedTrackPieceX + 25 + 'px';
   straightButton.style.top = selectedTrackPieceY - 25 + 'px';
   rampButton.style.display = "block";
   rampButton.style.left = selectedTrackPieceX + 5 + 'px';
@@ -277,17 +275,49 @@ function addTrackPiece(){
   boostButton.style.top = selectedTrackPieceY + 25 + 'px';
   jumpButton.style.display = "block";
   jumpButton.style.left = selectedTrackPieceX + 5  + 'px';
-  jumpButton.style.top = selectedTrackPieceY + 25 + 'px';*/
+  jumpButton.style.top = selectedTrackPieceY + 25 + 'px';
 }
 
 function clearPieMenu(){
   pieMenuOpen = false;
   document.getElementById('STRIAGHT_button').style.display = "none";
-  /*document.getElementById('RAMP_button').style.display = "none";
+  document.getElementById('RAMP_button').style.display = "none";
   document.getElementById('CORNER_button').style.display = "none";
   document.getElementById('INTERSECTION_button').style.display = "none";
   document.getElementById('BOOST_button').style.display = "none";
-  document.getElementById('JUMP_button').style.display = "none";*/
+  document.getElementById('JUMP_button').style.display = "none";
+}
+
+function addTypeOfTrack(trackPiece){
+  selectedTrackPieceX =
+  switch(trackPiece){
+    case STRAIGHT:
+    currentTrack.pieces.push({
+      type:trackPiece,
+      pos:[lastpiece.pos[0]+lastpiece.dir[0],lastpiece.pos[1]+lastpiece.dir[1],lastpiece.pos[2]],
+      dir: [lastpiece.dir[0],lastpiece.dir[1]],
+    });
+    break;
+    case LEFT:
+      s = 'c';
+      break;
+    case RIGHT:
+      s = 'c';
+      break;
+    case JUMP:
+      s = 'j';
+      break;
+    case RAMP:
+      s = 's';
+      break;
+    case INTERSECTION:
+      s = 'x';
+      break;
+    case BOOST:
+      s = 'b';
+      break;
+  }
+  clearPieMenu();
 }
 
 function doMouseDown(e) {
@@ -298,11 +328,8 @@ function doMouseDown(e) {
     context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
     context.fillStyle = "#000000";
     context.fill();*/
-    console.log(e.clientX,e.clientY);
-    //selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) + (panX%gridSize);// + (gridSize/2);
-    //selectedTrackPieceY = (e.clientY - (e.clientY%gridSize)) + (panY%gridSize);// + (gridSize/2);
-    console.log(selectedTrackPieceX,selectedTrackPieceY);
-    console.log(panX, panY);
+    selectedTrackPieceX = (e.clientX - ((e.clientX - panX%gridSize)%gridSize)) + (gridSize/2);
+    selectedTrackPieceY = (e.clientY - ((e.clientY - panY%gridSize)%gridSize)) + (gridSize/2);
     originX = e.clientX;
     originY = e.clientY;
 
@@ -316,11 +343,6 @@ function endTracking(e) {
     canvas.removeEventListener("mousemove", mouseTracking);
     canvas.removeEventListener("mouseup", endTracking);
     canvas.removeEventListener("mouseleave", endTracking);
-    if((e.clientX%gridSize) > (gridSize/2))
-      selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) + (panX%gridSize);// + (gridSize/2);
-    else
-      selectedTrackPieceX = (e.clientX - (e.clientX%gridSize)) + (panX%gridSize)+gridSize;
-    selectedTrackPieceY = (e.clientY - (e.clientY%gridSize)) + (panY%gridSize);// + (gridSize/2);
     if(pieMenuOpen == false)
       addTrackPiece();
     else
