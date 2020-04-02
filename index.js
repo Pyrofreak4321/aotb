@@ -78,7 +78,7 @@ function clearTrack() {
             { type: -1, pos: [0, 0, 0], dir: [0, -1] }
         ]
     };
-    draw(currentTrack, document.getElementById('canvas'), gridSize);
+    draw(currentTrack, document.getElementById('canvas'), gridSize ,panX, panY);
 }
 
 //draw grid
@@ -166,15 +166,15 @@ function drawResize() {
 // }
 
 //draw each layer from bottom to top
-function draw(track, canvas, size) {
+function draw(track, canvas, size, x, y) {
     let body = document.getElementById('body');
     //let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
     //this should fix the window scaling issues
     let offsetx = (canvas.width / 2);
     let offsety = (canvas.width / 2);
-    offsetx = offsetx - (offsetx %  size ) + panX;
-    offsety = offsety - (offsety % size) + panY;
+    offsetx = offsetx - (offsetx %  size ) + x;
+    offsety = offsety - (offsety % size) + y;
     drawGrid();
     var curImage
 
@@ -315,7 +315,7 @@ function draw(track, canvas, size) {
 function drawGoodTracks() {
     if (!drawing) {
         drawing = true;
-        draw(currentTrack, document.getElementById('canvas'), gridSize);
+        draw(currentTrack, document.getElementById('canvas'), gridSize, panX, panY);
         drawing = false;
     }
 }
@@ -450,7 +450,7 @@ function addTypeOfTrack(trackPiece){
       break;
   }
   clearAddPieMenu();
-  draw(currentTrack, document.getElementById('canvas'), gridSize);
+  draw(currentTrack, document.getElementById('canvas'), gridSize, panX, panY);
 }
 
 function editTrackPiece(trackPiece){
@@ -478,7 +478,7 @@ function editTrackPiece(trackPiece){
       break;
   }
   clearEditPieMenu();
-  draw(currentTrack, document.getElementById('canvas'), gridSize);
+  draw(currentTrack, document.getElementById('canvas'), gridSize, panX, panY);
 }
 
 function isSpaceOccupied(xCoord,yCoord,zCoord){
