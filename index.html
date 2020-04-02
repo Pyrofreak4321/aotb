@@ -102,10 +102,10 @@ input.visually-hidden:focus-within + label {
     <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(4)" id="RAMP_button"/>
     <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(5)" id="INTERSECTION_button"/>
     <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(6)" id="JUMP_button"/>
-    <input type="image" src="images/straight.png" class="_pieButton" id="ROTATERIGHT"/>
-    <input type="image" src="images/straight.png" class="_pieButton" id="ROTATELEFT"/>
-    <input type="image" src="images/straight.png" class="_pieButton" id="DELETE"/>
-    <input type="image" src="images/straight.png" class="_pieButton" id="SWITCH"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"/>
     <!--Track piece images-->
     <img src="images/start.png" style="display: none;" id="imgStart" />
     <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
