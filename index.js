@@ -38,6 +38,7 @@ var selectedTrackPieceX = null;
 var selectedTrackPieceY = null;
 var selectedGridPieceX = null;
 var selectedGridPieceY = null;
+var selectedTrackIndex = 0;
 
 //image locations
 const IMAGES = [document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
@@ -262,7 +263,6 @@ function drawGoodTracks() {
 
 function displayAddPieMenu(){
   pieAddMenuOpen = true;
-  //var canvas = document.getElementById('canvas');
   var straightButton = document.getElementById('STRIAGHT_button');
   var rampButton = document.getElementById('RAMP_button');
   var cornerButton = document.getElementById('CORNER_button');
@@ -299,8 +299,6 @@ function clearAddPieMenu(){
   document.getElementById('JUMP_button').style.display = "none";
 }
 
-
-
 function displayEditPieMenu(pieceType){
   pieEditMenuOpen = true;
   var rotateRightButton = document.getElementById('ROTATERIGHT');
@@ -320,14 +318,13 @@ function displayEditPieMenu(pieceType){
   straightToRampButton.style.left = selectedTrackPieceX - 25 + 'px';
   straightToRampButton.style.top = selectedTrackPieceY + 25 + 'px';
   if(pieceType == 2 || pieceType == 4){
-    if(pieceType == 4)
+    if(pieceType == 2)
       straightToRampButton.src = "images/ramp.png";
   }
   else{
     straightToRampButton.style.filter = "grayscale(100%)";
     straightToRampButton.disabled = true;
   }
-
 }
 
 function clearEditPieMenu(){
@@ -336,98 +333,112 @@ function clearEditPieMenu(){
   document.getElementById('ROTATELEFT').style.display = "none";
   document.getElementById('DELETE').style.display = "none";
   document.getElementById('SWITCH').style.display = "none";
+  document.getElementById('SWITCH').disabled = false;
+  document.getElementById('SWITCH').src = "images/straight.png";
+  document.getElementById('SWITCH').style.filter = "grayscale(0%)";
 }
 
 function addTypeOfTrack(trackPiece){
-  var canvas = document.getElementById('canvas');
-  var widthX = (canvas.width / 2);
-  var widthY = (canvas.width / 2);
-  var trackX = Math.ceil(((selectedTrackPieceX - (gridSize/2)) - panX - widthX)/gridSize);
-  var trackY = Math.ceil(((selectedTrackPieceY - (gridSize/2)) - panY - widthY)/gridSize);
-  var trackZ = focusLayer;
-  console.log(trackY);
-  console.log(trackX);
   switch(trackPiece){
     case STRAIGHT:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir:[0,-1],
       });
       break;
     case LEFT:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir: [0,-1],
       });
       break;
     case RIGHT:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir:[0,-1],
       });
       break;
     case JUMP:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir:[0,-1],
       });
       break;
     case RAMP:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir:[0,-1],
       });
       break;
     case INTERSECTION:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir:[0,-1],
       });
       break;
     case BOOST:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[trackX,trackY,trackZ],
+        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
         dir:[0,-1],
       });
       break;
   }
-  //Do we need to redraw the currentTrack after we add a piece?
   clearAddPieMenu();
   draw(currentTrack);
 }
 
 function editTrackPiece(trackPiece){
-  var canvas = document.getElementById('canvas');
-  var widthX = (canvas.width / 2);
-  var widthY = (canvas.width / 2);
-  var trackX = Math.ceil(((selectedTrackPieceX - (gridSize/2)) - panX - widthX)/gridSize);
-  var trackY = Math.ceil(((selectedTrackPieceY - (gridSize/2)) - panY - widthY)/gridSize);
-  var trackZ = focusLayer;
   switch(trackPiece){
     case 0:
+      currentTrack.pieces.splice(selectedTrackIndex,1);
       //delete button
-      //pop specific track piece
       break;
     case 1:
+      currentTrack.pieces[selectedTrackIndex].dir = right(currentTrack.pieces[selectedTrackIndex].dir);
       //rotate right
       break;
     case 2:
+      currentTrack.pieces[selectedTrackIndex].dir = left(currentTrack.pieces[selectedTrackIndex].dir);
       //rotate left
       break;
     case 3:
+      if(currentTrack.pieces[selectedTrackIndex].type == STRAIGHT){
+        currentTrack.pieces[selectedTrackIndex].type = RAMP;
+      }
+      else{
+        currentTrack.pieces[selectedTrackIndex].type = STRAIGHT;
+      }
       //switch from ramp to straight or vice versa
       break;
   }
   clearEditPieMenu();
+  draw(currentTrack);
 }
 
+function isSpaceOccupied(xCoord,yCoord,zCoord){
+  var flag = false;
+  for(var index = 0; index < currentTrack.pieces.length; index++){
+    if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord)){
+      flag = true;
+      selectedTrackIndex = index;
+    }
+  }
+  return flag;
+}
+
+function isStartPiece(xCoord,yCoord,zCoord){
+  var flag = false;
+  if((xCoord == 0) && (yCoord == 0) && (zCoord == 0))
+      flag = true;
+  return flag;
+}
 
 function doMouseDown(e) {
     var canvas = document.getElementById('canvas');
@@ -459,38 +470,27 @@ function doMouseDown(e) {
 
 }
 
-function isSpaceOccupied(xCoord,yCoord,zCoord){
-  var flag = false;
-  for(var index = 0; index < currentTrack.pieces.length; index++)
-  {
-    if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord))
-      flag = true;
-  }
-  return flag;
-}
-
 function endTracking(e) {
     var canvas = document.getElementById('canvas');
     canvas.removeEventListener("mousemove", mouseTracking);
     canvas.removeEventListener("mouseup", endTracking);
     canvas.removeEventListener("mouseleave", endTracking);
-    if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false){
-      var check = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
-      if(check == false){
-        if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5)))
+    var startCheck = isStartPiece(selectedGridPieceX,selectedGridPieceY,focusLayer);
+    if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && startCheck == false){
+      var spaceCheck = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
+      if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
+        if(spaceCheck == false)
           displayAddPieMenu();
-      }
-      else if (pieEditMenuOpen == false){
-        if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5)))
-          displayEditPieMenu(1);
+        else if (pieEditMenuOpen == false)
+          displayEditPieMenu(currentTrack.pieces[selectedTrackIndex].type);
       }
     }
     else if(pieAddMenuOpen == true)
       clearAddPieMenu();
     else
       clearEditPieMenu();
-    // originX = null;
-    // originY = null;
+    originX = null;
+    originY = null;
     rightClick = false;
 }
 
