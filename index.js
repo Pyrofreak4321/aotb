@@ -6,9 +6,12 @@ var trackIndex = 0;
 var trackInterval;
 var currentTrack;
 
-var pieMenuOpen = false;
+var rightClick = false;
+var pieAddMenuOpen = false;
+var pieEditMenuOpen = false;
 var drawing = false;
 var working = false;
+
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
@@ -27,6 +30,8 @@ var panX = 0;
 var panY = 0;
 
 // specifically for mouse panning
+var startX = null;
+var startY = null;
 var originX = null;
 var originY = null;
 var selectedTrackPieceX = null;
@@ -54,13 +59,18 @@ window.onload = function () {
     window.addEventListener('resize', function () {
         drawResize();
     });
+    currentTrack = {
+      pieces:[
+        {type:-1, pos:[0,0,0], dir:[0,-1]}
+      ]
+    }
     var body = document.getElementById('body');
     var h = body.clientHeight;
     var w = body.clientWidth;
     var canvas = document.getElementById('canvas');
     canvas.height = h;
     canvas.width = w;
-    drawGrid();
+    draw(currentTrack);
     canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
     canvas.addEventListener("mousedown", doMouseDown);
 }
@@ -153,6 +163,12 @@ function drawResize() {
 
 //need to change this so it draws images
 //draw track
+
+// function drawT(track,canvas,xCoord,yCoord,trackScale)
+// {
+//
+// }
+
 function draw(track) {
     let body = document.getElementById('body');
     let canvas = document.getElementById('canvas');
@@ -238,20 +254,14 @@ function draw(track) {
 function drawGoodTracks() {
     if (!drawing) {
         drawing = true;
-        if (trackIndex < 0) {
-            trackIndex = 0;
-        }
-        if (trackIndex >= goodTracks.length) {
-            trackIndex = 0;
-        }
-        if (trackIndex < goodTracks.length) draw(JSON.parse(goodTracks[trackIndex]));
+        draw(currentTrack);
         drawing = false;
     }
 }
 
-function addTrackPiece(){
-  pieMenuOpen = true;
-  var canvas = document.getElementById('canvas');
+function displayAddPieMenu(){
+  pieAddMenuOpen = true;
+  //var canvas = document.getElementById('canvas');
   var straightButton = document.getElementById('STRIAGHT_button');
   var rampButton = document.getElementById('RAMP_button');
   var cornerButton = document.getElementById('CORNER_button');
@@ -278,8 +288,8 @@ function addTrackPiece(){
   jumpButton.style.top = selectedTrackPieceY + 25 + 'px';
 }
 
-function clearPieMenu(){
-  pieMenuOpen = false;
+function clearAddPieMenu(){
+  pieAddMenuOpen = false;
   document.getElementById('STRIAGHT_button').style.display = "none";
   document.getElementById('RAMP_button').style.display = "none";
   document.getElementById('CORNER_button').style.display = "none";
@@ -288,37 +298,113 @@ function clearPieMenu(){
   document.getElementById('JUMP_button').style.display = "none";
 }
 
+
+
+function displayEditPieMenu(pieceType){
+  pieEditMenuOpen = true;
+  var rotateRightButton = document.getElementById('ROTATERIGHT');
+  var rotateLeftButton = document.getElementById('ROTATELEFT');
+  var deleteButton = document.getElementById('DELETE');
+  var straightToRampButton = document.getElementById('SWITCH');
+  rotateRightButton.style.display = "block";
+  rotateRightButton.style.left = selectedTrackPieceX - 75 + 'px';
+  rotateRightButton.style.top = selectedTrackPieceY - 25 + 'px';
+  rotateLeftButton.style.display = "block";
+  rotateLeftButton.style.left = selectedTrackPieceX + 25 + 'px';
+  rotateLeftButton.style.top = selectedTrackPieceY - 25 + 'px';
+  deleteButton.style.display = "block";
+  deleteButton.style.left = selectedTrackPieceX - 25 + 'px';
+  deleteButton.style.top = selectedTrackPieceY - 75 + 'px';
+  straightToRampButton.style.display = "block";
+  straightToRampButton.style.left = selectedTrackPieceX - 25 + 'px';
+  straightToRampButton.style.top = selectedTrackPieceY + 25 + 'px';
+  if(pieceType == 2 || pieceType == 4){
+    if(pieceType == 4)
+      straightToRampButton.src = "images/ramp.png";
+  }
+  else{
+    straightToRampButton.style.filter = "grayscale(100%)";
+    straightToRampButton.disabled = true;
+  }
+
+}
+
+function clearEditPieMenu(){
+  pieEditMenuOpen = false;
+  document.getElementById('ROTATERIGHT').style.display = "none";
+  document.getElementById('ROTATELEFT').style.display = "none";
+  document.getElementById('DELETE').style.display = "none";
+  document.getElementById('SWITCH').style.display = "none";
+}
+
 function addTypeOfTrack(trackPiece){
-  selectedTrackPieceX =
+  var canvas = document.getElementById('canvas');
+  var widthX = (canvas.width / 2);
+  var widthY = (canvas.width / 2);
+  var trackX = Math.floor((originX - panX - widthX)/gridSize);
+  var trackY = Math.floor((originY - panY - widthY)/gridSize);
+  var trackZ = focusLayer;
+
   switch(trackPiece){
     case STRAIGHT:
-    currentTrack.pieces.push({
-      type:trackPiece,
-      pos:[lastpiece.pos[0]+lastpiece.dir[0],lastpiece.pos[1]+lastpiece.dir[1],lastpiece.pos[2]],
-      dir: [lastpiece.dir[0],lastpiece.dir[1]],
-    });
-    break;
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir:[0,-1],
+      });
+      break;
     case LEFT:
-      s = 'c';
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir: [0,-1],
+      });
       break;
     case RIGHT:
-      s = 'c';
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir:[0,-1],
+      });
       break;
     case JUMP:
-      s = 'j';
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir:[0,-1],
+      });
       break;
     case RAMP:
-      s = 's';
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir:[0,-1],
+      });
       break;
     case INTERSECTION:
-      s = 'x';
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir:[0,-1],
+      });
       break;
     case BOOST:
-      s = 'b';
+      currentTrack.pieces.push({
+        type:trackPiece,
+        pos:[trackX,trackY,trackZ],
+        dir:[0,-1],
+      });
       break;
   }
-  clearPieMenu();
+  //Do we need to redraw the currentTrack after we add a piece?
+  clearAddPieMenu();
+  draw(currentTrack);
 }
+
+function editTrackPiece(trackPiece){
+
+}
+
 
 function doMouseDown(e) {
     var canvas = document.getElementById('canvas');
@@ -330,12 +416,30 @@ function doMouseDown(e) {
     context.fill();*/
     selectedTrackPieceX = (e.clientX - ((e.clientX - panX%gridSize)%gridSize)) + (gridSize/2);
     selectedTrackPieceY = (e.clientY - ((e.clientY - panY%gridSize)%gridSize)) + (gridSize/2);
+
+    startX = e.clientX;
+    startY = e.clientY;
     originX = e.clientX;
     originY = e.clientY;
+
+    if(e.button == 2)
+      rightClick = true;
 
     canvas.addEventListener("mousemove", mouseTracking);
     canvas.addEventListener("mouseup", endTracking);
     canvas.addEventListener("mouseleave", endTracking);
+
+
+}
+
+function isSpaceOccupied(xCoord,yCoord,zCoord){
+  var flag = false;
+  for(var index = 0; index < currentTrack.pieces.length; index++)
+  {
+    if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord))
+      flag = true;
+  }
+  return flag;
 }
 
 function endTracking(e) {
@@ -343,12 +447,20 @@ function endTracking(e) {
     canvas.removeEventListener("mousemove", mouseTracking);
     canvas.removeEventListener("mouseup", endTracking);
     canvas.removeEventListener("mouseleave", endTracking);
-    if(pieMenuOpen == false)
-      addTrackPiece();
+    if(pieEditMenuOpen == false && rightClick == false)
+    {
+      //var check = isSpaceOccupied(originX,gridY,focusLayer);
+      //if(check == false)
+      //{
+        if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5)))
+          displayEditPieMenu(3);
+      //}
+    }
     else
-      clearPieMenu();
+      clearEditPieMenu();
     originX = null;
     originY = null;
+    rightClick = false;
 }
 
 function mouseTracking(e) {
@@ -356,7 +468,8 @@ function mouseTracking(e) {
     var context = canvas.getContext('2d');
     var diffX = e.clientX - originX;
     var diffY = e.clientY - originY;
-    pan(diffX, diffY);
+    if(rightClick == true)
+      pan(diffX, diffY);
     originX = e.clientX;
     originY = e.clientY;
 }
