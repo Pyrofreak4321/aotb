@@ -61,30 +61,24 @@ window.onload = function () {
     window.addEventListener('resize', function () {
         drawResize();
     });
-    currentTrack = {
-      pieces:[
-        {type:-1, pos:[0,0,0], dir:[0,-1]}
-      ]
-    }
     var body = document.getElementById('body');
     var h = body.clientHeight;
     var w = body.clientWidth;
     var canvas = document.getElementById('canvas');
     canvas.height = h;
     canvas.width = w;
-    draw(currentTrack);
+    clearTrack();
     canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
     canvas.addEventListener("mousedown", doMouseDown);
 }
 
 function clearTrack() {
-    drawGrid(); //remove this line if this function calls draw(track) in its final form
-    //clear all but the start of the current track
-    //uncomment or edit this once manual track editing is in place
-    //while (curTrack.pieces > 1) {
-    //    curTrack.pieces.pop();
-    //}
-    //draw(curTrack);
+    currentTrack = {
+        pieces: [
+            { type: -1, pos: [0, 0, 0], dir: [0, -1] }
+        ]
+    };
+    draw(currentTrack);
 }
 
 //draw grid
@@ -171,6 +165,7 @@ function drawResize() {
 //
 // }
 
+//draw each layer from bottom to top
 function draw(track) {
     let body = document.getElementById('body');
     let canvas = document.getElementById('canvas');
@@ -178,9 +173,10 @@ function draw(track) {
     //this should fix the window scaling issues
     let offsetx = (canvas.width / 2);
     let offsety = (canvas.width / 2);
-    offsetx = offsetx - (offsetx%gridSize) + panX;
-    offsety = offsety - (offsety%gridSize) + panY;
+    offsetx = offsetx - (offsetx % gridSize) + panX;
+    offsety = offsety - (offsety % gridSize) + panY;
     drawGrid();
+    var curImage
 
     //draw each layer from bottom to top
     //will this *appear* to properly focus when layer switching is added? (as in, will they look distinct?)
@@ -189,7 +185,7 @@ function draw(track) {
         for (var s = 0; s < track.pieces.length; s++) {
             //if this is on the layer currently being drawn
             if (track.pieces[s].pos[2] == i) {
-                if(i == (focusLayer - 1)) // Set opacity of image to 20% if not on focused layer
+                if (i == (focusLayer - 1)) // Set opacity of image to 20% if not on focused layer
                     context.globalAlpha = 0.2;
                 else
                     context.globalAlpha = 1;
@@ -197,49 +193,112 @@ function draw(track) {
                     case START:
                         context.drawImage(IMAGES[IMAGES.length - 1], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
-                        //context.fillStyle = '#00FF00'; //light green
                         //get last index for start's number
                         break;
                     case STRAIGHT:
-                        //context.fillStyle = '#FFFFFF'; //white
-                        context.drawImage(IMAGES[STRAIGHT], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
+                        curImage = IMAGES[STRAIGHT];
+                        //left or right
+                        if ((track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) || (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0)) {
+                            //var id = "imgStraight";//The ID of the <img> element you want to rotate.
+                            //var deg = 90;//The rotation angle, in degrees.
+                            //document.getElementById(id).style = 'transform: rotate(' + deg + 'deg)';
+                            //curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            //IMAGES[STRAIGHT].style.transform = "rotate(180deg)";
+                            curImage.style.transform = "rotate(90deg)";
+                            // curImage.style.rotate(90);
+                        }
+                        //up or down, hopefully
+                        else {
+                            curImage.setAttribute('style', 'transform:rotate(0deg');
+                        }
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case LEFT:
-                        //context.fillStyle = '#F08080'; //light coral
-                        context.drawImage(IMAGES[LEFT], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
-                        break;
                     case RIGHT:
-                        //context.fillStyle = '#FF5A5A'; //red
-                        context.drawImage(IMAGES[RIGHT], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
+                        curImage = IMAGES[RIGHT];
+                        //left
+                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            //right
+                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            //down
+                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
+                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            //up
+                        } else {
+                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                        }
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case JUMP:
-                        //context.fillStyle = '#DA70D6'; //magenta was bothering my eyes, so I changed it to orchid
                         //if the piece is a jump, fill two squares
-                        context.drawImage(IMAGES[JUMP], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
+                        curImage = IMAGES[JUMP];
+                        var extraImage = IMAGES[JUMP + 1];
+                        //left
+                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            extraImage.setAttribute('style', 'transform:rotate(270deg)');
+                        //right
+                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            extraImage.setAttribute('style', 'transform:rotate(0deg)');
+                        //down
+                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
+                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            extraImage.setAttribute('style', 'transform:rotate(90deg');
+                        //up
+                        } else {
+                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                            extraImage.setAttribute('style', 'transform:rotate(180)deg');
+                        }
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
-                        // if (track.pieces[s].type == JUMP) { // This if statement is redundant, switch-case already checks for jump
-                        context.drawImage(IMAGES[JUMP + 1], offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize),
+                        context.drawImage(extraImage, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), 
                             offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
-                            //context.fillRect(offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
-                        // }
                         break;
                     case RAMP:
-                        //context.fillStyle = '#0000FF'; //blue
-                        context.drawImage(IMAGES[RAMP], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
+                        curImage = IMAGES[RAMP];
+                        //left
+                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            //right
+                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            //down
+                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
+                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            //up
+                        } else {
+                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                        }
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case BOOST: //this is still needed, since straights can be upgraded into boosts
-                        //context.fillStyle = '#FFFF00'; //yellow
-                        context.drawImage(IMAGES[BOOST], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
+                        curImage = IMAGES[BOOST];
+                        //left
+                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            //right
+                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
+                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            //down
+                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
+                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            //up
+                        } else {
+                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                        }
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
                         break;
                     case INTERSECTION:
+                        //intersections can't be rotated
                         context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
                             gridSize, gridSize);
-                        //context.fillStyle = '#FFA500'; //was dark gray, I changed it to orange
                         break;
                     default:
                         context.globalAlpha = 0.5;
