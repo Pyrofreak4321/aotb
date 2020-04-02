@@ -78,7 +78,7 @@ function clearTrack() {
             { type: -1, pos: [0, 0, 0], dir: [0, -1] }
         ]
     };
-    draw(currentTrack);
+    draw(currentTrack, document.getElementById('canvas'), gridSize);
 }
 
 //draw grid
@@ -166,15 +166,15 @@ function drawResize() {
 // }
 
 //draw each layer from bottom to top
-function draw(track) {
+function draw(track, canvas, size) {
     let body = document.getElementById('body');
-    let canvas = document.getElementById('canvas');
+    //let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
     //this should fix the window scaling issues
     let offsetx = (canvas.width / 2);
     let offsety = (canvas.width / 2);
-    offsetx = offsetx - (offsetx % gridSize) + panX;
-    offsety = offsety - (offsety % gridSize) + panY;
+    offsetx = offsetx - (offsetx %  size ) + panX;
+    offsety = offsety - (offsety % size) + panY;
     drawGrid();
     var curImage
 
@@ -191,8 +191,8 @@ function draw(track) {
                     context.globalAlpha = 1;
                 switch (track.pieces[s].type) {
                     case START:
-                        context.drawImage(IMAGES[IMAGES.length - 1], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
+                        context.drawImage(IMAGES[IMAGES.length - 1], offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
                         //get last index for start's number
                         break;
                     case STRAIGHT:
@@ -211,8 +211,8 @@ function draw(track) {
                         else {
                             curImage.setAttribute('style', 'transform:rotate(0deg');
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
                         break;
                     case LEFT:
                     case RIGHT:
@@ -230,8 +230,8 @@ function draw(track) {
                         } else {
                             curImage.setAttribute('style', 'transform: rotate(0deg)');
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
                         break;
                     case JUMP:
                         //if the piece is a jump, fill two squares
@@ -254,10 +254,10 @@ function draw(track) {
                             curImage.setAttribute('style', 'transform: rotate(0deg)');
                             extraImage.setAttribute('style', 'transform:rotate(180)deg');
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
-                        context.drawImage(extraImage, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * gridSize), 
-                            offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * gridSize), gridSize, gridSize);
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
+                        context.drawImage(extraImage, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), 
+                            offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
                         break;
                     case RAMP:
                         curImage = IMAGES[RAMP];
@@ -274,8 +274,8 @@ function draw(track) {
                         } else {
                             curImage.setAttribute('style', 'transform: rotate(0deg)');
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
                         break;
                     case BOOST: //this is still needed, since straights can be upgraded into boosts
                         curImage = IMAGES[BOOST];
@@ -292,18 +292,18 @@ function draw(track) {
                         } else {
                             curImage.setAttribute('style', 'transform: rotate(0deg)');
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
+                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
                         break;
                     case INTERSECTION:
                         //intersections can't be rotated
-                        context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
+                        context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                            size, size);
                         break;
                     default:
                         context.globalAlpha = 0.5;
                         context.fillStyle = '#1A1110'; //the switch should only fall here if a track piece's type is set wrong, so I set it to licorice to make it stand out
-                        context.fillRect(offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize), gridSize, gridSize);
+                        context.fillRect(offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
                         context.globalAlpha = 1;
                 }
 
@@ -315,7 +315,7 @@ function draw(track) {
 function drawGoodTracks() {
     if (!drawing) {
         drawing = true;
-        draw(currentTrack);
+        draw(currentTrack, document.getElementById('canvas'), gridSize);
         drawing = false;
     }
 }
@@ -450,7 +450,7 @@ function addTypeOfTrack(trackPiece){
       break;
   }
   clearAddPieMenu();
-  draw(currentTrack);
+  draw(currentTrack, document.getElementById('canvas'), gridSize);
 }
 
 function editTrackPiece(trackPiece){
@@ -478,7 +478,7 @@ function editTrackPiece(trackPiece){
       break;
   }
   clearEditPieMenu();
-  draw(currentTrack);
+  draw(currentTrack, document.getElementById('canvas'), gridSize);
 }
 
 function isSpaceOccupied(xCoord,yCoord,zCoord){
