@@ -423,14 +423,15 @@ function editTrackPiece(trackPiece){
 }
 
 function isSpaceOccupied(xCoord,yCoord,zCoord){
-  var flag = false;
+  var selectedIndex = -1;
   for(var index = 0; index < currentTrack.pieces.length; index++){
     if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord)){
       flag = true;
+      selectedIndex = index;
       selectedTrackIndex = index;
     }
   }
-  return flag;
+  return selectedIndex;
 }
 
 function isStartPiece(xCoord,yCoord,zCoord){
@@ -455,6 +456,7 @@ function doMouseDown(e) {
     selectedGridPieceX = Math.ceil(((selectedTrackPieceX - (gridSize/2)) - panX - widthX)/gridSize);
     selectedGridPieceY = Math.ceil(((selectedTrackPieceY - (gridSize/2)) - panY - widthY)/gridSize);
 
+
     startX = e.clientX;
     startY = e.clientY;
 
@@ -477,12 +479,12 @@ function endTracking(e) {
     canvas.removeEventListener("mouseleave", endTracking);
     var startCheck = isStartPiece(selectedGridPieceX,selectedGridPieceY,focusLayer);
     if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && startCheck == false){
-      var spaceCheck = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
+      var selectedIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
-        if(spaceCheck == false)
+        if(selectedIndex == -1)
           displayAddPieMenu();
         else if (pieEditMenuOpen == false)
-          displayEditPieMenu(currentTrack.pieces[selectedTrackIndex].type);
+          displayEditPieMenu(currentTrack.pieces[selectedIndex].type);
       }
     }
     else if(pieAddMenuOpen == true)
