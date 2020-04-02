@@ -14,6 +14,16 @@
     ._floatingButton{
       position:fixed;
     }
+    ._pieButton{
+      position:absolute;
+      display:none;
+      height: 50px;
+      width: 50px;
+      border-top-left-radius:50% !important;
+      border-top-right-radius:50% !important;
+      border-bottom-left-radius:50% !important;
+      border-bottom-right-radius:50% !important;
+    }
 
     ._diamond {
       transform: rotate(45deg);
@@ -55,6 +65,7 @@
     input.visually-hidden:focus + label {
   outline: thin dotted;
 }
+oncontextmenu="return false;"
 input.visually-hidden:focus-within + label {
   outline: thin dotted;
 }*/
@@ -85,6 +96,16 @@ input.visually-hidden:focus-within + label {
       <input type="button" name="" class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"/><br>
       <input type="button" name="" class="_roundtop _roundbottom" value="L" id="btnLayer" onclick="switchLayer()" /><br>
     </span>
+    <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(2)" id="STRIAGHT_button"/>
+    <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(1)" id="CORNER_button"/>
+    <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(3)" id="BOOST_button"/>
+    <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(4)" id="RAMP_button"/>
+    <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(5)" id="INTERSECTION_button"/>
+    <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(6)" id="JUMP_button"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"/>
+    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"/>
     <!--Track piece images-->
     <img src="images/start.png" style="display: none;" id="imgStart" />
     <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
