@@ -215,23 +215,6 @@ function draw(track) {
                             gridSize, gridSize);
                         break;
                     case LEFT:
-                        curImage = IMAGES[LEFT];
-                        //left
-                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
-                            //right
-                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(180deg)');
-                            //down
-                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            curImage.setAttribute('style', 'transform:rotate(270deg)');
-                            //up
-                        } else {
-                            curImage.setAttribute('style', 'transform: rotate(0deg)');
-                        }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * gridSize), offsety + (track.pieces[s].pos[1] * gridSize),
-                            gridSize, gridSize);
-                        break;
                     case RIGHT:
                         curImage = IMAGES[RIGHT];
                         //left
