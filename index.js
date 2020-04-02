@@ -176,7 +176,7 @@ function draw(track, canvas, size, x, y) {
     offsetx = offsetx - (offsetx %  size ) + x;
     offsety = offsety - (offsety % size) + y;
     drawGrid();
-    var curImage
+    var curImage;
 
     //draw each layer from bottom to top
     //will this *appear* to properly focus when layer switching is added? (as in, will they look distinct?)
