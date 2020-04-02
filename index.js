@@ -428,17 +428,9 @@ function isSpaceOccupied(xCoord,yCoord,zCoord){
     if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord)){
       flag = true;
       selectedIndex = index;
-      selectedTrackIndex = index;
     }
   }
   return selectedIndex;
-}
-
-function isStartPiece(xCoord,yCoord,zCoord){
-  var flag = false;
-  if((xCoord == 0) && (yCoord == 0) && (zCoord == 0))
-      flag = true;
-  return flag;
 }
 
 function doMouseDown(e) {
@@ -455,7 +447,6 @@ function doMouseDown(e) {
     selectedTrackPieceY = (e.clientY - ((e.clientY - panY%gridSize)%gridSize)) + (gridSize/2);
     selectedGridPieceX = Math.ceil(((selectedTrackPieceX - (gridSize/2)) - panX - widthX)/gridSize);
     selectedGridPieceY = Math.ceil(((selectedTrackPieceY - (gridSize/2)) - panY - widthY)/gridSize);
-
 
     startX = e.clientX;
     startY = e.clientY;
@@ -477,14 +468,15 @@ function endTracking(e) {
     canvas.removeEventListener("mousemove", mouseTracking);
     canvas.removeEventListener("mouseup", endTracking);
     canvas.removeEventListener("mouseleave", endTracking);
-    var startCheck = isStartPiece(selectedGridPieceX,selectedGridPieceY,focusLayer);
-    if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && startCheck == false){
-      var selectedIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
+    var selectedIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
+    if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && selectedIndex != 0){
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
         if(selectedIndex == -1)
           displayAddPieMenu();
-        else if (pieEditMenuOpen == false)
+        else if (pieEditMenuOpen == false){
+          selectedTrackIndex = selectedIndex;
           displayEditPieMenu(currentTrack.pieces[selectedIndex].type);
+        }
       }
     }
     else if(pieAddMenuOpen == true)
