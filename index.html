@@ -15,6 +15,8 @@
       position:fixed;
     }
     ._pieButton{
+      background-color: orange;
+      border: none;
       position:absolute;
       display:none;
       height: 50px;
@@ -35,11 +37,11 @@
     ._diamond div {
       height: 40px;
     }
-    ._diamond span{
+    ._diamond i{
       position: fixed;
       transform: rotate(-45deg) translate(0px, -20px);
-      height: 40px;
-      width: 40px;
+      height: 50px;
+      width: 50px;
     }
 
     ._floatingButton input, ._floatingButton button{
@@ -72,29 +74,39 @@ input.visually-hidden:focus-within + label {
   </style>
   <body id="body" onload="onload();" onkeydown="shift(event)">
     <canvas id="canvas"></canvas>
-    <span class="_floatingButton" style="top:10px; left:10px;">
-      <input type="button" class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" name="" value="Save" id="btnSave" />
-      <input type="button" class="_roundtop _roundbottom" onclick="uploadTrack()" name="" value="Load" id="btnLoad" />
-      <input type="button" class="_roundtop _roundbottom" name="" value="New" id="btnNew" />
-      <input type="button" class="_roundtop _roundbottom" name="" value="Clean" id="btnClean" />
-      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="Generate" id="btnGen" />
+    <span class="_floatingButton" style="top:15px; left:15px;">
+      <button class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" id="btnSave">
+        <i class="fas fa-save" aria-hidden="true"></i>
+      </button>
+      <button class="_roundtop _roundbottom" onclick="uploadTrack()" id="btnLoad">
+        <i class="fas fa-folder-open" aria-hidden="true"></i>
+      </button>
+      <button class="_roundtop _roundbottom" id="btnNew">
+        <i class="fas fa-trash-alt" aria-hidden="true"></i>
+      </button>
+      <button class="_roundtop _roundbottom" id="btnClean">
+        <i class="fas fa-brush" aria-hidden="true"></i>
+      </button>
+      <button class="_roundtop _roundbottom" onclick="threadGen()" id="btnGen">
+        <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
+      </button>
     </span>
     <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
-    <span class="_floatingButton" style="top:10px; right:10px; text-align:right;">
+    <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
       <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
         <div class="">
-          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><span>&uarr;</span></button>
-          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><span>&rarr;</span></button>
+          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
         </div>
         <div class="">
-          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><span>&larr;</span></button>
-          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><span>&darr;</span></button>
+          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
         </div>
       </div>
-      <input type="button" name="" class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"/><br>
-      <input type="button" name="" class="" onclick="resetScale()" value="=" id="btnZoomReset"/><br>
-      <input type="button" name="" class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"/><br>
-      <input type="button" name="" class="_roundtop _roundbottom" value="L" id="btnLayer" onclick="switchLayer()" /><br>
+      <button class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i></button><br>
+      <button class="" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i></button><br>
+      <button class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
+      <button class="_roundtop _roundbottom" style="margin-top: 10px;" value="L" id="btnLayer" onclick="switchLayer()"><i class="fas fa-layer-group" aria-hidden="true"></i></button><br>
     </span>
     <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(2)" id="STRIAGHT_button"/>
     <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(1)" id="CORNER_button"/>
@@ -102,9 +114,9 @@ input.visually-hidden:focus-within + label {
     <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(4)" id="RAMP_button"/>
     <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(5)" id="INTERSECTION_button"/>
     <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(6)" id="JUMP_button"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"/>
+    <button class="_pieButton _roundtop _roundbottom" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo fa-2x" aria-hidden="true"></i></button>
+    <button class="_pieButton _roundtop _roundbottom" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo fa-2x" aria-hidden="true"></i></button>
+    <button class="_pieButton _roundtop _roundbottom" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt fa-2x" aria-hidden="true"></i></button>
     <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"/>
     <!--Track piece images-->
     <img src="images/start.png" style="display: none;" id="imgStart" />
@@ -120,4 +132,5 @@ input.visually-hidden:focus-within + label {
 
   <script type="text/javascript" src="index.js"></script>
   <script type="text/javascript" src="generator.js"></script>
+  <script src="https://kit.fontawesome.com/0dce990a33.js" crossorigin="anonymous"></script>
 </html>
