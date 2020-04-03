@@ -82,11 +82,11 @@ function clearTrack() {
 }
 
 //draw grid
-function drawGrid() {
+function drawGrid(canvas, size) {
     let body = document.getElementById('body');
     let h = body.clientHeight;
     let w = body.clientWidth;
-    let canvas = document.getElementById('canvas');
+    //let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
 
     // Enforce global alpha of 1 to prevent ghosting
@@ -97,16 +97,16 @@ function drawGrid() {
     context.fillRect(0, 0, w, h);
 
     context.beginPath();
-    for(var x = 0; x <= w+gridSize; x+=gridSize){
+    for (var x = 0; x <= w + size; x += size) {
         // Draw one tile further offscreen to try to stop panning into blank space
-        context.moveTo(x + (panX % gridSize),0 + (panY % gridSize)-gridSize);
-        context.lineTo(x + (panX % gridSize),h + (panY % gridSize)+gridSize);
+        context.moveTo(x + (panX % size), 0 + (panY % size) - size);
+        context.lineTo(x + (panX % size), h + (panY % size) + size);
     }
     context.stroke();
     context.beginPath();
-    for(var y = 0; y <= h+gridSize; y+=gridSize){
-        context.moveTo(0 + (panX % gridSize)-gridSize,y + (panY % gridSize));
-        context.lineTo(w + (panX % gridSize)+gridSize,y + (panY % gridSize));
+    for (var y = 0; y <= h + size; y += size) {
+        context.moveTo(0 + (panX % size) - size, y + (panY % size));
+        context.lineTo(w + (panX % size) + size, y + (panY % size));
     }
     context.stroke();
 }
@@ -119,7 +119,6 @@ function drawResize() {
     /*let body = document.getElementById('body');
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
-
     let h = body.clientHeight;
     let w = body.clientWidth;
     context.strokeStyle = "#AAAAAA"; //this isn't "#AAAAAA" since that color was appearing darker than it should've for some reason - Because drawResize wasn't drawing clear rectangles it stacked the lines and made them darker
@@ -153,7 +152,7 @@ function drawResize() {
     var canvas = document.getElementById('canvas');
     canvas.height = h;
     canvas.width = w;
-    drawGrid();
+    drawGrid(canvas, gridSize);
     drawGoodTracks();
 }
 
@@ -168,19 +167,18 @@ function drawResize() {
 //draw each layer from bottom to top
 function draw(track, canvas, size, x, y) {
     let body = document.getElementById('body');
-    //let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
-    //this should fix the window scaling issues
+    var c2 = document.createElement("canvas");
+    var ctx2 = c2.getContext("2d");
+    c2.width = size;
+    c2.height = size;
     let offsetx = (canvas.width / 2);
     let offsety = (canvas.width / 2);
-    offsetx = offsetx - (offsetx %  size ) + x;
+    offsetx = offsetx - (offsetx % size) + x;
     offsety = offsety - (offsety % size) + y;
-    drawGrid();
+    drawGrid(canvas, size);
     var curImage;
-
     //draw each layer from bottom to top
-    //will this *appear* to properly focus when layer switching is added? (as in, will they look distinct?)
-        //maybe should edit the default color for empty tiles to be dark gray or dark green when focused on the upper layer?
     for (var i = 0; i <= 1; i++) {
         for (var s = 0; s < track.pieces.length; s++) {
             //if this is on the layer currently being drawn
@@ -191,112 +189,149 @@ function draw(track, canvas, size, x, y) {
                     context.globalAlpha = 1;
                 switch (track.pieces[s].type) {
                     case START:
-                        context.drawImage(IMAGES[IMAGES.length - 1], offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
-                        //get last index for start's number
+                        curImage = IMAGES[IMAGES.length - 1];
+                        //left or right
+                        if ((track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) || (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0)) {
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
+                        }
+                        //up or down, hopefully
+                        else {
+                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                                size, size);
+                        }
                         break;
                     case STRAIGHT:
                         curImage = IMAGES[STRAIGHT];
                         //left or right
                         if ((track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) || (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0)) {
-                            //var id = "imgStraight";//The ID of the <img> element you want to rotate.
-                            //var deg = 90;//The rotation angle, in degrees.
-                            //document.getElementById(id).style = 'transform: rotate(' + deg + 'deg)';
-                            //curImage.setAttribute('style', 'transform:rotate(.25turn)');
-                            //IMAGES[STRAIGHT].style.transform = "rotate(180deg)";
-                            curImage.style.transform = "rotate(90deg)";
-                            // curImage.style.rotate(90);
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI)/ 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                         }
                         //up or down, hopefully
                         else {
-                            curImage.setAttribute('style', 'transform:rotate(0deg');
+                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                                size, size);
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
                         break;
                     case LEFT:
                     case RIGHT:
                         curImage = IMAGES[RIGHT];
                         //left
                         if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //right
                         } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(Math.PI);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //down
                         } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(3 * (Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //up
                         } else {
-                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                                size, size);
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
                         break;
                     case JUMP:
                         //if the piece is a jump, fill two squares
                         curImage = IMAGES[JUMP];
                         var extraImage = IMAGES[JUMP + 1];
+
                         //left
                         if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
-                            extraImage.setAttribute('style', 'transform:rotate(270deg)');
-                        //right
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
+
+                            ctx2.drawImage(extraImage, 0, 0, size, size);
+                            ctx2.rotate(3*(Math.PI) / 2);
+                            context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size),
+                                offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size));
+                            //right
                         } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(180deg)');
-                            extraImage.setAttribute('style', 'transform:rotate(0deg)');
-                        //down
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(Math.PI);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
+
+                            ctx2.drawImage(extraImage, 0, 0, size, size);
+                            ctx2.rotate(Math.PI);
+                            context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size),
+                                offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size));
+                            //down
                         } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            curImage.setAttribute('style', 'transform:rotate(270deg)');
-                            extraImage.setAttribute('style', 'transform:rotate(90deg');
-                        //up
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(3 * (Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
+
+                            context.drawImage(extraImage, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size),
+                                offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
+                            //up
                         } else {
-                            curImage.setAttribute('style', 'transform: rotate(0deg)');
-                            extraImage.setAttribute('style', 'transform:rotate(180)deg');
-                        }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
-                        context.drawImage(extraImage, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), 
-                            offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
+                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                                size, size);
+
+
+                            ctx2.drawImage(extraImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI) / 2);
+                            context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size),
+                                offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size));
+                        }                     
                         break;
                     case RAMP:
                         curImage = IMAGES[RAMP];
-                        //left
                         if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //right
                         } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(Math.PI);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //down
                         } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(3 * (Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //up
                         } else {
-                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                                size, size);
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
                         break;
                     case BOOST: //this is still needed, since straights can be upgraded into boosts
                         curImage = IMAGES[BOOST];
                         //left
                         if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(.25turn)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate((Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //right
                         } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            curImage.setAttribute('style', 'transform:rotate(180deg)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(Math.PI);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //down
                         } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            curImage.setAttribute('style', 'transform:rotate(270deg)');
+                            ctx2.drawImage(curImage, 0, 0, size, size);
+                            ctx2.rotate(3 * (Math.PI) / 2);
+                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
                             //up
                         } else {
-                            curImage.setAttribute('style', 'transform: rotate(0deg)');
+                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
+                                size, size);
                         }
-                        context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
                         break;
                     case INTERSECTION:
-                        //intersections can't be rotated
+                        //even if they are rotated, intersections won't appear to be rotated
                         context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
                             size, size);
                         break;
@@ -311,7 +346,6 @@ function draw(track, canvas, size, x, y) {
         }
     }
 }
-
 function drawGoodTracks() {
     if (!drawing) {
         drawing = true;
@@ -565,9 +599,9 @@ function mouseTracking(e) {
     originX = e.clientX;
     originY = e.clientY;
 }
-
+/*
 function switchLayer(){
-    /*
+    
     * fL 0 = No focused layer
     * fL 1 = Darken first layer
     * fL 2 = Darken second layer
@@ -577,10 +611,11 @@ function switchLayer(){
     * Second press = second layer focus
     * Third press = no focus
     * Repeat
-    */
+    
     focusLayer = (focusLayer + 2) % 3;
     drawGoodTracks();
 }
+*/
 
 function pan(x,y){
     panX += x;
@@ -607,7 +642,7 @@ function modScale(interval){
         scale = 0.2;
     gridSize = defaultGridSize * scale;
     halfGrid = gridSize/2;
-    drawGrid();
+    drawGrid(canvas, size);
     drawGoodTracks();
 }
 
