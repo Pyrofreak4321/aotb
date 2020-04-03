@@ -599,9 +599,9 @@ function mouseTracking(e) {
     originX = e.clientX;
     originY = e.clientY;
 }
-/*
+
 function switchLayer(){
-    
+    /*
     * fL 0 = No focused layer
     * fL 1 = Darken first layer
     * fL 2 = Darken second layer
@@ -611,11 +611,12 @@ function switchLayer(){
     * Second press = second layer focus
     * Third press = no focus
     * Repeat
+    */
     
     focusLayer = (focusLayer + 2) % 3;
     drawGoodTracks();
 }
-*/
+
 
 function pan(x,y){
     panX += x;
@@ -664,7 +665,7 @@ function wheelZoom(e){
         modScale(0.1);
     // No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
 }
-
+/*
 function switchLayer(){
     /*
     * fL 0 = No focused layer
@@ -676,10 +677,10 @@ function switchLayer(){
     * Second press = second layer focus
     * Third press = no focus
     * Repeat
-    */
+    
     focusLayer = (focusLayer + 2) % 3;
 }
-
+*/ 
 //run track generation
 function threadGen() {
     var time;
