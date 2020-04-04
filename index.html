@@ -4,7 +4,7 @@
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
     <title>ANKI Track builder</title>
   </head>
-  <style media="screen">
+  <style>
     body{
       height: 100vh;
       width: 100vw;
@@ -24,11 +24,14 @@
       height: 50px;
       width: 50px;
       margin:0px;
+      top:0;
+      left:0;
       border-top-left-radius:50% !important;
       border-top-right-radius:50% !important;
       border-bottom-left-radius:50% !important;
       border-bottom-right-radius:50% !important;
       transition: margin .1s, visibility .1s, opacity .1s;
+      outline: none;
     }
     ._pieButton i {
         margin-top: 5px;
@@ -58,6 +61,13 @@
       width: 50px;
       height: 50px;
       border-radius: 5px;
+      outline: none;
+    }
+    ._floatingButton input:active, ._floatingButton button:active{
+      background-color: darkorange;
+
+      height: 48px;
+      border: 2px transparent;
     }
 
     ._detail{
@@ -66,10 +76,10 @@
     ._detail:hover{
       width: 200px;
     }
-    ._detail span{
+    ._detail ._detail_label{
       display: none;
     }
-    ._detail:hover span{
+    ._detail:hover ._detail_label{
       display: inline-block;
     }
     ._detail i{
@@ -87,33 +97,24 @@
       border-bottom-left-radius:25px !important;
       border-bottom-right-radius:25px !important;
     }
-
-    /*
-    input.visually-hidden:focus + label {
-  outline: thin dotted;
-}
-oncontextmenu="return false;"
-input.visually-hidden:focus-within + label {
-  outline: thin dotted;
-}*/
   </style>
   <body id="body" onload="onload();" onkeydown="shift(event)">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:15px; left:15px;">
       <button class="_roundtop _roundbottom _detail" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" id="btnSave">
-        <span>Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
+        <span class="_detail_label">Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
       </button>
       <button class="_roundtop _roundbottom _detail" onclick="uploadTrack()" id="btnLoad">
-        <span>Load&nbsp;Track</span><i class="fas fa-folder-open" aria-hidden="true"></i>
+        <span class="_detail_label">Load&nbsp;Track</span><i class="fas fa-folder-open" aria-hidden="true"></i>
       </button>
       <button class="_roundtop _roundbottom _detail" id="btnNew">
-        <span>New&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
+        <span class="_detail_label">New&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
       </button>
       <button class="_roundtop _roundbottom _detail" id="btnClean">
-        <span>Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
+        <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
       </button>
       <button class="_roundtop _roundbottom _detail" onclick="threadGen()" id="btnGen">
-        <span>Generate&nbsp;Tracks</span><i class="fas fa-pencil-ruler" aria-hidden="true"></i>
+        <span class="_detail_label">Generate&nbsp;Tracks</span><i class="fas fa-pencil-ruler" aria-hidden="true"></i>
       </button>
     </span>
     <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
