@@ -320,6 +320,24 @@ function drawGoodTracks() {
     }
 }
 
+
+function hideMenuButton(e){
+  console.log(e);
+  e.style.visibility = "hidden";
+  e.style.margin = "0";
+  e.style.opacity = "0";
+  return e;
+}
+
+function showMenuButton(e){
+  console.log(e);
+  e.style.left = selectedTrackPieceX - 25  + 'px';
+  e.style.top = selectedTrackPieceY - 25 + 'px';
+  e.style.visibility = "visible";
+  e.style.opacity = "1";
+  return e;
+}
+
 function displayAddPieMenu(){
   pieAddMenuOpen = true;
   var straightButton = document.getElementById('STRIAGHT_button');
@@ -328,34 +346,23 @@ function displayAddPieMenu(){
   var intersectionButton = document.getElementById('INTERSECTION_button');
   var boostButton = document.getElementById('BOOST_button');
   var jumpButton = document.getElementById('JUMP_button');
-  straightButton.style.display = "block";
-  straightButton.style.left = selectedTrackPieceX + 25 + 'px';
-  straightButton.style.top = selectedTrackPieceY - 25 + 'px';
-  rampButton.style.display = "block";
-  rampButton.style.left = selectedTrackPieceX + 5 + 'px';
-  rampButton.style.top = selectedTrackPieceY - 75 + 'px';
-  cornerButton.style.display = "block";
-  cornerButton.style.left = selectedTrackPieceX - 50 + 'px';
-  cornerButton.style.top = selectedTrackPieceY - 75 + 'px';
-  intersectionButton.style.display = "block";
-  intersectionButton.style.left = selectedTrackPieceX - 75 + 'px';
-  intersectionButton.style.top = selectedTrackPieceY - 25 + 'px';
-  boostButton.style.display = "block";
-  boostButton.style.left = selectedTrackPieceX - 50  + 'px';
-  boostButton.style.top = selectedTrackPieceY + 25 + 'px';
-  jumpButton.style.display = "block";
-  jumpButton.style.left = selectedTrackPieceX + 5  + 'px';
-  jumpButton.style.top = selectedTrackPieceY + 25 + 'px';
+
+  showMenuButton(straightButton).style.margin = ' 0 50px';
+  showMenuButton(rampButton).style.margin = '-50px 30px';
+  showMenuButton(cornerButton).style.margin = '-50px -25px';
+  showMenuButton(intersectionButton).style.margin = '0 -50px';
+  showMenuButton(boostButton).style.margin = '50px -25px';
+  showMenuButton(jumpButton).style.margin = '50px 30px';
 }
 
 function clearAddPieMenu(){
   pieAddMenuOpen = false;
-  document.getElementById('STRIAGHT_button').style.display = "none";
-  document.getElementById('RAMP_button').style.display = "none";
-  document.getElementById('CORNER_button').style.display = "none";
-  document.getElementById('INTERSECTION_button').style.display = "none";
-  document.getElementById('BOOST_button').style.display = "none";
-  document.getElementById('JUMP_button').style.display = "none";
+  hideMenuButton(document.getElementById('STRIAGHT_button'));
+  hideMenuButton(document.getElementById('RAMP_button'));
+  hideMenuButton(document.getElementById('CORNER_button'));
+  hideMenuButton(document.getElementById('INTERSECTION_button'));
+  hideMenuButton(document.getElementById('BOOST_button'));
+  hideMenuButton(document.getElementById('JUMP_button'));
 }
 
 function displayEditPieMenu(pieceType){
@@ -364,18 +371,10 @@ function displayEditPieMenu(pieceType){
   var rotateLeftButton = document.getElementById('ROTATELEFT');
   var deleteButton = document.getElementById('DELETE');
   var straightToRampButton = document.getElementById('SWITCH');
-  rotateRightButton.style.display = "block";
-  rotateRightButton.style.left = selectedTrackPieceX - 75 + 'px';
-  rotateRightButton.style.top = selectedTrackPieceY - 25 + 'px';
-  rotateLeftButton.style.display = "block";
-  rotateLeftButton.style.left = selectedTrackPieceX + 25 + 'px';
-  rotateLeftButton.style.top = selectedTrackPieceY - 25 + 'px';
-  deleteButton.style.display = "block";
-  deleteButton.style.left = selectedTrackPieceX - 25 + 'px';
-  deleteButton.style.top = selectedTrackPieceY - 75 + 'px';
-  straightToRampButton.style.display = "block";
-  straightToRampButton.style.left = selectedTrackPieceX - 25 + 'px';
-  straightToRampButton.style.top = selectedTrackPieceY + 25 + 'px';
+  showMenuButton(rotateRightButton).style.margin = ' 0 -50px';
+  showMenuButton(rotateLeftButton).style.margin = ' 0 50px';
+  showMenuButton(deleteButton).style.margin = '-50px 0';
+  showMenuButton(straightToRampButton).style.margin = '50px 0';
   if(pieceType == 2 || pieceType == 4){
     if(pieceType == 2)
       straightToRampButton.src = "images/ramp.png";
@@ -388,10 +387,10 @@ function displayEditPieMenu(pieceType){
 
 function clearEditPieMenu(){
   pieEditMenuOpen = false;
-  document.getElementById('ROTATERIGHT').style.display = "none";
-  document.getElementById('ROTATELEFT').style.display = "none";
-  document.getElementById('DELETE').style.display = "none";
-  document.getElementById('SWITCH').style.display = "none";
+  hideMenuButton(document.getElementById('ROTATERIGHT'));
+  hideMenuButton(document.getElementById('ROTATELEFT'));
+  hideMenuButton(document.getElementById('DELETE'));
+  hideMenuButton(document.getElementById('SWITCH'));
   document.getElementById('SWITCH').disabled = false;
   document.getElementById('SWITCH').src = "images/straight.png";
   document.getElementById('SWITCH').style.filter = "grayscale(0%)";
