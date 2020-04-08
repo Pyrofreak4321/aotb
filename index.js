@@ -74,30 +74,30 @@ function clearTrack() {
 
 
 function drawGrid(canvas, size) {
-    var body = document.getElementById('body');
-    var h = body.clientHeight;
-    var w = body.clientWidth;
+    var h = canvas.height;
+    var w = canvas.width;
     //let canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
 
     // Enforce global alpha of 1 to prevent ghosting
     context.globalAlpha = 1;
 
+    context.clearRect(0, 0, w, h);
+
     context.fillStyle = "#FFFFFF";
     context.strokeStyle = "#AAAAAA";
-    context.fillRect(0, 0, w, h);
 
     context.beginPath();
     for (var x = 0; x <= w + size; x += size) {
         // Draw one tile further offscreen to try to stop panning into blank space
-        context.moveTo(x + (panX % size), 0 + (panY % size) - size);
-        context.lineTo(x + (panX % size), h + (panY % size) + size);
+        context.moveTo(x + (panX % size), 0);
+        context.lineTo(x + (panX % size), h);
     }
     context.stroke();
     context.beginPath();
     for (var y = 0; y <= h + size; y += size) {
-        context.moveTo(0 + (panX % size) - size, y + (panY % size));
-        context.lineTo(w + (panX % size) + size, y + (panY % size));
+        context.moveTo(0, y + (panY % size));
+        context.lineTo(w, y + (panY % size));
     }
     context.stroke();
 }
@@ -156,14 +156,14 @@ function draw(track, canvas, size, x, y, layer) {
                   }
                 }
 
+                bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
+
+                context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
+
                 if(track.pieces[s].type == JUMP){
                   bufferImage(ctx2, track.pieces[s].dir,2+track.pieces[s].type);
                   context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
                 }
-
-                bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
-
-                context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
             }
         }
     }
@@ -256,7 +256,7 @@ function clearEditPieMenu(){
 
 
 function addTypeOfTrack(trackPiece){
-  inbound = getAdjacent(selectedGridPieceX,selectedGridPieceY,focusLayer)||{dir:[0,-1]};
+  inbound = getInbound(selectedGridPieceX,selectedGridPieceY,focusLayer);
   switch(trackPiece){
     case STRAIGHT:
       currentTrack.pieces.push({
@@ -289,7 +289,7 @@ function addTypeOfTrack(trackPiece){
     case RAMP:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
+        pos:[selectedGridPieceX,selectedGridPieceY,(focusLayer+1)%2],
         dir:inbound.dir,
       });
       switchLayer();
@@ -346,16 +346,20 @@ function editTrackPiece(trackPiece){
 }
 
 
-function getAdjacent(xCoord,yCoord,zCoord){
-  var selectedtrack;
+function getInbound(xCoord,yCoord,zCoord){
+  var selectedDir;
   for(var index = 0; index < currentTrack.pieces.length; index++){
     if((currentTrack.pieces[index].pos[0]+currentTrack.pieces[index].dir[0] == xCoord) &&
     (currentTrack.pieces[index].pos[1]+currentTrack.pieces[index].dir[1] == yCoord) &&
     (currentTrack.pieces[index].pos[2] == zCoord)){
-      selectedtrack = currentTrack.pieces[index];
+      selectedDir = currentTrack.pieces[index].dir;
+    }else if((currentTrack.pieces[index].pos[0]-currentTrack.pieces[index].dir[0] == xCoord) &&
+    (currentTrack.pieces[index].pos[1]-currentTrack.pieces[index].dir[1] == yCoord) &&
+    (currentTrack.pieces[index].pos[2] == zCoord)){
+      selectedDir = left(left(currentTrack.pieces[index].dir));
     }
   }
-  return selectedtrack;
+  return {dir:selectedDir||[0,-1]};
 }
 
 function isSpaceOccupied(xCoord,yCoord,zCoord){
@@ -382,16 +386,11 @@ function doMouseDown(e) {
     var canvas = document.getElementById('canvas');
     var widthX = (canvas.width / 2);
     var widthY = (canvas.height / 2);
-    /* old placeholder function for testing - draws circle on click
-    var context = canvas.getContext('2d');
-    context.beginPath();
-    context.arc(e.clientX, e.clientY, 25, 0, 2*Math.PI);
-    context.fillStyle = "#000000";
-    context.fill();*/
+
     selectedTrackPieceX = (e.clientX - ((e.clientX - panX%gridSize)%gridSize)) + (gridSize/2);
     selectedTrackPieceY = (e.clientY - ((e.clientY - panY%gridSize)%gridSize)) + (gridSize/2);
-    selectedGridPieceX = Math.floor(((selectedTrackPieceX +(gridSize/2)) - panX - widthX)/gridSize);
-    selectedGridPieceY = Math.floor(((selectedTrackPieceY +(gridSize/2)) - panY - widthY)/gridSize);
+    selectedGridPieceX = Math.floor((e.clientX - (widthX-(widthX%gridSize)) - panX)/gridSize);
+    selectedGridPieceY = Math.floor((e.clientY - (widthY-(widthY%gridSize)) - panY)/gridSize);
 
     startX = e.clientX;
     startY = e.clientY;
@@ -404,8 +403,6 @@ function doMouseDown(e) {
     canvas.addEventListener("mousemove", mouseTracking);
     canvas.addEventListener("mouseup", endTracking);
     canvas.addEventListener("mouseleave", endTracking);
-
-
 }
 
 function endTracking(e) {
@@ -514,7 +511,7 @@ function wheelZoom(e){
 
 
 function cycle(){
-  if(trackIndex < goodTracks.length){
+  if(trackIndex < goodTracks.length && trackIndex >= 0){
     currentTrack = JSON.parse(goodTracks[trackIndex]);
     drawCurrentTrack();
   } else
