@@ -96,7 +96,7 @@
       border-bottom-right-radius:25px !important;
     }
   </style>
-  <body id="body" onload="onload();" onkeydown="shift(event)">
+  <body id="body" onload="onload();" onContextMenu="return false;" onkeydown="shift(event)">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:15px; left:15px;">
       <button class="_roundtop _roundbottom _detail" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" id="btnSave">
@@ -132,12 +132,12 @@
       <button class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
       <button class="_roundtop _roundbottom" style="margin-top: 10px;" value="L" id="btnLayer" onclick="switchLayer()"><i class="fas fa-layer-group" aria-hidden="true"></i></button><br>
     </span>
-    <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(2)" id="STRIAGHT_button"/>
-    <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(1)" id="CORNER_button"/>
-    <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(3)" id="BOOST_button"/>
-    <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(4)" id="RAMP_button"/>
-    <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(5)" id="INTERSECTION_button"/>
-    <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(6)" id="JUMP_button"/>
+    <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT)" id="STRIAGHT_button"/>
+    <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT)" id="CORNER_button"/>
+    <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST)" id="BOOST_button"/>
+    <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP)" id="RAMP_button"/>
+    <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION)" id="INTERSECTION_button"/>
+    <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
     <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
     <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
     <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
