@@ -492,9 +492,9 @@ function modScale(interval){
 }
 
 function resetScale(){
-    modScale(1 - scale);
     panX = 0;
     panY = 0;
+    modScale(1 - scale);
 }
 
 function wheelZoom(e){
