@@ -2,7 +2,7 @@ var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
 var ready = true;
-var consecLimit = [2,2,2,0,0,0,0];
+var consecLimit = [4,4,4,0,0,0,0];
 
 //changed these to const - caused errors for having same consts in index AND generator
 var START = -1;

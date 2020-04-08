@@ -41,12 +41,12 @@ var selectedGridPieceY = null;
 var selectedTrackIndex = 0;
 
 //image locations
-const IMAGES = [document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
+var  IMAGES = [document.getElementById("imgStart"),document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
 document.getElementById("imgBoost"), document.getElementById("imgRamp"), document.getElementById("imgIntersection"),
-document.getElementById("imgJumpLaunch"), document.getElementById("imgJumpCatch"), document.getElementById("imgStart")];
+document.getElementById("imgJumpCatch"), document.getElementById("imgJumpLaunch"), ];
 
 //initalize
-window.onload = function () {
+function onload() {
     //handler for when the window's resized
     window.addEventListener('resize', function () {
         drawResize();
@@ -68,16 +68,17 @@ function clearTrack() {
             { type: -1, pos: [0, 0, 0], dir: [0, -1] }
         ]
     };
-    draw(currentTrack, document.getElementById('canvas'), gridSize, panX, panY);
+    resetScale();
+    drawCurrentTrack();
 }
 
-//draw grid, now usable for canvases that aren't the main one
+
 function drawGrid(canvas, size) {
-    let body = document.getElementById('body');
-    let h = body.clientHeight;
-    let w = body.clientWidth;
+    var body = document.getElementById('body');
+    var h = body.clientHeight;
+    var w = body.clientWidth;
     //let canvas = document.getElementById('canvas');
-    let context = canvas.getContext('2d');
+    var context = canvas.getContext('2d');
 
     // Enforce global alpha of 1 to prevent ghosting
     context.globalAlpha = 1;
@@ -101,8 +102,6 @@ function drawGrid(canvas, size) {
     context.stroke();
 }
 
-//repurposed to readjust canvas size when resizing browser window as static size caused issues
-//removed all the commented out code
 function drawResize() {
     var body = document.getElementById('body');
     var h = body.clientHeight;
@@ -110,234 +109,77 @@ function drawResize() {
     var canvas = document.getElementById('canvas');
     canvas.height = h;
     canvas.width = w;
-    drawGrid(canvas, gridSize);
-    drawGoodTracks();
+    drawCurrentTrack();
 }
 
 //draw each layer from bottom to top
-function draw(track, canvas, size, x, y) {
-    //let body = document.getElementById('body');
-    let context = canvas.getContext('2d');
-    let offsetx = (canvas.width / 2);
-    let offsety = (canvas.height / 2);
+function draw(track, canvas, size, x, y, layer) {
+    var context = canvas.getContext('2d');
+    var offsetx = (canvas.width / 2);
+    var offsety = (canvas.height / 2);
     offsetx = offsetx - (offsetx % size) + x;
     offsety = offsety - (offsety % size) + y;
-    drawGrid(canvas, size);
     var curImage;
+    var c2 = document.createElement("canvas");
+    var ctx2 = c2.getContext("2d");
+    c2.width = size;
+    c2.height = size;
     //draw each layer from bottom to top
     for (var i = 0; i <= 1; i++) {
         for (var s = 0; s < track.pieces.length; s++) {
             //if this is on the layer currently being drawn
             if (track.pieces[s].pos[2] == i) {
-                if (i == (focusLayer - 1)) // Set opacity of image to 20% if not on focused layer
-                    context.globalAlpha = 0.2;
+                if (i != layer && layer <= 1) // Set opacity of image to 20% if not on focused layer
+                    context.globalAlpha = 0.5;
                 else
                     context.globalAlpha = 1;
-                var c2 = document.createElement("canvas");
-                var ctx2 = c2.getContext("2d");
-                c2.width = size;
-                c2.height = size;
-                switch (track.pieces[s].type) {
-                    case START:
-                        curImage = IMAGES[IMAGES.length - 1];
-                        //left or right
-                        if ((track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) || (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0)) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(curImage, 0, -size, size, size); 
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                        }
-                        //up or down, hopefully
-                        else {
-                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                                size, size);
-                        }
-                        break;
-                    //sth is causing this image to possess the others
-                    case STRAIGHT:
-                        curImage = IMAGES[STRAIGHT];
-                        //left or right
-                        if ((track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) || (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0)) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(curImage, 0, -size, size, size); 
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                        }
-                        //up or down
-                        else {
-                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                                size, size);
-                        }
-                        break;
-                    case LEFT:
-                    case RIGHT:
-                        curImage = IMAGES[RIGHT];
-                        //left
-                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(curImage, 0, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                            //right
-                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(3 * (Math.PI) / 2);
-                            ctx2.drawImage(curImage, -size, 0, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                            //down
-                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(Math.PI);
-                            ctx2.drawImage(curImage, -size, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                            //up
-                        } else {
-                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                                size, size);
-                        }
-                        break;
-                    case JUMP:
-                        //if the piece is a jump, fill two squares
-                        curImage = IMAGES[JUMP];
-                        var extraImage = IMAGES[JUMP + 1];
 
-                        //left
-                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(curImage, 0, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
+                function bufferImage(context, dir, index){
+                  var curImage = IMAGES[index];
 
-                            c2 = document.createElement("canvas");
-                            ctx2 = c2.getContext("2d");
-                            c2.width = size;
-                            c2.height = size;
-                            ctx2.drawImage(extraImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(extraImage, 0, -size, size, size);
-                            context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] + track.pieces[s].dir[1]) * size));
+                  context.clearRect(0, 0, size, size);
 
-                            //right
-                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(3 * (Math.PI) / 2);
-                            ctx2.drawImage(curImage, -size, 0, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-
-                            c2 = document.createElement("canvas");
-                            ctx2 = c2.getContext("2d");
-                            c2.width = size;
-                            c2.height = size;
-                            ctx2.drawImage(extraImage, 0, 0, size, size);
-                            ctx2.rotate(3 * (Math.PI) / 2);
-                            ctx2.drawImage(extraImage, -size, 0, size, size);
-                            context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] + track.pieces[s].dir[1]) * size));
-
-                            //down
-                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(Math.PI);
-                            ctx2.drawImage(curImage, -size, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-
-                            c2 = document.createElement("canvas");
-                            ctx2 = c2.getContext("2d");
-                            c2.width = size;
-                            c2.height = size;
-                            ctx2.drawImage(extraImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI));
-                            ctx2.drawImage(extraImage, -size, -size, size, size);
-                            context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] + track.pieces[s].dir[1]) * size));
-
-                            //up
-                        } else {
-                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                                size, size);
-                            context.drawImage(extraImage, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size),
-                                offsety + ((track.pieces[s].pos[1] + track.pieces[s].dir[1]) * size), size,size);
-                        }
-
-                        break;
-                    case RAMP:
-                        curImage = IMAGES[RAMP];
-                        //left
-                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(curImage, 0, -size, size, size); 
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                        //right
-                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(3 * (Math.PI) / 2);
-                            ctx2.drawImage(curImage, -size, 0, size, size); 
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                        //down
-                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(Math.PI);
-                            ctx2.drawImage(curImage, -size, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                        //up
-                        } else {
-                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                                size, size);
-                        }
-                        break;
-                    case BOOST: //this is still needed, since straights can be upgraded into boosts
-                        curImage = IMAGES[BOOST];
-                        //left
-                        if (track.pieces[s].dir[0] == -1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate((Math.PI) / 2);
-                            ctx2.drawImage(curImage, 0, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                            //right
-                        } else if (track.pieces[s].dir[0] == 1 && track.pieces[s].dir[1] == 0) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(3 * (Math.PI) / 2);
-                            ctx2.drawImage(curImage, -size, 0, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                            //down
-                        } else if (track.pieces[s].dir[0] == 0 && track.pieces[s].dir[1] == 1) {
-                            ctx2.drawImage(curImage, 0, 0, size, size);
-                            ctx2.rotate(Math.PI);
-                            ctx2.drawImage(curImage, -size, -size, size, size);
-                            context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size));
-                            //up
-                        } else {
-                            context.drawImage(curImage, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                                size, size);
-                        }
-                        break;
-                    case INTERSECTION:
-                        //even if they are rotated, intersections won't appear to be rotated
-                        context.drawImage(IMAGES[INTERSECTION], offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size),
-                            size, size);
-                        break;
-                    default:
-                        context.globalAlpha = 0.5;
-                        context.fillStyle = '#1A1110'; //the switch should only fall here if a track piece's type is set wrong, so I set it to licorice to make it stand out
-                        context.fillRect(offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
-                        context.globalAlpha = 1;
+                  if (dir[0] == 1 && dir[1] == 0) {
+                    context.rotate((Math.PI) / 2);
+                    context.drawImage(curImage, 0, -size, size, size);
+                    context.rotate(-(Math.PI) / 2);
+                  } else if (dir[0] == -1 && dir[1] == 0) {
+                    context.rotate(3 * (Math.PI) / 2);
+                    context.drawImage(curImage, -size, 0, size, size);
+                    context.rotate(-3 * (Math.PI) / 2);
+                  } else if (dir[0] == 0 && dir[1] == 1) {
+                    context.rotate(Math.PI);
+                    context.drawImage(curImage, -size, -size, size, size);
+                    context.rotate(-Math.PI);
+                  } else {
+                    context.drawImage(curImage, 0, 0, size, size);
+                  }
                 }
 
+                if(track.pieces[s].type == JUMP){
+                  bufferImage(ctx2, track.pieces[s].dir,2+track.pieces[s].type);
+                  context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
+                }
+
+                bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
+
+                context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
             }
         }
     }
 }
 
-function drawGoodTracks() {
+function drawCurrentTrack(track) {
     if (!drawing) {
         drawing = true;
-        draw(currentTrack);
+        drawGrid(document.getElementById('canvas'), gridSize);
+        draw(track||currentTrack, document.getElementById('canvas'), gridSize, panX, panY, focusLayer);
         drawing = false;
     }
 }
 
 
 function hideMenuButton(e){
-  console.log(e);
   e.style.visibility = "hidden";
   e.style.margin = "0";
   e.style.opacity = "0";
@@ -345,13 +187,13 @@ function hideMenuButton(e){
 }
 
 function showMenuButton(e){
-  console.log(e);
   e.style.left = selectedTrackPieceX - 25  + 'px';
   e.style.top = selectedTrackPieceY - 25 + 'px';
   e.style.visibility = "visible";
   e.style.opacity = "1";
   return e;
 }
+
 
 function displayAddPieMenu(){
   pieAddMenuOpen = true;
@@ -381,6 +223,7 @@ function clearAddPieMenu(){
 }
 
 function displayEditPieMenu(pieceType){
+
   pieEditMenuOpen = true;
   var rotateRightButton = document.getElementById('ROTATERIGHT');
   var rotateLeftButton = document.getElementById('ROTATELEFT');
@@ -411,66 +254,71 @@ function clearEditPieMenu(){
   document.getElementById('SWITCH').style.filter = "grayscale(0%)";
 }
 
+
 function addTypeOfTrack(trackPiece){
+  inbound = getAdjacent(selectedGridPieceX,selectedGridPieceY,focusLayer)||{dir:[0,-1]};
   switch(trackPiece){
     case STRAIGHT:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir:[0,-1],
+        dir:inbound.dir,
       });
       break;
     case LEFT:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir: [0,-1],
+        dir:left(inbound.dir),
       });
       break;
     case RIGHT:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir:[0,-1],
+        dir:right(inbound.dir),
       });
       break;
     case JUMP:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir:[0,-1],
+        dir:inbound.dir,
       });
       break;
     case RAMP:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir:[0,-1],
+        dir:inbound.dir,
       });
+      switchLayer();
       break;
     case INTERSECTION:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir:[0,-1],
+        dir:inbound.dir,
       });
       break;
     case BOOST:
       currentTrack.pieces.push({
         type:trackPiece,
         pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
-        dir:[0,-1],
+        dir:inbound.dir,
       });
       break;
   }
   clearAddPieMenu();
-  draw(currentTrack, document.getElementById('canvas'), gridSize, panX, panY);
+  drawCurrentTrack();
 }
 
 function editTrackPiece(trackPiece){
+  var hide = false;
   switch(trackPiece){
     case 0:
       currentTrack.pieces.splice(selectedTrackIndex,1);
+      hide = true;
       //delete button
       break;
     case 1:
@@ -488,11 +336,26 @@ function editTrackPiece(trackPiece){
       else{
         currentTrack.pieces[selectedTrackIndex].type = STRAIGHT;
       }
+      switchLayer()
+      hide = true;
       //switch from ramp to straight or vice versa
       break;
   }
-  clearEditPieMenu();
-  draw(currentTrack, document.getElementById('canvas'), gridSize, panX, panY);
+  if(hide)clearEditPieMenu();
+  drawCurrentTrack();
+}
+
+
+function getAdjacent(xCoord,yCoord,zCoord){
+  var selectedtrack;
+  for(var index = 0; index < currentTrack.pieces.length; index++){
+    if((currentTrack.pieces[index].pos[0]+currentTrack.pieces[index].dir[0] == xCoord) &&
+    (currentTrack.pieces[index].pos[1]+currentTrack.pieces[index].dir[1] == yCoord) &&
+    (currentTrack.pieces[index].pos[2] == zCoord)){
+      selectedtrack = currentTrack.pieces[index];
+    }
+  }
+  return selectedtrack;
 }
 
 function isSpaceOccupied(xCoord,yCoord,zCoord){
@@ -514,10 +377,11 @@ function isStartPiece(xCoord,yCoord,zCoord){
   return flag;
 }
 
+
 function doMouseDown(e) {
     var canvas = document.getElementById('canvas');
     var widthX = (canvas.width / 2);
-    var widthY = (canvas.width / 2);
+    var widthY = (canvas.height / 2);
     /* old placeholder function for testing - draws circle on click
     var context = canvas.getContext('2d');
     context.beginPath();
@@ -526,9 +390,8 @@ function doMouseDown(e) {
     context.fill();*/
     selectedTrackPieceX = (e.clientX - ((e.clientX - panX%gridSize)%gridSize)) + (gridSize/2);
     selectedTrackPieceY = (e.clientY - ((e.clientY - panY%gridSize)%gridSize)) + (gridSize/2);
-    selectedGridPieceX = Math.ceil(((selectedTrackPieceX - (gridSize/2)) - panX - widthX)/gridSize);
-    selectedGridPieceY = Math.ceil(((selectedTrackPieceY - (gridSize/2)) - panY - widthY)/gridSize);
-
+    selectedGridPieceX = Math.floor(((selectedTrackPieceX +(gridSize/2)) - panX - widthX)/gridSize);
+    selectedGridPieceY = Math.floor(((selectedTrackPieceY +(gridSize/2)) - panY - widthY)/gridSize);
 
     startX = e.clientX;
     startY = e.clientY;
@@ -556,8 +419,9 @@ function endTracking(e) {
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
         if(selectedIndex == -1)
           displayAddPieMenu();
-        else if (pieEditMenuOpen == false)
+        else if (pieEditMenuOpen == false){
           displayEditPieMenu(currentTrack.pieces[selectedIndex].type);
+        }
       }
     }
     else if(pieAddMenuOpen == true)
@@ -580,11 +444,12 @@ function mouseTracking(e) {
     originY = e.clientY;
 }
 
+
 function switchLayer(){
     /*
-    * fL 0 = No focused layer
+    * fL 0 = Darken second layer
     * fL 1 = Darken first layer
-    * fL 2 = Darken second layer
+    * fL 2 = No focused layer
     *
     * Adding 2 and using modulus to make button order:
     * First press = first layer focus
@@ -592,15 +457,16 @@ function switchLayer(){
     * Third press = no focus
     * Repeat
     */
-    focusLayer = (focusLayer + 2) % 3;
-    drawGoodTracks();
+    focusLayer = ((focusLayer + 1) % 2);
+    drawCurrentTrack();
 }
+
 
 function pan(x,y){
     panX += x;
     panY += y;
     drawGrid(document.getElementById('canvas'), gridSize);
-    drawGoodTracks();
+    drawCurrentTrack();
 }
 
 function panButton(num){
@@ -614,6 +480,7 @@ function panButton(num){
     pan(Math.cos((Math.PI/2)*num)*gridSize, Math.sin((Math.PI/2)*num)*gridSize);
 }
 
+
 function modScale(interval){
     if(scale + interval >= 0.2)
         scale += interval;
@@ -621,12 +488,13 @@ function modScale(interval){
         scale = 0.2;
     gridSize = defaultGridSize * scale;
     halfGrid = gridSize/2;
-    drawGrid(document.getElementById('canvas'), gridSize);
-    drawGoodTracks();
+    drawCurrentTrack();
 }
 
 function resetScale(){
     modScale(1 - scale);
+    panX = 0;
+    panY = 0;
 }
 
 function wheelZoom(e){
@@ -644,21 +512,14 @@ function wheelZoom(e){
     // No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
 }
 
-//function switchLayer() {
-//    /*
-//    * fL 0 = No focused layer
-//    * fL 1 = Darken first layer
-//    * fL 2 = Darken second layer
-//    *
-//    * Adding 2 and using modulus to make button order:
-//    * First press = first layer focus
-//    * Second press = second layer focus
-//    * Third press = no focus
-//    * Repeat
-//    */
-//    focusLayer = (focusLayer + 2) % 3;
-//}
 
+function cycle(){
+  if(trackIndex < goodTracks.length){
+    currentTrack = JSON.parse(goodTracks[trackIndex]);
+    drawCurrentTrack();
+  } else
+  trackIndex = 0;
+}
 //run track generation
 function threadGen() {
     var time;
@@ -668,7 +529,10 @@ function threadGen() {
         trackIndex = 0;
 
         if (trackInterval) clearInterval(trackInterval);
-        trackInterval = setInterval(function () { drawGoodTracks(); trackIndex++; }, 100);
+        trackInterval = setInterval(function () {
+          cycle()
+          trackIndex++;
+        }, 100);
 
         time = Date.now();
         if (typeof (w) == "undefined") {
@@ -677,9 +541,8 @@ function threadGen() {
 
         // tell worker piece pool
         console.log('start');
-        w.postMessage([10, 10, 10, 0, 4, 2, 2]);
-        //w.postMessage([4, 4, 6, 0, 0, 0, 0]);
-        //             L R S B Ra X J
+        w.postMessage([6, 6, 6, 0, 2, 1, 2]);
+        //             L  R  S  B Ra  X  J
 
         w.onmessage = function (event) {
             if (event.data.type == 0) {
@@ -710,23 +573,24 @@ function shift(event){
             trackInterval = null;
         }
         trackIndex--;
-        drawGoodTracks();
+        cycle()
     } else if (x == 39){
         if(trackInterval){
             clearInterval(trackInterval);
             trackInterval = null;
         }
         trackIndex++;
-        drawGoodTracks();
+        cycle()
     } else if (x == 32){
         if(trackInterval){
             clearInterval(trackInterval);
             trackInterval = null;
         }
         else
-            trackInterval = setInterval(function(){drawGoodTracks(); trackIndex++;}, 100);
+            trackInterval = setInterval(function(){cycle(); trackIndex++;}, 100);
     }
 }
+
 
 function uploadTrack(){
   var fileElem = document.getElementById("fileElem");
