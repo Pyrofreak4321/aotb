@@ -4,13 +4,59 @@
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
     <title>ANKI Track builder</title>
   </head>
+  <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
   <style>
     body{
       height: 100vh;
       width: 100vw;
       padding: 0;
       margin: 0;
+      overflow: hidden;
     }
+    *{
+      outline: none;
+    }
+    body, input, button{
+      font-family: 'Antic';
+    }
+
+    ._marquee {
+      overflow: hidden;
+      position: relative;
+      font-size: 1em;
+      height: 1em;
+      font-weight: bold;
+      padding: 5px;
+    }
+    ._marquee p, ._marquee span{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      line-height: 1em;
+      text-align: center;
+    }
+    ._marquee._run span, ._marquee p{
+      display: none;
+    }
+    ._marquee._run p {
+      transform: translateX(100%);
+      display: inline;
+      animation: scroll-left 10s linear infinite;
+    }
+    ._marquee p:last-of-type{
+      animation-delay: 5s;
+    }
+
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
     ._floatingButton{
       position:fixed;
     }
@@ -31,7 +77,6 @@
       border-bottom-left-radius:50% !important;
       border-bottom-right-radius:50% !important;
       transition: margin .1s, visibility .1s, opacity .1s;
-      outline: none;
     }
     ._pieButton i {
         margin-top: 5px;
@@ -61,7 +106,6 @@
       width: 50px;
       height: 50px;
       border-radius: 5px;
-      outline: none;
     }
     ._floatingButton input:active, ._floatingButton button:active{
       background-color: darkorange;
@@ -95,11 +139,149 @@
       border-bottom-left-radius:25px !important;
       border-bottom-right-radius:25px !important;
     }
+
+    ._backdrop{
+      transition: visibility .5s, opacity .5s;
+      background-color: rgba(1,1,1,.25);
+      position:absolute;
+      top:0;
+      left:0;
+      bottom: 0;
+      right:0;
+    }
+
+    ._modal{
+      position: relative;
+      display: inline-block;
+      background-color: white;
+      border: solid 2px Grey;
+      border-radius:10px;
+    }
+
+    ._header{
+      background-color: orange;
+      border: none;
+      padding: 10px;
+      font-size: 1.25em;
+      border-radius: 10px 10px 0 0;
+    }
+    ._body{
+      background-color: white;
+      border: none;
+      padding: 10px;
+    }
+    ._footer{
+      background-color: lightGrey;
+      border: none;
+      padding: 10px;
+      border-radius: 0 0 10px 10px;
+    }
+    ._footer button{
+      border-radius:10px;
+      border: none;
+      padding: 5px 10px;
+      font-weight: bold;
+      font-size: 1.25em;
+    }
+
+    ._clear {
+      background-color: transparent !important;
+      padding: 2px;
+      border: none;
+    }
+
+    ._red {
+      background: red;
+    }
+    ._green {
+      background: lime;
+    }
+    ._grey {
+      background: dimgrey;
+    }
+    ._black {
+      background: black;
+    }
+
+    ._red:active {
+      background: darkred;
+    }
+    ._green:active {
+      background: darkgreen;
+    }
+    ._grey:active {
+      background: black;
+    }
+    ._black:active {
+      line-height: 1.6em;
+      font-size: 1.4em;
+    }
+
+    ._clear._red {
+      color: red;
+    }
+    ._clear._green {
+      color: lime;
+    }
+    ._clear._grey {
+      color: dimgrey;
+    }
+    ._clear._black {
+      color: black;
+    }
+
+    ._clear._red:active {
+      color: darkred;
+    }
+    ._clear._green:active {
+      color: darkgreen;
+    }
+    ._clear._grey:active {
+      color: black;
+    }
+    ._clear._black:active {
+      line-height: 1.6em;
+      font-size: 1.4em;
+    }
+
+    ._flex{
+      display: flex;
+    }
+    ._column{
+      flex-direction: column;
+    }
+    ._flex>span {
+      flex: 1 1 100%;
+    }
+
+    ._btnGroup{
+      flex:1 1 100%;
+      text-align:center;
+      font-size: 2em;
+    }
+    ._btnGroup>span{
+      min-width: 40px;
+      display: inline-block;
+    }
+    ._btnGroup ._clear {
+      border: solid black 1px;
+      border-radius: 8px;
+    }
+
+    ._cog{
+      position: absolute;
+      /* top: 5px; */
+      right: 5px;
+      font-size: 1.5em;
+      line-height: 1.5em;
+    }
+
   </style>
-  <body id="body" onload="onload();" onContextMenu="return false;" onkeydown="shift(event)">
+  <!--  -->
+  <body id="body" onload="onload();" onContextMenu="return false;">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:15px; left:15px;">
-      <button class="_roundtop _roundbottom _detail" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" id="btnSave">
+      <button class="_roundtop _roundbottom _detail" onclick="console.log(currentTrack)" id="btnSave">
         <span class="_detail_label">Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
       </button>
       <button class="_roundtop _roundbottom _detail" onclick="uploadTrack()" id="btnLoad">
@@ -111,7 +293,7 @@
       <button class="_roundtop _roundbottom _detail" id="btnClean">
         <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
       </button>
-      <button class="_roundtop _roundbottom _detail" onclick="threadGen()" id="btnGen">
+      <button class="_roundtop _roundbottom _detail" onclick="showGenMenu()" id="btnGen">
         <span class="_detail_label">Generate&nbsp;Tracks</span><i class="fas fa-pencil-ruler" aria-hidden="true"></i>
       </button>
     </span>
@@ -132,26 +314,193 @@
       <button class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
       <button class="_roundtop _roundbottom" style="margin-top: 10px;" value="L" id="btnLayer" onclick="switchLayer()"><i class="fas fa-layer-group" aria-hidden="true"></i></button><br>
     </span>
-    <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT)" id="STRIAGHT_button"/>
-    <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT)" id="CORNER_button"/>
-    <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST)" id="BOOST_button"/>
-    <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP)" id="RAMP_button"/>
-    <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION)" id="INTERSECTION_button"/>
-    <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
-    <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
-    <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
-    <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"/>
+    <!-- menu buttons -->
+    <span>
+      <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT)" id="STRIAGHT_button"/>
+      <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT)" id="CORNER_button"/>
+      <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST)" id="BOOST_button"/>
+      <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP)" id="RAMP_button"/>
+      <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION)" id="INTERSECTION_button"/>
+      <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
+      <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
+      <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"/>
+    </span>
     <!--Track piece images-->
-    <img src="images/start.png" style="display: none;" id="imgStart" />
-    <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
-    <img src="images/left corner.png" style="display: none;" id="imgCornerL" />
-    <img src="images/straight.png" style="display: none;" id="imgStraight" />
-    <img src="images/boost.png" style="display: none;" id="imgBoost" />
-    <img src="images/ramp.png" style="display: none;" id="imgRamp" />
-    <img src="images/intersection.png" style="display: none;" id="imgIntersection" />
-    <img src="images/jump1.png" style="display: none;" id="imgJumpLaunch" />
-    <img src="images/jump2.png" style="display: none;" id="imgJumpCatch" />
+    <span>
+      <img src="images/start.png" style="display: none;" id="imgStart" />
+      <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
+      <img src="images/left corner.png" style="display: none;" id="imgCornerL" />
+      <img src="images/straight.png" style="display: none;" id="imgStraight" />
+      <img src="images/boost.png" style="display: none;" id="imgBoost" />
+      <img src="images/ramp.png" style="display: none;" id="imgRamp" />
+      <img src="images/intersection.png" style="display: none;" id="imgIntersection" />
+      <img src="images/jump1.png" style="display: none;" id="imgJumpLaunch" />
+      <img src="images/jump2.png" style="display: none;" id="imgJumpCatch" />
+    </span>
+    <!-- generation menu -->
+    <div id="genMenuBack" class="_backdrop _flex" onclick="hideGenMenu()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="genMenu" class="_modal">
+          <div class="_header">
+            Select Pieces for Auto Generation
+          </div>
+          <div class="_body">
+            <div class="_flex">
+              <img src="images/straight.png" width="150" height="150"/>
+              <img src="images/right corner.png" width="150" height="150"/>
+              <img src="images/ramp.png" width="150" height="150"/>
+              <img src="images/intersection.png" width="150" height="150"/>
+              <img src="images/jump1.png" width="150" height="150"/>
+            </div>
+            <div class="_flex">
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(STRAIGHT,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="straight_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(STRAIGHT,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(LEFT,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="corner_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(LEFT,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(RAMP,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="ramp_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(RAMP,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(INTERSECTION,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="intersection_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(INTERSECTION,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(JUMP,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="jump_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(JUMP,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span id="boost_counter" style="display:none;">0</span>
+            </div>
+            <div>
+              Maximum consecutive pieces:
+              <div class="_flex" >
+                <span class="_btnGroup">
+                  <button class="_clear _green" onclick="consecSet(STRAIGHT,1)"  style="">
+                    <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                  </button>
+                  <span id="straight_consec">4</span>
+                  <button class="_clear _red" onclick="consecSet(STRAIGHT,-1)"  style="">
+                    <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                  </button>
+                </span>
+                <span class="_btnGroup">
+                  <button class="_clear _green" onclick="consecSet(LEFT,1)"  style="">
+                    <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                  </button>
+                  <span id="corner_consec">4</span>
+                  <button class="_clear _red" onclick="consecSet(LEFT,-1)"  style="">
+                    <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                  </button>
+                </span>
+                <span class="_btnGroup">
+                  <span id="ramp_consec" style="display:none;">9</span>
+                </span>
+                <span class="_btnGroup">
+                  <span id="intersection_consec" style="display:none;">9</span>
+                </span>
+                <span class="_btnGroup">
+                  <span id="jump_consec" style="display:none;">9</span>
+                </span>
+                <span id="boost_consec" style="display:none;">9</span>
+              </div>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <button class="_red" onclick="hideGenMenu()" style="flex: 1 0 150px;">
+              <i class="fas fa-times" aria-hidden="true"></i>&nbsp;CANCEL
+            </button>
+            <span></span>
+            <button class="_green" onclick="hideGenMenu();showResMenu();threadGen();"  style="flex: 1 0 150px;">
+              GO&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+    <div id="resMenuBack" class="_backdrop _flex" onclick="hideResMenu()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="resMenu" class="_modal">
+          <div class="_header">
+            Select a track
+          </div>
+          <div id="marquee" class="_marquee _run">
+            <p>...Generating tracks...</p>
+            <p>...Generating tracks...</p>
+            <span>All tracks generated</span>
+          </div>
+          <div class="_body" style="padding:0;">
+            <div class="_flex" style="position:relative">
+              <p id="trackCounter" style="position:absolute;top:5px;right:5px;margin:0;"></p>
+              <canvas id="trackContainer" width="600" height="400"></canvas>
+              <div class="_flex _column">
+                <button class="_clear _grey" style="" onclick="trackIndexSet(-1)">
+                  <i class="fas fa-angle-up fa-2x" aria-hidden="true"></i>
+                </button>
+                <button class="_clear _grey" style="" onclick="trackIndexSet(-tracksPerCol)">
+                  <i class="fas fa-angle-double-up fa-2x" aria-hidden="true"></i>
+                </button>
+                <span></span>
+                <button class="_clear _grey" style="" onclick="trackIndexSet(tracksPerCol)">
+                  <i class="fas fa-angle-double-down fa-2x" aria-hidden="true"></i>
+                </button>
+                <button class="_clear _grey" style="" onclick="trackIndexSet(1)">
+                  <i class="fas fa-angle-down fa-2x" aria-hidden="true"></i>
+                </button>
+              </div>
+              <canvas id="previewCanvas" width="300" height="400"></canvas>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <button class="_red" onclick="hideResMenu()" style="flex: 1 0 150px;">
+              <i class="fas fa-times" aria-hidden="true"></i>&nbsp;CANCEL
+            </button>
+            <span></span>
+            <button class="_green" onclick="hideResMenu(true)"  style="flex: 1 0 150px;">
+              SELECT&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
   </body>
 
   <script type="text/javascript" src="index.js"></script>
