@@ -1,7 +1,6 @@
 var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
-var ready = true;
 var consecLimit = [4,4,4,0,0,0,0];
 
 //changed these to const - caused errors for having same consts in index AND generator
@@ -401,15 +400,21 @@ function doGen(track,type){
 
 var doGenRes = 0;
 
+function start(e){
+
+}
+
 //when the worker gets the pool
 onmessage = function(e) {
   goodTracks = [];
   newTracks = [];
   dupe = 0; dead = 0;
 
+  consecLimit = e.data[1];
+
   var newTrack = {
     intersections : 0,
-    pool : e.data,
+    pool : e.data[0],
     pieces : [{
       type:-1,
       pos:[0,0,0],
@@ -428,4 +433,4 @@ onmessage = function(e) {
 
   //send good tracks back
   postMessage({type: 1, tracks: newTracks, dupes:dupe, invalid: dead});
-};
+}

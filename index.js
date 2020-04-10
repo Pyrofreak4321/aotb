@@ -2,16 +2,21 @@ var defaultGridSize = 50;
 var gridSize = defaultGridSize;
 var halfGrid = gridSize/2;
 var goodTracks = [];
+var currentTrack;
+
+var tracksPerRow = 6;
+var tracksPerCol = 5;
 var trackIndex = 0;
 var trackInterval;
-var currentTrack;
+
 
 var rightClick = false;
 var pieAddMenuOpen = false;
 var pieEditMenuOpen = false;
 var drawing = false;
-var working = false;
 
+var working = false;
+var worker = null;
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
@@ -22,6 +27,8 @@ var BOOST = 3;
 var RAMP = 4;
 var INTERSECTION = 5;
 var JUMP = 6;
+
+var ctrlPrefix = ['corner_','corner_','straight_','boost_','ramp_','intersection_','jump_'];
 
 //transform controls
 var focusLayer = 0;
@@ -38,12 +45,8 @@ var selectedTrackPieceX = null;
 var selectedTrackPieceY = null;
 var selectedGridPieceX = null;
 var selectedGridPieceY = null;
-var selectedTrackIndex = 0;
-
-//image locations
-var  IMAGES = [document.getElementById("imgStart"),document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
-document.getElementById("imgBoost"), document.getElementById("imgRamp"), document.getElementById("imgIntersection"),
-document.getElementById("imgJumpCatch"), document.getElementById("imgJumpLaunch"), ];
+var selectedPieceIndex = -1;
+var selectedTrackIndex = -1;
 
 //initalize
 function onload() {
@@ -60,6 +63,10 @@ function onload() {
     clearTrack();
     canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
     canvas.addEventListener("mousedown", doMouseDown);
+    document.getElementById('genMenu').addEventListener("click", preventDef);
+    document.getElementById('resMenu').addEventListener("click", preventDef);
+    document.getElementById('trackContainer').addEventListener("click", selectTrack);
+    document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
 }
 
 function clearTrack() {
@@ -114,11 +121,12 @@ function drawResize() {
 
 //draw each layer from bottom to top
 function draw(track, canvas, size, x, y, layer) {
+    var  IMAGES = [document.getElementById("imgStart"),document.getElementById("imgCornerR"), document.getElementById("imgCornerL"), document.getElementById("imgStraight"),
+      document.getElementById("imgBoost"), document.getElementById("imgRamp"), document.getElementById("imgIntersection"),
+      document.getElementById("imgJumpCatch"), document.getElementById("imgJumpLaunch")];
     var context = canvas.getContext('2d');
-    var offsetx = (canvas.width / 2);
-    var offsety = (canvas.height / 2);
-    offsetx = offsetx - (offsetx % size) + x;
-    offsety = offsety - (offsety % size) + y;
+    var offsetx = x;
+    var offsety = y;
     var curImage;
     var c2 = document.createElement("canvas");
     var ctx2 = c2.getContext("2d");
@@ -172,8 +180,13 @@ function draw(track, canvas, size, x, y, layer) {
 function drawCurrentTrack(track) {
     if (!drawing) {
         drawing = true;
-        drawGrid(document.getElementById('canvas'), gridSize);
-        draw(track||currentTrack, document.getElementById('canvas'), gridSize, panX, panY, focusLayer);
+        var canvas = document.getElementById('canvas')
+        drawGrid(canvas, gridSize);
+        var offsetx = (canvas.width / 2);
+        var offsety = (canvas.height / 2);
+        offsetx = offsetx - (offsetx % gridSize) + panX;
+        offsety = offsety - (offsety % gridSize) + panY;
+        draw(track||currentTrack, canvas, gridSize, offsetx, offsety, focusLayer);
         drawing = false;
     }
 }
@@ -223,7 +236,6 @@ function clearAddPieMenu(){
 }
 
 function displayEditPieMenu(pieceType){
-
   pieEditMenuOpen = true;
   var rotateRightButton = document.getElementById('ROTATERIGHT');
   var rotateLeftButton = document.getElementById('ROTATELEFT');
@@ -317,24 +329,24 @@ function editTrackPiece(trackPiece){
   var hide = false;
   switch(trackPiece){
     case 0:
-      currentTrack.pieces.splice(selectedTrackIndex,1);
+      currentTrack.pieces.splice(selectedPieceIndex,1);
       hide = true;
       //delete button
       break;
     case 1:
-      currentTrack.pieces[selectedTrackIndex].dir = right(currentTrack.pieces[selectedTrackIndex].dir);
+      currentTrack.pieces[selectedPieceIndex].dir = right(currentTrack.pieces[selectedPieceIndex].dir);
       //rotate right
       break;
     case 2:
-      currentTrack.pieces[selectedTrackIndex].dir = left(currentTrack.pieces[selectedTrackIndex].dir);
+      currentTrack.pieces[selectedPieceIndex].dir = left(currentTrack.pieces[selectedPieceIndex].dir);
       //rotate left
       break;
     case 3:
-      if(currentTrack.pieces[selectedTrackIndex].type == STRAIGHT){
-        currentTrack.pieces[selectedTrackIndex].type = RAMP;
+      if(currentTrack.pieces[selectedPieceIndex].type == STRAIGHT){
+        currentTrack.pieces[selectedPieceIndex].type = RAMP;
       }
       else{
-        currentTrack.pieces[selectedTrackIndex].type = STRAIGHT;
+        currentTrack.pieces[selectedPieceIndex].type = STRAIGHT;
       }
       switchLayer()
       hide = true;
@@ -368,7 +380,7 @@ function isSpaceOccupied(xCoord,yCoord,zCoord){
     if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord)){
       flag = true;
       selectedIndex = index;
-      selectedTrackIndex = index;
+      selectedPieceIndex = index;
     }
   }
   return selectedIndex;
@@ -510,84 +522,203 @@ function wheelZoom(e){
 }
 
 
-function cycle(){
-  if(trackIndex < goodTracks.length && trackIndex >= 0){
-    currentTrack = JSON.parse(goodTracks[trackIndex]);
-    drawCurrentTrack();
-  } else
-  trackIndex = 0;
+function preventDef(event){
+  event.preventDefault();
+  event.stopPropagation();
+  return false;
 }
-//run track generation
+
+
+function showGenMenu(){
+  var menu = document.getElementById('genMenuBack');
+  menu.style.visibility = "visible";
+  menu.style.opacity = "1";
+}
+function hideGenMenu(){
+  var menu = document.getElementById('genMenuBack');
+  menu.style.visibility = "hidden";
+  menu.style.opacity = "0";
+}
+function poolSet(type,val){
+  var counter = document.getElementById(ctrlPrefix[type]+'counter');
+  var count = parseInt(counter.innerHTML)+val;
+  if(count < 0) count = 0;
+  counter.innerHTML = count;
+}
+function consecSet(type,val){
+  var counter = document.getElementById(ctrlPrefix[type]+'consec');
+  var count = parseInt(counter.innerHTML)+val;
+  if(count < 1) count = 1;
+  counter.innerHTML = count;
+}
+function toggleGenOptions(){
+  var div = document.getElementById('genOptions');
+  if(div.style.height=='60px'){
+    div.style.height='0';
+  } else {
+    div.style.height='60px';
+  }
+}
+
+function showResMenu(){
+  document.getElementById('previewCanvas').getContext("2d").clearRect(0,0,1000,1000);
+  document.getElementById('trackContainer').getContext("2d").clearRect(0,0,1000,1000);
+  document.getElementById('marquee').setAttribute("class","_marquee _run");
+  var menu = document.getElementById('resMenuBack');
+  menu.style.visibility = "visible";
+  menu.style.opacity = "1";
+}
+function hideResMenu(save){
+  if(save){currentTrack = goodTracks[selectedTrackIndex];}
+  var menu = document.getElementById('resMenuBack');
+  menu.style.visibility = "hidden";
+  menu.style.opacity = "0";
+  endThread();
+  drawCurrentTrack();
+}
+function trackIndexSet(val){
+  trackIndex+=val;
+  var rows = Math.trunc(goodTracks.length/tracksPerRow);
+  if(trackIndex > rows) trackIndex = rows;
+  if(trackIndex < 0) trackIndex = 0;
+  document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc(goodTracks.length/tracksPerRow)+1);
+  drawGenTracks(trackIndex);
+}
+function wheelTracks(e){
+  if(e.deltaY > 0)
+    trackIndexSet(1);
+  else if(e.deltaY < 0)
+    trackIndexSet(-1);
+}
+
+function drawGenTracks(index){
+  var canvas = document.getElementById('trackContainer');
+  var ctx = canvas.getContext("2d");
+  var h = canvas.height-6, w = canvas.width-6;
+  var xoffset = (w/tracksPerRow)/2;
+  var yoffset = (h/tracksPerCol)/2;
+  var sizeDim = Math.min((w/tracksPerRow),(h/tracksPerCol))
+
+
+  ctx.clearRect(0,0,w,h);
+  var tIndex = 0
+  for(var y = 0; y < tracksPerCol && tIndex < goodTracks.length; y++){
+    for(var x = 0; x < tracksPerRow && tIndex < goodTracks.length; x++){
+      tIndex = ((index+y)*tracksPerRow)+x;
+      if(tIndex < goodTracks.length){
+        if(selectedTrackIndex==tIndex){
+          var tmp = ctx.strokeStyle
+          ctx.strokeStyle = "orange";
+          ctx.beginPath();
+          ctx.moveTo((x*(xoffset*2))+2,(y*(yoffset*2))+2);
+          ctx.lineTo(((x+1)*(xoffset*2))-2,(y*(yoffset*2))+2);
+          ctx.lineTo(((x+1)*(xoffset*2))-2,((y+1)*(yoffset*2))-2);
+          ctx.lineTo((x*(xoffset*2))+2,((y+1)*(yoffset*2))-2);
+          ctx.lineTo((x*(xoffset*2))+2,(y*(yoffset*2))+2);
+          ctx.stroke();
+          ctx.strokeStyle = tmp;
+        }
+
+        var size = sizeDim/10;
+        var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
+        var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
+        draw(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
+      }
+    }
+  }
+}
+
+function selectTrack(e){
+  var canvas = document.getElementById('trackContainer');
+  var sizeX = (canvas.width/tracksPerRow);
+  var sizeY = (canvas.height/tracksPerCol);
+  var x = Math.trunc(e.offsetX/sizeX);
+  var y = Math.trunc(e.offsetY/sizeY);
+  var index = ((trackIndex+y)*tracksPerRow)+x;
+
+  if(index < goodTracks.length){
+    canvas = document.getElementById('previewCanvas');
+    canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
+    selectedTrackIndex = index;
+    var size = canvas.width/Math.max(Math.abs(goodTracks[selectedTrackIndex].minx)+goodTracks[selectedTrackIndex].maxx+1,Math.abs(goodTracks[selectedTrackIndex].miny)+goodTracks[selectedTrackIndex].maxy+1);
+    var width = size*(goodTracks[selectedTrackIndex].minx+goodTracks[selectedTrackIndex].maxx+1)/2;
+    var height = size*(goodTracks[selectedTrackIndex].miny+goodTracks[selectedTrackIndex].maxy+1)/2;
+    draw(goodTracks[selectedTrackIndex],canvas, size, (canvas.width/2)-width, (canvas.height/2)-height, 0);
+    drawGenTracks(trackIndex);
+  }
+}
+
 function threadGen() {
-    var time;
-    if (!working) {
-        goodTracks = [];
-        working = true;
-        trackIndex = 0;
+  var time;
+  if (!working) {
+    document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc(goodTracks.length/tracksPerRow)+1);
+    goodTracks = [];
+    processingTracks = [];
+    working = true;
+    trackIndex = 0;
+    var hasDrawn = false;
 
-        if (trackInterval) clearInterval(trackInterval);
-        trackInterval = setInterval(function () {
-          cycle()
-          trackIndex++;
-        }, 100);
-
-        time = Date.now();
-        if (typeof (w) == "undefined") {
-            w = new Worker("./generator.js");
+    function loadTracks(tracks){
+      for(var i = 0; i < event.data.tracks.length; i++){
+        var t = JSON.parse(event.data.tracks[i]);
+        t.minx = 999;
+        t.miny = 999;
+        t.maxx = -999;
+        t.maxy = -999;
+        for(var p = 0; p < t.pieces.length; p++){
+          if(t.pieces[p].pos[0]<t.minx)t.minx=t.pieces[p].pos[0];
+          if(t.pieces[p].pos[0]>t.maxx)t.maxx=t.pieces[p].pos[0];
+          if(t.pieces[p].pos[1]<t.miny)t.miny=t.pieces[p].pos[1];
+          if(t.pieces[p].pos[1]>t.maxy)t.maxy=t.pieces[p].pos[1];
         }
-
-        // tell worker piece pool
-        console.log('start');
-        w.postMessage([6, 6, 6, 0, 2, 1, 2]);
-        //             L  R  S  B Ra  X  J
-
-        w.onmessage = function (event) {
-            if (event.data.type == 0) {
-                //trackIndex = goodTracks.length-1;
-                goodTracks = goodTracks.concat(event.data.tracks);
-                console.log('tracks :' + goodTracks.length);
-            }
-            else if (event.data.type == 1) {
-                goodTracks = goodTracks.concat(event.data.tracks);
-                console.log('stop');
-                console.log('time :' + (Date.now() - time));
-                console.log('tracks :' + goodTracks.length);
-
-                working = false;
-                //loop drawing good tracks
-                // if(trackInterval)clearInterval(trackInterval);
-                // trackInterval = setInterval(drawGoodTracks, 500);
-            }
-        };
+        goodTracks.push(t);
+      }
+      document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc(goodTracks.length/tracksPerRow)+1);
     }
-}
 
-function shift(event){
-    var x = event.keyCode;
-    if(x == 37){
-        if(trackInterval){
-            clearInterval(trackInterval);
-            trackInterval = null;
-        }
-        trackIndex--;
-        cycle()
-    } else if (x == 39){
-        if(trackInterval){
-            clearInterval(trackInterval);
-            trackInterval = null;
-        }
-        trackIndex++;
-        cycle()
-    } else if (x == 32){
-        if(trackInterval){
-            clearInterval(trackInterval);
-            trackInterval = null;
-        }
-        else
-            trackInterval = setInterval(function(){cycle(); trackIndex++;}, 100);
+    time = Date.now();
+    if (!worker) {
+        worker = new Worker("./generator.js");
     }
-}
 
+    var pool = [];
+    var consec = [];
+    for(var i = 0; i < 7; i++){
+      pool.push(parseInt(document.getElementById(ctrlPrefix[i]+'counter').innerHTML));
+      consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
+    }
+    console.log('start');
+    worker.postMessage([pool,consec]);
+    worker.onmessage = function (event) {
+        if (event.data.type == 0) {
+            loadTracks(event.data.tracks);
+            if(!hasDrawn){
+              drawGenTracks(0);
+              hasDrawn = true;
+            }
+            console.log('tracks :' + goodTracks.length);
+        }
+        else if (event.data.type == 1) {
+            loadTracks(event.data.tracks);
+            if(!hasDrawn){
+              drawGenTracks(0);
+              hasDrawn = true;
+            }
+
+            console.log('stop');
+            console.log('time :' + (Date.now() - time));
+            console.log('tracks :' + goodTracks.length);
+            endThread();
+        }
+    };
+  }
+}
+function endThread(){
+  if(worker)worker.terminate();
+  worker = null;
+  working = false;
+  document.getElementById('marquee').setAttribute("class","_marquee");
+}
 
 function uploadTrack(){
   var fileElem = document.getElementById("fileElem");
