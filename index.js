@@ -564,12 +564,15 @@ function showResMenu(){
   document.getElementById('previewCanvas').getContext("2d").clearRect(0,0,1000,1000);
   document.getElementById('trackContainer').getContext("2d").clearRect(0,0,1000,1000);
   document.getElementById('marquee').setAttribute("class","_marquee _run");
+  document.getElementById('selectTrack').setAttribute("disabled","true");
   var menu = document.getElementById('resMenuBack');
   menu.style.visibility = "visible";
   menu.style.opacity = "1";
 }
 function hideResMenu(save){
-  if(save){currentTrack = goodTracks[selectedTrackIndex];}
+  if(save && goodTracks[selectedTrackIndex]){
+    currentTrack = goodTracks[selectedTrackIndex];
+  }
   var menu = document.getElementById('resMenuBack');
   menu.style.visibility = "hidden";
   menu.style.opacity = "0";
@@ -578,10 +581,10 @@ function hideResMenu(save){
 }
 function trackIndexSet(val){
   trackIndex+=val;
-  var rows = Math.trunc(goodTracks.length/tracksPerRow);
+  var rows = Math.trunc((goodTracks.length/tracksPerRow)-0.1);
   if(trackIndex > rows) trackIndex = rows;
   if(trackIndex < 0) trackIndex = 0;
-  document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc(goodTracks.length/tracksPerRow)+1);
+  document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
   drawGenTracks(trackIndex);
 }
 function wheelTracks(e){
@@ -637,6 +640,7 @@ function selectTrack(e){
   var index = ((trackIndex+y)*tracksPerRow)+x;
 
   if(index < goodTracks.length){
+    document.getElementById('selectTrack').removeAttribute("disabled");
     canvas = document.getElementById('previewCanvas');
     canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
     selectedTrackIndex = index;
@@ -651,7 +655,7 @@ function selectTrack(e){
 function threadGen() {
   var time;
   if (!working) {
-    document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc(goodTracks.length/tracksPerRow)+1);
+    document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
     goodTracks = [];
     processingTracks = [];
     working = true;
@@ -673,7 +677,7 @@ function threadGen() {
         }
         goodTracks.push(t);
       }
-      document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc(goodTracks.length/tracksPerRow)+1);
+      document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
     }
 
     time = Date.now();
