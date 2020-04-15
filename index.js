@@ -613,7 +613,7 @@ function trackIndexSet(val){
   var rows = Math.trunc((goodTracks.length/tracksPerRow)-0.1);
   if(trackIndex > rows) trackIndex = rows;
   if(trackIndex < 0) trackIndex = 0;
-  document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
+  document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
   drawGenTracks(trackIndex);
 }
 function wheelTracks(e){
