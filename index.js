@@ -140,7 +140,7 @@ function draw(track, canvas, size, x, y, layer) {
         for (var s = 0; s < track.pieces.length; s++) {
             //if this is on the layer currently being drawn
             if (track.pieces[s].pos[2] == i) {
-                if (i != layer && layer <= 1) // Set opacity of image to 20% if not on focused layer
+                if (i != layer && layer <= 1 && track.pieces[s].type != RAMP) // Set opacity of image to 20% if not on focused layer
                     context.globalAlpha = 0.5;
                 else
                     context.globalAlpha = 1;
@@ -167,7 +167,12 @@ function draw(track, canvas, size, x, y, layer) {
                   }
                 }
 
-                bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
+                if(track.pieces[s].type == RAMP && track.pieces[s].pos[2]==layer){
+                  bufferImage(ctx2, left(left(track.pieces[s].dir)), 1+track.pieces[s].type);
+                }else{
+                  bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
+                }
+
 
                 context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
 
