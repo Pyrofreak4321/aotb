@@ -554,10 +554,16 @@ function hidePartsList(){
   menu.style.opacity = "0";
 }
 
-function showGenMenu(){
-  var menu = document.getElementById('genMenuBack');
-  menu.style.visibility = "visible";
-  menu.style.opacity = "1";
+function showGenMenu(reset){
+  if(goodTracks.length > 0 && !reset){
+    showResMenu();
+    drawGenTracks(trackIndex);
+  } else {
+    endThread();
+    var menu = document.getElementById('genMenuBack');
+    menu.style.visibility = "visible";
+    menu.style.opacity = "1";
+  }
 }
 function hideGenMenu(){
   var menu = document.getElementById('genMenuBack');
@@ -588,11 +594,10 @@ function toggleGenOptions(){
 function showResMenu(){
   document.getElementById('previewCanvas').getContext("2d").clearRect(0,0,1000,1000);
   document.getElementById('trackContainer').getContext("2d").clearRect(0,0,1000,1000);
-  document.getElementById('marquee').setAttribute("class","_marquee _run");
-  document.getElementById('selectTrack').setAttribute("disabled","true");
   var menu = document.getElementById('resMenuBack');
   menu.style.visibility = "visible";
   menu.style.opacity = "1";
+  drawSelectedTrack();
 }
 function hideResMenu(save){
   if(save && goodTracks[selectedTrackIndex]){
@@ -601,7 +606,6 @@ function hideResMenu(save){
   var menu = document.getElementById('resMenuBack');
   menu.style.visibility = "hidden";
   menu.style.opacity = "0";
-  endThread();
   drawCurrentTrack();
 }
 function trackIndexSet(val){
@@ -664,15 +668,18 @@ function selectTrack(e){
   var y = Math.trunc(e.offsetY/sizeY);
   var index = ((trackIndex+y)*tracksPerRow)+x;
 
-  if(index < goodTracks.length){
-    document.getElementById('selectTrack').removeAttribute("disabled");
+  if(index < goodTracks.length) selectedTrackIndex = index;
+  drawSelectedTrack();
+}
+function drawSelectedTrack(){
+  if(selectedTrackIndex < goodTracks.length && selectedTrackIndex >= 0){
     canvas = document.getElementById('previewCanvas');
     canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
-    selectedTrackIndex = index;
     var size = canvas.width/Math.max(Math.abs(goodTracks[selectedTrackIndex].minx)+goodTracks[selectedTrackIndex].maxx+1,Math.abs(goodTracks[selectedTrackIndex].miny)+goodTracks[selectedTrackIndex].maxy+1);
     var width = size*(goodTracks[selectedTrackIndex].minx+goodTracks[selectedTrackIndex].maxx+1)/2;
     var height = size*(goodTracks[selectedTrackIndex].miny+goodTracks[selectedTrackIndex].maxy+1)/2;
     draw(goodTracks[selectedTrackIndex],canvas, size, (canvas.width/2)-width, (canvas.height/2)-height, 0);
+    document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
     drawGenTracks(trackIndex);
   }
 }
@@ -680,12 +687,16 @@ function selectTrack(e){
 function threadGen() {
   var time;
   if (!working) {
-    document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
     goodTracks = [];
     processingTracks = [];
     working = true;
     trackIndex = 0;
+    selectedTrackIndex = -1;
     var hasDrawn = false;
+
+    document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
+    document.getElementById('marquee').setAttribute("class","_marquee _run");
+    document.getElementById('workingSpinner').setAttribute("style",'display: inline-block;');
 
     function loadTracks(tracks){
       for(var i = 0; i < event.data.tracks.length; i++){
@@ -702,7 +713,7 @@ function threadGen() {
         }
         goodTracks.push(t);
       }
-      document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
+      document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
     }
 
     time = Date.now();
@@ -733,7 +744,6 @@ function threadGen() {
               drawGenTracks(0);
               hasDrawn = true;
             }
-
             console.log('stop');
             console.log('time :' + (Date.now() - time));
             console.log('tracks :' + goodTracks.length);
@@ -747,6 +757,7 @@ function endThread(){
   worker = null;
   working = false;
   document.getElementById('marquee').setAttribute("class","_marquee");
+  document.getElementById('workingSpinner').style.display='none';
 }
 
 function uploadTrack(){

@@ -49,7 +49,6 @@
     ._marquee p:last-of-type{
       animation-delay: 5s;
     }
-
     @keyframes scroll-left {
       0% {
         transform: translateX(100%);
@@ -115,22 +114,61 @@
     }
 
     ._detail{
+      position: relative;
       transition: width .1s;
     }
     ._detail:hover{
       width: 200px;
     }
+
     ._detail ._detail_label{
-      display: none;
+      opacity: 0;
+      visibility: hidden;
+      vertical-align: middle;
+      position: absolute;
+      left: 0;
+      right:0;
+      transition: opacity .2s,visabilty .2s;
     }
     ._detail:hover ._detail_label{
-      display: inline-block;
+      opacity: 1;
+      visibility: visible;
     }
+
     ._detail i{
-      display: inline;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .2s,visabilty .2s;
     }
     ._detail:hover i{
-      display: none;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    ._spinner{
+      position: absolute;
+      display: inline-block;
+      left: 0;
+      top: 0;
+      width: 40px;
+      height: 40px;
+      border: solid 5px transparent;
+      border-left: solid 5px lime;
+      animation: spin 1s linear infinite;
+    }
+    ._detail:hover ._spinner{
+      display: none !important;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      50%{
+        transform: rotate(180deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     ._roundtop {
@@ -200,6 +238,7 @@
     }
     ._grey {
       background: dimgrey;
+      color:white;
     }
     ._black {
       background: black;
@@ -220,6 +259,7 @@
     }
     ._grey:active {
       background: black;
+      color:lightGrey;
     }
     ._black:active {
       line-height: 1.6em;
@@ -292,7 +332,6 @@
       font-size: 1.5em;
       line-height: 1.5em;
     }
-
   </style>
   <!--  -->
   <body id="body" onload="onload();" onContextMenu="return false;">
@@ -311,7 +350,9 @@
         <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
       </button>
       <button class="_roundtop _roundbottom _detail" onclick="showGenMenu()" id="btnGen">
-        <span class="_detail_label">Generate&nbsp;Tracks</span><i class="fas fa-pencil-ruler" aria-hidden="true"></i>
+        <span class="_detail_label">Generate&nbsp;Tracks</span>
+        <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
+        <div id="workingSpinner" class="_spinner _roundtop _roundbottom" style="display:none;"></div>
       </button>
       <button class="_roundtop _roundbottom _detail" onclick="showPartsList()" id="btnParts">
         <span class="_detail_label">Parts&nbsp;List</span><i class="fas fa-list" aria-hidden="true"></i>
@@ -480,7 +521,7 @@
           <div class="_header">
             Select a track
           </div>
-          <div id="marquee" class="_marquee _run">
+          <div id="marquee" class="_marquee">
             <p>...Generating tracks...</p>
             <p>...Generating tracks...</p>
             <span>All tracks generated</span>
@@ -510,6 +551,10 @@
           <div class="_footer _flex">
             <button class="_red" onclick="hideResMenu()" style="flex: 1 0 150px;">
               <i class="fas fa-times" aria-hidden="true"></i>&nbsp;CANCEL
+            </button>
+            <span></span>
+            <button class="_grey" onclick="hideResMenu(); showGenMenu(true);"  style="flex: 1 0 225px;">
+              CHANGE&nbsp;SETTINGS&nbsp;<i class="fas fa-cog" aria-hidden="true"></i>
             </button>
             <span></span>
             <button id="selectTrack" class="_green" onclick="hideResMenu(true)"  style="flex: 1 0 150px;">
