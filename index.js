@@ -65,6 +65,7 @@ function onload() {
     canvas.addEventListener("mousedown", doMouseDown);
     document.getElementById('genMenu').addEventListener("click", preventDef);
     document.getElementById('resMenu').addEventListener("click", preventDef);
+    document.getElementById('partsList').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
 }
@@ -528,6 +529,30 @@ function preventDef(event){
   return false;
 }
 
+function showPartsList(){
+  var bits = [0,0,0,0,0,0,0];
+  var overpass = 0;
+  for(var i = 1; i < currentTrack.pieces.length; i++){
+    bits[currentTrack.pieces[i].type]++;
+    if(currentTrack.pieces[i].pos[2] == 1)overpass++;
+  }
+
+  document.getElementById('corner_list').innerHTML = bits[LEFT]+bits[RIGHT];
+  document.getElementById('straight_list').innerHTML = bits[STRAIGHT]+bits[RAMP];
+  document.getElementById('jump_list').innerHTML = bits[JUMP];
+  document.getElementById('intersection_list').innerHTML = bits[INTERSECTION];
+  document.getElementById('boost_list').innerHTML = bits[BOOST];
+  document.getElementById('riser_list').innerHTML = overpass*2;
+
+  var menu = document.getElementById('partsListBack');
+  menu.style.visibility = "visible";
+  menu.style.opacity = "1";
+}
+function hidePartsList(){
+  var menu = document.getElementById('partsListBack');
+  menu.style.visibility = "hidden";
+  menu.style.opacity = "0";
+}
 
 function showGenMenu(reset){
   if(goodTracks.length > 0 && !reset){
@@ -575,7 +600,9 @@ function showResMenu(){
   drawSelectedTrack();
 }
 function hideResMenu(save){
-  if(save){currentTrack = goodTracks[selectedTrackIndex];}
+  if(save && goodTracks[selectedTrackIndex]){
+    currentTrack = goodTracks[selectedTrackIndex];
+  }
   var menu = document.getElementById('resMenuBack');
   menu.style.visibility = "hidden";
   menu.style.opacity = "0";
@@ -583,9 +610,10 @@ function hideResMenu(save){
 }
 function trackIndexSet(val){
   trackIndex+=val;
-  var rows = Math.trunc(goodTracks.length/tracksPerRow);
+  var rows = Math.trunc((goodTracks.length/tracksPerRow)-0.1);
   if(trackIndex > rows) trackIndex = rows;
   if(trackIndex < 0) trackIndex = 0;
+  document.getElementById('trackCounter').innerHTML = (trackIndex+1)+'/'+(Math.trunc((goodTracks.length/tracksPerRow)-0.1)+1);
   drawGenTracks(trackIndex);
 }
 function wheelTracks(e){
@@ -639,6 +667,7 @@ function selectTrack(e){
   var x = Math.trunc(e.offsetX/sizeX);
   var y = Math.trunc(e.offsetY/sizeY);
   var index = ((trackIndex+y)*tracksPerRow)+x;
+
   if(index < goodTracks.length) selectedTrackIndex = index;
   drawSelectedTrack();
 }

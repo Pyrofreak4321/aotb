@@ -34,6 +34,8 @@
       height: 100%;
       margin: 0;
       line-height: 1em;
+    }
+    ._marquee span{
       text-align: center;
     }
     ._marquee._run span, ._marquee p{
@@ -242,6 +244,13 @@
       background: black;
     }
 
+    ._red:disabled {
+      background: lightcoral;
+    }
+    ._green:disabled {
+      background: lightgreen;
+    }
+
     ._red:active {
       background: darkred;
     }
@@ -308,6 +317,14 @@
       border-radius: 8px;
     }
 
+    ._parts span span::after{
+      content: 'x';
+    }
+
+    ._padded>*{
+      padding: 0 5px;
+    }
+
     ._cog{
       position: absolute;
       /* top: 5px; */
@@ -336,6 +353,9 @@
         <span class="_detail_label">Generate&nbsp;Tracks</span>
         <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
         <div id="workingSpinner" class="_spinner _roundtop _roundbottom" style="display:none;"></div>
+      </button>
+      <button class="_roundtop _roundbottom _detail" onclick="showPartsList()" id="btnParts">
+        <span class="_detail_label">Parts&nbsp;List</span><i class="fas fa-list" aria-hidden="true"></i>
       </button>
     </span>
     <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
@@ -537,7 +557,7 @@
               CHANGE&nbsp;SETTINGS&nbsp;<i class="fas fa-cog" aria-hidden="true"></i>
             </button>
             <span></span>
-            <button class="_green" onclick="hideResMenu(true)"  style="flex: 1 0 150px;">
+            <button id="selectTrack" class="_green" onclick="hideResMenu(true)"  style="flex: 1 0 150px;">
               SELECT&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
             </button>
           </div>
@@ -546,6 +566,46 @@
       </div>
       <span></span>
     </div>
+    <div id="partsListBack" class="_backdrop _flex" onclick="hidePartsList()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="partsList" class="_modal">
+          <div class="_header">
+            Pieces required for this track
+          </div>
+          <div class="_body">
+            <div class="_flex _padded">
+              <img src="images/start.png" width="50" height="50"/>
+              <img src="images/straight.png" width="50" height="50"/>
+              <img src="images/right corner.png" width="50" height="50"/>
+              <img src="images/intersection.png" width="50" height="50"/>
+              <img src="images/boost.png" width="50" height="50"/>
+              <img src="images/jump1.png" width="50" height="50"/>
+              <P>Risers</P>
+            </div>
+            <div class="_flex _parts" style="text-align:center;">
+              <span><span id="start_list">1</span></span>
+              <span><span id="straight_list">0</span></span>
+              <span><span id="corner_list">0</span></span>
+              <span><span id="intersection_list">0</span></span>
+              <span><span id="jump_list">0</span></span>
+              <span><span id="boost_list">0</span></span>
+              <span><span id="riser_list">0</span></span>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <span></span>
+            <button class="_green" onclick="hidePartsList();"  style="flex: 1 0 150px;">
+              OK&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+
   </body>
 
   <script type="text/javascript" src="index.js"></script>
