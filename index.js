@@ -65,6 +65,7 @@ function onload() {
     canvas.addEventListener("mousedown", doMouseDown);
     document.getElementById('genMenu').addEventListener("click", preventDef);
     document.getElementById('resMenu').addEventListener("click", preventDef);
+    document.getElementById('partsList').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
 }
@@ -528,6 +529,30 @@ function preventDef(event){
   return false;
 }
 
+function showPartsList(){
+  var bits = [0,0,0,0,0,0,0];
+  var overpass = 0;
+  for(var i = 1; i < currentTrack.pieces.length; i++){
+    bits[currentTrack.pieces[i].type]++;
+    if(currentTrack.pieces[i].pos[2] == 1)overpass++;
+  }
+
+  document.getElementById('corner_list').innerHTML = bits[LEFT]+bits[RIGHT];
+  document.getElementById('straight_list').innerHTML = bits[STRAIGHT]+bits[RAMP];
+  document.getElementById('jump_list').innerHTML = bits[JUMP];
+  document.getElementById('intersection_list').innerHTML = bits[INTERSECTION];
+  document.getElementById('boost_list').innerHTML = bits[BOOST];
+  document.getElementById('riser_list').innerHTML = overpass*2;
+
+  var menu = document.getElementById('partsListBack');
+  menu.style.visibility = "visible";
+  menu.style.opacity = "1";
+}
+function hidePartsList(){
+  var menu = document.getElementById('partsListBack');
+  menu.style.visibility = "hidden";
+  menu.style.opacity = "0";
+}
 
 function showGenMenu(){
   var menu = document.getElementById('genMenuBack');
