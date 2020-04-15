@@ -533,7 +533,6 @@ function showPartsList(){
   var bits = [0,0,0,0,0,0,0];
   var overpass = 0;
   for(var i = 1; i < currentTrack.pieces.length; i++){
-    console.log(currentTrack.pieces[i]);
     bits[currentTrack.pieces[i].type]++;
     if(currentTrack.pieces[i].pos[2] == 1)overpass++;
   }
