@@ -817,6 +817,7 @@ function handleFiles(files) {
   reader.onload = function(){
     var text = reader.result;
     currentTrack = JSON.parse(text);
+    drawCurrentTrack();
   }
   reader.readAsText(files[0]);
 }
