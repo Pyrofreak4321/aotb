@@ -806,6 +806,19 @@ function uploadTrack(){
   }
 }
 
+function download() {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentTrack));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
 function handleFiles(files) {
   var reader = new FileReader();
   reader.onload = function(){
