@@ -498,13 +498,6 @@ function switchLayer(){
     /*
     * fL 0 = Darken second layer
     * fL 1 = Darken first layer
-    * fL 2 = No focused layer
-    *
-    * Adding 2 and using modulus to make button order:
-    * First press = first layer focus
-    * Second press = second layer focus
-    * Third press = no focus
-    * Repeat
     */
     focusLayer = ((focusLayer + 1) % 2);
     drawCurrentTrack();
@@ -808,7 +801,7 @@ function uploadTrack(){
 
 function download() {
   var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentTrack));
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentTrack)));
   element.setAttribute('download', filename);
 
   element.style.display = 'none';
