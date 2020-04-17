@@ -82,6 +82,7 @@ function clearTrack() {
         ]
     };
     resetScale();
+    focusLayer = 0;
     drawCurrentTrack();
 }
 
