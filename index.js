@@ -262,7 +262,11 @@ function clearEditPieMenu(){
 
 
 function addTypeOfTrack(trackPiece){
-  inbound = getInbound(selectedGridPieceX,selectedGridPieceY,focusLayer);
+  if(selectedPieceIndex >= 0){
+    currentTrack.pieces.splice(selectedPieceIndex,1);
+  }
+
+  var inbound = getInbound(selectedGridPieceX,selectedGridPieceY,focusLayer);
 
   switch(trackPiece){
     case STRAIGHT:
@@ -315,9 +319,6 @@ function addTypeOfTrack(trackPiece){
         dir:inbound.dir,
       });
       break;
-  }
-  if(selectedPieceIndex >= 0){
-    currentTrack.pieces.splice(selectedPieceIndex,1);
   }
   clearAddPieMenu();
   drawCurrentTrack();
