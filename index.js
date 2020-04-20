@@ -269,7 +269,11 @@ function clearEditPieMenu(){
 
 
 function addTypeOfTrack(trackPiece){
-  inbound = getInbound(selectedGridPieceX,selectedGridPieceY,focusLayer);
+  if(selectedPieceIndex >= 0){
+    currentTrack.pieces.splice(selectedPieceIndex,1);
+  }
+
+  var inbound = getInbound(selectedGridPieceX,selectedGridPieceY,focusLayer);
 
   switch(trackPiece){
     case STRAIGHT:
@@ -322,9 +326,6 @@ function addTypeOfTrack(trackPiece){
         dir:inbound.dir,
       });
       break;
-  }
-  if(selectedPieceIndex >= 0){
-    currentTrack.pieces.splice(selectedPieceIndex,1);
   }
   clearAddPieMenu();
   drawCurrentTrack();
@@ -393,10 +394,11 @@ function isStartPiece(xCoord,yCoord,zCoord){
 
 
 function doMouseDown(e) {
-    var canvas = document.getElementById('canvas');
-    var widthX = (canvas.width / 2);
-    var widthY = (canvas.height / 2);
+  var canvas = document.getElementById('canvas');
+  var widthX = (canvas.width / 2);
+  var widthY = (canvas.height / 2);
 
+  if(!dragging && !rightClick){
     selectedTrackPieceX = (e.clientX - ((e.clientX - panX%gridSize)%gridSize)) + (gridSize/2);
     selectedTrackPieceY = (e.clientY - ((e.clientY - panY%gridSize)%gridSize)) + (gridSize/2);
     selectedGridPieceX = Math.floor((e.clientX - (widthX-(widthX%gridSize)) - panX)/gridSize);
@@ -407,38 +409,45 @@ function doMouseDown(e) {
 
     originX = e.clientX;
     originY = e.clientY;
-    if(e.button == 2)
+    if(e.button == 2){
       rightClick = true;
+      clearAddPieMenu();
+      clearEditPieMenu();
+    }
 
     selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
 
     canvas.addEventListener("mousemove", mouseTracking);
     canvas.addEventListener("mouseup", endTracking);
     canvas.addEventListener("mouseleave", endTracking);
+  }
 }
 
 function endTracking(e) {
+    var consumed = false;
     var canvas = document.getElementById('canvas');
-    canvas.removeEventListener("mousemove", mouseTracking);
-    canvas.removeEventListener("mouseup", endTracking);
-    canvas.removeEventListener("mouseleave", endTracking);
     var startCheck = isStartPiece(selectedGridPieceX,selectedGridPieceY,focusLayer);
     if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && startCheck == false && dragging == false){
       selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
-      console.log(selectedPieceIndex);
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
-        if(selectedPieceIndex == -1)
+        if(selectedPieceIndex == -1){
+          consumed = true;
           displayAddPieMenu();
-        else if (pieEditMenuOpen == false){
+        }else if (pieEditMenuOpen == false){
+          consumed = true;
           displayEditPieMenu(currentTrack.pieces[selectedPieceIndex].type);
         }
       }
     }
-    else if(pieAddMenuOpen == true)
+    else if(pieAddMenuOpen == true){
+      consumed = true;
       clearAddPieMenu();
-    else if(pieEditMenuOpen == true)
+    }
+    else if(pieEditMenuOpen == true){
+      consumed = true;
       clearEditPieMenu();
-    else if(dragging == true){
+    }
+    else if(dragging == true && e.button != 2){
       var widthX = (canvas.width / 2);
       var widthY = (canvas.height / 2);
       selectedGridPieceX = Math.floor((e.clientX - (widthX-(widthX%gridSize)) - panX)/gridSize);
@@ -446,15 +455,23 @@ function endTracking(e) {
       var space = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
       if(space == -1){
         addTypeOfTrack(currentTrack.pieces[selectedPieceIndex].type);
-        // currentTrack.pieces.splice(selectedPieceIndex,1);
         drawCurrentTrack();
       }
       document.getElementById('dragIcon').style.display='none';
+      consumed = true;
       dragging = false;
+    } else if(rightClick && e.button == 2){
+      originX = null;
+      originY = null;
+      rightClick = false;
+      consumed = true;
     }
-    originX = null;
-    originY = null;
-    rightClick = false;
+
+    if(consumed){
+      canvas.removeEventListener("mousemove", mouseTracking);
+      canvas.removeEventListener("mouseup", endTracking);
+      canvas.removeEventListener("mouseleave", endTracking);
+    }
 }
 
 function mouseTracking(e) {
@@ -467,13 +484,16 @@ function mouseTracking(e) {
     originX = e.clientX;
     originY = e.clientY;
 
-    if(selectedPieceIndex >= 0 && !dragging && ((Math.abs(startX-e.clientX) > (gridSize/1.5)) || (Math.abs(startY-e.clientY) > (gridSize/1.5)))){
+    if(!rightClick && selectedPieceIndex >= 0 && currentTrack.pieces[selectedPieceIndex].type!=START && !dragging && ((Math.abs(startX-e.clientX) > (gridSize/2.5)) || (Math.abs(startY-e.clientY) > (gridSize/2.5)))){
       var icon =document.getElementById('dragIcon');
       icon.src = IMAGES[currentTrack.pieces[selectedPieceIndex].type+1].src;
       icon.style.display='inline-block';
       icon.style.top = (e.clientY-25)+'px';
       icon.style.left = (e.clientX-25)+'px';
       dragging = true;
+
+      clearAddPieMenu();
+      clearEditPieMenu();
     }
 
     if(dragging){
