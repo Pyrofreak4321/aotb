@@ -71,8 +71,15 @@ function onload() {
     document.getElementById('genMenu').addEventListener("click", preventDef);
     document.getElementById('resMenu').addEventListener("click", preventDef);
     document.getElementById('partsList').addEventListener("click", preventDef);
+    document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
+    setTimeout(function () {
+      if(!localStorage.getItem("firstTime")){
+        localStorage.setItem("firstTime", "true");
+        showHelpMenu();
+      }
+    }, 10);
 }
 
 function clearTrack() {
@@ -580,6 +587,17 @@ function preventDef(event){
   event.preventDefault();
   event.stopPropagation();
   return false;
+}
+
+function showHelpMenu(){
+  var menu = document.getElementById('helpMenuBack');
+  menu.style.visibility = "visible";
+  menu.style.opacity = "1";
+}
+function hideHelpMenu(){
+  var menu = document.getElementById('helpMenuBack');
+  menu.style.visibility = "hidden";
+  menu.style.opacity = "0";
 }
 
 function showPartsList(){

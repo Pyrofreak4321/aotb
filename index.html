@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
-    <title>ANKI Track builder</title>
+    <title>Track builder</title>
   </head>
   <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
   <style>
@@ -302,6 +302,14 @@
     ._flex>span {
       flex: 1 1 100%;
     }
+    ._padded>div>img, ._padded>div>span>i {
+      vertical-align: middle;
+      padding: 5px 0
+    }
+    li{
+      padding-bottom: 5px;
+    }
+
 
     ._btnGroup{
       flex:1 1 100%;
@@ -337,6 +345,9 @@
   <body id="body" onload="onload();" onContextMenu="return false;">
     <canvas id="canvas"></canvas>
     <span class="_floatingButton" style="top:15px; left:15px;">
+      <button class="_roundtop _roundbottom _detail" onclick="showHelpMenu()" id="btnHelp">
+        <span class="_detail_label">About</span><i class="fas fa-question" aria-hidden="true"></i>
+      </button>
       <button class="_roundtop _roundbottom _detail" onclick="download()" id="btnSave">
         <span class="_detail_label">Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
       </button>
@@ -598,6 +609,145 @@
           <div class="_footer _flex">
             <span></span>
             <button class="_green" onclick="hidePartsList();"  style="flex: 1 0 150px;">
+              OK&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+    <div id="helpMenuBack" class="_backdrop _flex" onclick="hideHelpMenu()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="helpMenu" class="_modal">
+          <div class="_header">
+            Welcome to the CSC380 Group D track builder
+          </div>
+          <div class="_body" style="max-height:350px; overflow-y:auto">
+            <div class="_flex">
+              <div style="min-width:600px; flex:1 1 100%; padding:5px;">
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Editing your track -
+                  </b></li>
+                  <li>
+                    To add a new track piece, simply click the grid location where you want it and select the type of piece from the context menu.
+                  </li>
+                  <li>
+                    To edit existing pieces, simply click on them and select the desired action from the context menu.
+                  </li>
+                  <li>
+                    To move a piece just click and drag the piece to where you want it!
+                  </li>
+                </ul>
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Viewing your track -
+                  </b></li>
+                  <li>
+                    You can either right click and drag or click the arrow buttons in the top right corner to move your track around.
+                  </li>
+                  <li>
+                    To zoom in and out, scroll the mouse wheel or click the magnifying  glasses on the right side of the screen.
+                  </li>
+                  <li>
+                    To reset the screen, click the <i class="fas fa-expand" aria-hidden="true"></i> icon on the right, between the magnifying  glasses
+                  </li>
+                  <li>
+                    You can swap between the layers using the <i class="fas fa-layer-group" aria-hidden="true"></i> icon on the right
+                  </li>
+                </ul>
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Track generator -
+                  </b></li>
+                  <li>
+                    Clicking the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon in the tool bar will bring up the Track Generator dialog.
+                    Here you can customize the what pieces it will use to generate tracks. You can also set a limit to the number of consecutive straight and corner pieces it will use.
+                  </li>
+                    Once generation has started, the most interesting and distinct tracks will be displayed. You may select a track to view it in more detail, then if it suits you click ok to load that track in the design area.
+                  <li>
+                    After selecting a track the system will continue attempting to generating tracks, indicated by the green spinner on the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon.
+                  </li>
+                  <li>
+                    If you click the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon again, it will return you to the Track Pool. from here you can either select another track or change the settings of track generator.
+                  </li>
+                  <li>
+                    Note: Intersections, layer transitions and jumps exponentially increase the number of possible options for tracks and thus can exponentially increase the amount of time before valid tracks are generated.
+                  </li>
+                </ul>
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Other features -
+                  </b></li>
+                  <li>
+                    You can download your track with the <i class="fas fa-save" aria-hidden="true"></i> icon to use later or share with others.
+                  </li>
+                  <li>
+                    With the <i class="fas fa-folder-open" aria-hidden="true"></i> icon you can load saved tracks.
+                  </li>
+                  <li>
+                    Use the <i class="fas fa-trash-alt" aria-hidden="true"></i> icon to start over with a clean slate.
+                  </li>
+                  <li>
+                    To remove any unconnected pieces click the <i class="fas fa-brush" aria-hidden="true"></i> icon.
+                  </li>
+                  <li>
+                    Finally to get a list of all the parts for the current track, click the <i class="fas fa-list" aria-hidden="true"></i> icon.
+                  </li>
+                </ul>
+              </div>
+              <div style="min-width:200px; flex:1 1 100%" class="_padded">
+                <p>Menu icons:</p>
+                <div>
+                  <span><i class="fas fa-trash-alt fa-2x" aria-hidden="true"></i></span>
+                  Remove piece
+                </div>
+                <div>
+                  <span><i class="fas fa-exchange-alt fa-2x" aria-hidden="true"></i></span>
+                  Swap piece
+                </div>
+                <div>
+                  <span><i class="fas fa-undo fa-2x" aria-hidden="true"></i></span>
+                  Rotate Left
+                </div>
+                <div>
+                  <span><i class="fas fa-redo fa-2x" aria-hidden="true"></i></span>
+                  Rotate Right
+                </div>
+                <p>Track icons:</p>
+                <div>
+                  <img src="images/start.png" width="50" height="50"/>
+                  Start
+                </div>
+                <div>
+                  <img src="images/right corner.png" width="50" height="50"/>
+                  Corner
+                </div>
+                <div>
+                  <img src="images/intersection.png" width="50" height="50"/>
+                  Intersection
+                </div>
+                <div>
+                  <img src="images/boost.png" width="50" height="50"/>
+                  Speed
+                </div>
+                <div>
+                  <img src="images/jump1.png" width="50" height="50"/>
+                  Jump
+                </div>
+                <div>
+                  <img src="images/ramp.png" width="50" height="50"/>
+                  Layer Transition
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <span>Created By: Rudi Ugino, Trevor Primus, Anthony Mork, Sven Treu, Theresa Kamerman,</span>
+            <button class="_green" onclick="hideHelpMenu();"  style="flex: 1 0 150px;">
               OK&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
             </button>
           </div>
