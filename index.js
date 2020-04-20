@@ -74,6 +74,12 @@ function onload() {
     document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
+    setTimeout(function () {
+      if(!localStorage.getItem("firstTime")){
+        localStorage.setItem("firstTime", "true");
+        showHelpMenu();
+      }
+    }, 10);
 }
 
 function clearTrack() {
