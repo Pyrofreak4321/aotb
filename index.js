@@ -74,6 +74,10 @@ function onload() {
     document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
+    alertify.defaults.glossary.title = 'Track Builder';
+    alertify.defaults.theme.cancel = '_red';
+    alertify.defaults.theme.ok = '_green';
+    alertify.defaults.transition = 'fade';
     setTimeout(function () {
       if(!localStorage.getItem("firstTime")){
         localStorage.setItem("firstTime", "true");
@@ -528,6 +532,8 @@ function switchLayer(){
     * fL 1 = Darken first layer
     */
     focusLayer = ((focusLayer + 1) % 2);
+    document.getElementById('layerCap').style.top = focusLayer?'40px':'0px';
+
     drawCurrentTrack();
 }
 
@@ -834,24 +840,35 @@ function uploadTrack(){
 }
 
 function download() {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentTrack)));
-  element.setAttribute('download', 'track.json');
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
+  alertify.prompt('Name track','new track', function(evt, value) {
+    if(value){
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentTrack)));
+      element.setAttribute('download', value+'.json');
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+  }).set('reverseButtons', true);
 }
 
 function handleFiles(files) {
   var reader = new FileReader();
   reader.onload = function(){
     var text = reader.result;
-    currentTrack = JSON.parse(text);
-    drawCurrentTrack();
+    try{
+      var data = JSON.parse(text);
+      if(data.hasOwnProperty('pieces')){
+        currentTrack = data;
+        drawCurrentTrack();
+        alertify.success('Track Loaded');
+      } else {
+        throw "hate";
+      }
+    } catch(err){
+      alertify.error('Invalid file selected');
+    }
   }
   reader.readAsText(files[0]);
 }
