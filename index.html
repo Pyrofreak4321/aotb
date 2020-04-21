@@ -228,17 +228,21 @@
       background-color: transparent !important;
       padding: 2px;
       border: none;
+      box-shadow:none !important;
     }
 
     ._red {
       background: red;
+      box-shadow: 2px 2px 5px darkred;
     }
     ._green {
       background: lime;
+      box-shadow: 2px 2px 5px darkgreen;
     }
     ._grey {
       background: dimgrey;
       color:white;
+      box-shadow: 2px 2px 5px black;
     }
     ._black {
       background: black;
@@ -330,7 +334,10 @@
     }
 
     ._padded>*{
-      padding: 0 5px;
+      padding: 0 2.5px;
+    }
+    ._paddedV>*{
+      margin: 2.5px 0;
     }
 
     ._cog{
@@ -344,30 +351,30 @@
   <!--  -->
   <body id="body" onload="onload();" onContextMenu="return false;">
     <canvas id="canvas"></canvas>
-    <span class="_floatingButton" style="top:15px; left:15px;">
+    <span class="_floatingButton _paddedV" style="top:15px; left:15px;">
       <button class="_roundtop _roundbottom _detail" onclick="showHelpMenu()" id="btnHelp">
         <span class="_detail_label">About</span><i class="fas fa-question" aria-hidden="true"></i>
       </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="download()" id="btnSave">
         <span class="_detail_label">Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
-      </button>
+      </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="uploadTrack()" id="btnLoad">
         <span class="_detail_label">Load&nbsp;Track</span><i class="fas fa-folder-open" aria-hidden="true"></i>
-      </button>
+      </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="clearTrack()" id="btnNew">
          <span class="_detail_label">New&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
-      </button>
+      </button><br>
       <button class="_roundtop _roundbottom _detail" id="btnClean">
         <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
-      </button>
+      </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="showGenMenu()" id="btnGen">
         <span class="_detail_label">Generate&nbsp;Tracks</span>
         <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
         <div id="workingSpinner" class="_spinner _roundtop _roundbottom" style="display:none;"></div>
-      </button>
+      </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="showPartsList()" id="btnParts">
         <span class="_detail_label">Parts&nbsp;List</span><i class="fas fa-list" aria-hidden="true"></i>
-      </button>
+      </button><br>
     </span>
     <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
     <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
@@ -424,10 +431,10 @@
           <div class="_body">
             <div class="_flex">
               <img src="images/straight.png" width="150" height="150"/>
-              <img src="images/right corner.png" width="150" height="150"/>
+              <img src="images/right corner.png" style="transform: rotate(90deg);" width="150" height="150"/>
               <img src="images/ramp.png" width="150" height="150"/>
               <img src="images/intersection.png" width="150" height="150"/>
-              <img src="images/jump1.png" width="150" height="150"/>
+              <img src="images/jump_split.png" width="150" height="150"/>
             </div>
             <div class="_flex">
               <span class="_btnGroup">
@@ -588,21 +595,21 @@
           </div>
           <div class="_body">
             <div class="_flex _padded">
-              <img src="images/start.png" width="50" height="50"/>
-              <img src="images/straight.png" width="50" height="50"/>
-              <img src="images/right corner.png" width="50" height="50"/>
-              <img src="images/intersection.png" width="50" height="50"/>
-              <img src="images/boost.png" width="50" height="50"/>
-              <img src="images/jump1.png" width="50" height="50"/>
-              <P>Risers</P>
+              <img src="images/start.png" width="125" height="125"/>
+              <img src="images/straight.png" width="125" height="125"/>
+              <img src="images/right corner.png" style="transform:rotate(90deg);" width="125" height="125"/>
+              <img src="images/boost.png" width="125" height="125"/>
+              <img src="images/intersection.png" width="125" height="125"/>
+              <img src="images/jump_split.png" width="125" height="125"/>
+              <P style="min-width:125px; text-align:center;">Risers</P>
             </div>
             <div class="_flex _parts" style="text-align:center;">
               <span><span id="start_list">1</span></span>
               <span><span id="straight_list">0</span></span>
               <span><span id="corner_list">0</span></span>
-              <span><span id="intersection_list">0</span></span>
               <span><span id="jump_list">0</span></span>
               <span><span id="boost_list">0</span></span>
+              <span><span id="intersection_list">0</span></span>
               <span><span id="riser_list">0</span></span>
             </div>
           </div>
