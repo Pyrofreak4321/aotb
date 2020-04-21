@@ -1,4 +1,4 @@
-var defaultGridSize = 50;
+var defaultGridSize = 90;
 var gridSize = defaultGridSize;
 var halfGrid = gridSize/2;
 var goodTracks = [];
@@ -798,7 +798,6 @@ function threadGen() {
       pool.push(parseInt(document.getElementById(ctrlPrefix[i]+'counter').innerHTML));
       consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
     }
-    console.log('start');
     worker.postMessage([pool,consec]);
     worker.onmessage = function (event) {
         if (event.data.type == 0) {
@@ -807,7 +806,6 @@ function threadGen() {
               drawGenTracks(0);
               hasDrawn = true;
             }
-            console.log('tracks :' + goodTracks.length);
         }
         else if (event.data.type == 1) {
             loadTracks(event.data.tracks);
@@ -815,9 +813,6 @@ function threadGen() {
               drawGenTracks(0);
               hasDrawn = true;
             }
-            console.log('stop');
-            console.log('time :' + (Date.now() - time));
-            console.log('tracks :' + goodTracks.length);
             endThread();
         }
     };
