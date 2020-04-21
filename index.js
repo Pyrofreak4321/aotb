@@ -528,6 +528,8 @@ function switchLayer(){
     * fL 1 = Darken first layer
     */
     focusLayer = ((focusLayer + 1) % 2);
+    document.getElementById('layerCap').style.top = focusLayer?'40px':'0px';
+
     drawCurrentTrack();
 }
 

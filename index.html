@@ -107,10 +107,12 @@
       width: 50px;
       height: 50px;
       border-radius: 5px;
+      box-shadow: 2px 2px 5px dimgrey;
     }
     ._floatingButton input:active, ._floatingButton button:active{
       background-color: darkorange;
-      border: 2px solid antiquewhite;
+      /* border: 2px solid antiquewhite; */
+      box-shadow: inset 2px 2px 5px #a75c00;
     }
 
     ._detail{
@@ -233,11 +235,11 @@
 
     ._red {
       background: red;
-      box-shadow: 2px 2px 5px darkred;
+      box-shadow: 2px 2px 5px dimgrey;
     }
     ._green {
       background: lime;
-      box-shadow: 2px 2px 5px darkgreen;
+      box-shadow: 2px 2px 5px dimgrey;
     }
     ._grey {
       background: dimgrey;
@@ -256,17 +258,21 @@
     }
 
     ._red:active {
+      box-shadow: inset 2px 2px 5px #2b0000;
       background: darkred;
     }
     ._green:active {
+    box-shadow: inset 2px 2px 5px #002b00;
       background: darkgreen;
     }
     ._grey:active {
       background: black;
+      box-shadow: inset 2px 2px 5px black;
       color:lightGrey;
     }
     ._black:active {
       line-height: 1.6em;
+      box-shadow: inset 2px 2px 5px black;
       font-size: 1.4em;
     }
 
@@ -340,13 +346,21 @@
       margin: 2.5px 0;
     }
 
-    ._cog{
-      position: absolute;
-      /* top: 5px; */
-      right: 5px;
-      font-size: 1.5em;
-      line-height: 1.5em;
+    ._layer_ind{
+      display: inline-block;
+      height: 30px;
+      width: 30px;
+      padding: 5px;
     }
+
+    ._layer_cap{
+      position: absolute;
+      top:0px;
+      margin: 7.5px;
+      background: orange;
+      transition: top .2s;
+    }
+
   </style>
   <!--  -->
   <body id="body" onload="onload();" onContextMenu="return false;">
@@ -391,7 +405,11 @@
       <button class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i></button><br>
       <button class="" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i></button><br>
       <button class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
-      <button class="_roundtop _roundbottom" style="margin-top: 10px;" value="L" id="btnLayer" onclick="switchLayer()"><i class="fas fa-layer-group" aria-hidden="true"></i></button><br>
+      <button class="_roundtop _roundbottom" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
+        <span class="_layer_ind _roundtop _roundbottom">2</span>
+        <i id="layerCap" class="fas fa-layer-group _roundtop _roundbottom _layer_cap" aria-hidden="true"></i>
+        <span class="_layer_ind _roundtop _roundbottom">1</span>
+      </button><br>
     </span>
     <!-- menu buttons -->
     <span>
