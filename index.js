@@ -1,4 +1,4 @@
-var defaultGridSize = 50;
+var defaultGridSize = 90;
 var gridSize = defaultGridSize;
 var halfGrid = gridSize/2;
 var goodTracks = [];
@@ -424,7 +424,6 @@ function endTracking(e) {
     var startCheck = isStartPiece(selectedGridPieceX,selectedGridPieceY,focusLayer);
     if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && startCheck == false && dragging == false){
       selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
-      console.log(selectedPieceIndex);
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
         if(selectedPieceIndex == -1)
           displayAddPieMenu();
@@ -759,7 +758,6 @@ function threadGen() {
       pool.push(parseInt(document.getElementById(ctrlPrefix[i]+'counter').innerHTML));
       consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
     }
-    console.log('start');
     worker.postMessage([pool,consec]);
     worker.onmessage = function (event) {
         if (event.data.type == 0) {
@@ -768,7 +766,6 @@ function threadGen() {
               drawGenTracks(0);
               hasDrawn = true;
             }
-            console.log('tracks :' + goodTracks.length);
         }
         else if (event.data.type == 1) {
             loadTracks(event.data.tracks);
@@ -776,9 +773,6 @@ function threadGen() {
               drawGenTracks(0);
               hasDrawn = true;
             }
-            console.log('stop');
-            console.log('time :' + (Date.now() - time));
-            console.log('tracks :' + goodTracks.length);
             endThread();
         }
     };
