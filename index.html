@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
-    <title>Track builder</title>
+    <title>Track Builder</title>
   </head>
   <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
   <style>
@@ -354,8 +354,7 @@
     <span class="_floatingButton _paddedV" style="top:15px; left:15px;">
       <button class="_roundtop _roundbottom _detail" onclick="showHelpMenu()" id="btnHelp">
         <span class="_detail_label">About</span><i class="fas fa-question" aria-hidden="true"></i>
-      </button>
-
+      </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="download()" id="btnSave">
         <span class="_detail_label">Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
       </button><br>
@@ -631,7 +630,7 @@
         <span style="flex:1 1 50%"></span>
         <div id="helpMenu" class="_modal">
           <div class="_header">
-            Welcome to the CSC380 Group D track builder
+            Welcome to the CSC380 Group D Track Builder
           </div>
           <div class="_body" style="max-height:350px; overflow-y:auto">
             <div class="_flex">
@@ -641,10 +640,10 @@
                     Editing your track -
                   </b></li>
                   <li>
-                    To add a new track piece, simply click the grid location where you want it and select the type of piece from the context menu.
+                    To add a new track piece, click the grid location where you want it and select the type of piece from the context menu.
                   </li>
                   <li>
-                    To edit existing pieces, simply click on them and select the desired action from the context menu.
+                    To edit existing pieces, click on them and select the desired action from the context menu.
                   </li>
                   <li>
                     To move a piece just click and drag the piece to where you want it!
@@ -669,18 +668,18 @@
                 </ul>
                 <ul type="none" style="list-style: none;">
                   <li style="margin-left:-1em"><b>
-                    Track generator -
+                    Track Generator -
                   </b></li>
                   <li>
                     Clicking the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon in the tool bar will bring up the Track Generator dialog.
-                    Here you can customize the what pieces it will use to generate tracks. You can also set a limit to the number of consecutive straight and corner pieces it will use.
+                    Here you can customize what pieces it will use to generate tracks. You can also set a limit to the number of consecutive straight and corner pieces it will use.
                   </li>
-                    Once generation has started, the most interesting and distinct tracks will be displayed. You may select a track to view it in more detail, then if it suits you click ok to load that track in the design area.
+                    Once generation has started, the most interesting and distinct tracks will be displayed. You click on a track to view it in more detail, then if it suits you click "SELECT" to load that track in the design area.
                   <li>
                     After selecting a track the system will continue attempting to generating tracks, indicated by the green spinner on the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon.
                   </li>
                   <li>
-                    If you click the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon again, it will return you to the Track Pool. from here you can either select another track or change the settings of track generator.
+                    If you click the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon again, it will return you to the Track Pool. From here you can either select another track or change the settings of Track Generator.
                   </li>
                   <li>
                     Note: Intersections, layer transitions and jumps exponentially increase the number of possible options for tracks and thus can exponentially increase the amount of time before valid tracks are generated.
@@ -703,7 +702,7 @@
                     To remove any unconnected pieces click the <i class="fas fa-brush" aria-hidden="true"></i> icon.
                   </li>
                   <li>
-                    Finally to get a list of all the parts for the current track, click the <i class="fas fa-list" aria-hidden="true"></i> icon.
+                    To get a list of all the parts used in the current track, click the <i class="fas fa-list" aria-hidden="true"></i> icon.
                   </li>
                 </ul>
               </div>
@@ -711,11 +710,11 @@
                 <p>Menu icons:</p>
                 <div>
                   <span><i class="fas fa-trash-alt fa-2x" aria-hidden="true"></i></span>
-                  Remove piece
+                  Remove Piece
                 </div>
                 <div>
                   <span><i class="fas fa-exchange-alt fa-2x" aria-hidden="true"></i></span>
-                  Swap piece
+                  Swap Piece
                 </div>
                 <div>
                   <span><i class="fas fa-undo fa-2x" aria-hidden="true"></i></span>
