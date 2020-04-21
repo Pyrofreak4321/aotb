@@ -5,6 +5,8 @@
     <title>Track Builder</title>
   </head>
   <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
   <style>
     body{
       height: 100vh;
@@ -119,6 +121,10 @@
       box-shadow: inset 2px 2px 5px #0008;
     }
 
+    ._floatingButton button:active ._layer_cap{
+      background-color: darkorange;
+    }
+
     ._detail{
       position: relative;
       transition: width .1s;
@@ -185,6 +191,14 @@
       border-bottom-left-radius:25px !important;
       border-bottom-right-radius:25px !important;
     }
+    ._sharptop {
+      border-top-left-radius:0 !important;
+      border-top-right-radius:0 !important;
+    }
+    ._sharpbottom {
+      border-bottom-left-radius:0 !important;
+      border-bottom-right-radius:0 !important;
+    }
 
     ._backdrop{
       transition: visibility .5s, opacity .5s;
@@ -222,12 +236,13 @@
       padding: 10px;
       border-radius: 0 0 10px 10px;
     }
-    ._footer button{
+    ._footer button, .ajs-footer button{
       border-radius:10px;
-      border: none;
+      border: none !important;
       padding: 5px 10px;
-      font-weight: bold;
+      font-weight: bold !important;
       font-size: 1.25em;
+      min-height: unset !important;
     }
 
     ._clear {
@@ -365,6 +380,33 @@
       transition: top .2s;
     }
 
+    .ajs-header{
+      background: orange !important;
+    }
+
+    .ajs-button._red {
+      background: red !important;
+      box-shadow: 2px 2px 5px #0008;
+    }
+    .ajs-button._green {
+      background: lime !important;
+      box-shadow: 2px 2px 5px #0008;
+    }
+
+    .ajs-button._red:active {
+      box-shadow: inset 2px 2px 5px #0008;
+      background: darkred !important;
+    }
+    .ajs-button._green:active {
+      box-shadow: inset 2px 2px 5px #0008;
+      background: darkgreen !important;
+    }
+
+    .alertify-notifier .ajs-message{
+      color: black !important;
+      text-shadow: none !important;
+      box-shadow: 2px 2px 5px #0008;
+    }
   </style>
   <!--  -->
   <body id="body" onload="onload();" onContextMenu="return false;">
@@ -394,7 +436,7 @@
         <span class="_detail_label">Parts&nbsp;List</span><i class="fas fa-list" aria-hidden="true"></i>
       </button><br>
     </span>
-    <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
+    <input type="file" id="fileElem" accept="application/json" style="display:none" onchange="handleFiles(this.files)">
     <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
       <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
         <div class="">
@@ -406,9 +448,9 @@
           <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
         </div>
       </div>
-      <button class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i></button><br>
-      <button class="" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i></button><br>
-      <button class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
+      <button class="_roundtop _sharpbottom" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i></button><br>
+      <button class="_sharptop _sharpbottom" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i></button><br>
+      <button class="_roundbottom _sharptop" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
       <button class="_roundtop _roundbottom" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
         <span class="_layer_ind _roundtop _roundbottom">2</span>
         <i id="layerCap" class="fas fa-layer-group _roundtop _roundbottom _layer_cap" aria-hidden="true"></i>
@@ -790,5 +832,6 @@
 
   <script type="text/javascript" src="index.js"></script>
   <script type="text/javascript" src="generator.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
   <script src="https://kit.fontawesome.com/0dce990a33.js" crossorigin="anonymous"></script>
 </html>
