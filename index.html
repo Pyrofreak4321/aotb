@@ -77,10 +77,15 @@
       border-top-right-radius:50% !important;
       border-bottom-left-radius:50% !important;
       border-bottom-right-radius:50% !important;
+      box-shadow: 2px 2px 5px #0008;
       transition: margin .1s, visibility .1s, opacity .1s;
     }
     ._pieButton i {
         margin-top: 5px;
+    }
+    ._pieButton:active{
+      background-color: darkorange;
+      box-shadow: inset 2px 2px 5px #0008;
     }
 
     ._diamond {
@@ -107,12 +112,11 @@
       width: 50px;
       height: 50px;
       border-radius: 5px;
-      box-shadow: 2px 2px 5px dimgrey;
+      box-shadow: 2px 2px 5px #0008;
     }
     ._floatingButton input:active, ._floatingButton button:active{
       background-color: darkorange;
-      /* border: 2px solid antiquewhite; */
-      box-shadow: inset 2px 2px 5px #a75c00;
+      box-shadow: inset 2px 2px 5px #0008;
     }
 
     ._detail{
@@ -235,16 +239,16 @@
 
     ._red {
       background: red;
-      box-shadow: 2px 2px 5px dimgrey;
+      box-shadow: 2px 2px 5px #0008;
     }
     ._green {
       background: lime;
-      box-shadow: 2px 2px 5px dimgrey;
+      box-shadow: 2px 2px 5px #0008;
     }
     ._grey {
       background: dimgrey;
       color:white;
-      box-shadow: 2px 2px 5px black;
+      box-shadow: 2px 2px 5px #0008;
     }
     ._black {
       background: black;
@@ -258,21 +262,21 @@
     }
 
     ._red:active {
-      box-shadow: inset 2px 2px 5px #2b0000;
+      box-shadow: inset 2px 2px 5px #0008;
       background: darkred;
     }
     ._green:active {
-    box-shadow: inset 2px 2px 5px #002b00;
+      box-shadow: inset 2px 2px 5px #0008;
       background: darkgreen;
     }
     ._grey:active {
       background: black;
-      box-shadow: inset 2px 2px 5px black;
+      box-shadow: inset 2px 2px 5px #0008;
       color:lightGrey;
     }
     ._black:active {
       line-height: 1.6em;
-      box-shadow: inset 2px 2px 5px black;
+      box-shadow: inset 2px 2px 5px #0008;
       font-size: 1.4em;
     }
 
@@ -418,7 +422,7 @@
       <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST)" id="BOOST_button"/>
       <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP)" id="RAMP_button"/>
       <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION)" id="INTERSECTION_button"/>
-      <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
+      <input type="image" src="images/jump_split.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
       <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
