@@ -508,7 +508,7 @@
       <button class="_roundtop _roundbottom _detail" onclick="clearPrompt()" id="btnNew">
          <span class="_detail_label">Delete&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
       </button><br>
-      <button class="_roundtop _roundbottom _detail" id="btnClean">
+      <button class="_roundtop _roundbottom _detail" onclick="cleanTrack()" id="btnClean">
         <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
       </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="showGenMenu()" id="btnGen">
@@ -553,7 +553,7 @@
       <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"><i class="fas fa-exchange-alt" aria-hidden="true"></i></button>
-      <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none;" id="dragIcon" />
+      <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none; border-radius:5px;" id="dragIcon" />
     </span>
     <!--Track piece images-->
     <span>
@@ -819,12 +819,12 @@
                     Track Generator -
                   </b></li>
                   <li>
-                    Clicking the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon in the tool bar will bring up the Track Generator dialog. 
+                    Clicking the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon in the tool bar will bring up the Track Generator dialog.
                     Here you can customize what pieces it will use to generate tracks. You can also set a limit to the number of consecutive straight and corner pieces it will use.
                   </li>
                     Once generation has started, tracks will appear in the Track Pool. Click a track to view it in more detail, then press "SELECT" to load that track into the design area.
                   <li>
-                    After selecting a track the system will continue generating tracks, indicated by the green spinner on the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon.                    
+                    After selecting a track the system will continue generating tracks, indicated by the green spinner on the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon.
                   </li>
                   <li>
                     If you click <i class="fas fa-pencil-ruler" aria-hidden="true"></i> again, it will reopen the Track Pool. From here you can either select another track or change the settings of the Track Generator.
