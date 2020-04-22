@@ -61,7 +61,6 @@ function updateTouchEvent(e){
   e.clientY = (e.touches.item(0)||e.changedTouches.item(0)).clientY;
   e.isTouch = true;
 }
-screen.orientation.lock('landscape');
 
 //initalize
 function onload() {
@@ -123,6 +122,163 @@ function clearTrack() {
     focusLayer = 0;
     drawCurrentTrack();
 }
+
+function cleanTrack() {
+  for(var i = 0; i < currentTrack.pieces.length; i++){
+    currentTrack.pieces[i].bad = false;
+    currentTrack.pieces[i].crossed = false;
+    switch(currentTrack.pieces[i].type){
+      case STRAIGHT:
+      case BOOST:
+      case RAMP:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]-currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]-currentTrack.pieces[i].dir[1],1)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],1))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case RIGHT:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+right(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+right(currentTrack.pieces[i].dir)[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+right(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+right(currentTrack.pieces[i].dir)[1],1)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],1))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case LEFT:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+left(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+left(currentTrack.pieces[i].dir)[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+left(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+left(currentTrack.pieces[i].dir)[1],1)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],1))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case JUMP:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-(currentTrack.pieces[i].dir[0]*2),currentTrack.pieces[i].pos[1]-(currentTrack.pieces[i].dir[1]*2),0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case INTERSECTION:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+left(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+left(currentTrack.pieces[i].dir)[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+right(currentTrack.pieces[i].dir).dir[0],currentTrack.pieces[i].pos[1]+right(currentTrack.pieces[i].dir)[1],0))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+    }
+  }
+
+  function processPiece(lastpiece){
+    console.log(lastpiece);
+    var flag = false;
+    for(var n = 0; n < pieces.length && !flag; n++){
+      switch(pieces[n].type){
+        case STRAIGHT:
+        case BOOST:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+            flag = true;
+          } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+            pieces[n].dir = lastpiece.dir;
+            flag = true;
+          } else flag = false;
+          break;
+        case RAMP:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1];
+
+            if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+              flag = true;
+            } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+              pieces[n].dir = lastpiece.dir;
+              flag = true;
+            } else flag = false;
+          break;
+        case RIGHT:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+            pieces[n].type = LEFT;
+            pieces[n].dir = right(pieces[n].dir);
+            flag = true;
+          }else if(flag && lastpiece.dir[0] == left(pieces[n].dir)[0] && lastpiece.dir[1] == left(pieces[n].dir)[1]){
+            flag = true;
+          }else flag = false;
+          break;
+        case LEFT:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+            pieces[n].type = RIGHT;
+            pieces[n].dir = left(pieces[n].dir);
+            flag = true;
+          }else if(flag && lastpiece.dir[0] == right(pieces[n].dir)[0] && lastpiece.dir[1] == right(pieces[n].dir)[1]){
+            flag = true;
+          }else flag = false;
+          break;
+        case JUMP:
+          flag = lastpiece.pos[0]+(lastpiece.dir[0]*2) == pieces[n].pos[0] &&
+            lastpiece.pos[1]+(lastpiece.dir[1]*2) == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+            if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+              flag = true;
+            } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+              pieces[n].dir = lastpiece.dir;
+              flag = true;
+            } else flag = false;
+          break;
+        case INTERSECTION:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          break;
+      }
+
+      if(flag){
+        if(pieces[n].type == INTERSECTION){
+          pieces[n].dir = lastpiece.dir;
+          if(!pieces[n].crossed){
+            pieces[n].crossed = true
+            processPiece(pieces[n]);
+          } else {
+            currentTrack.pieces.push(pieces[n]);
+            var nextPiece = pieces.splice(n,1)[0];
+            processPiece(nextPiece);
+          }
+        } else {
+          currentTrack.pieces.push(pieces[n]);
+          var nextPiece = pieces.splice(n,1)[0];
+          processPiece(nextPiece);
+        }
+      }
+    }
+  }
+  var pieces = currentTrack.pieces;
+  currentTrack.pieces = [];
+
+  currentTrack.pieces.push(pieces[0]);
+  processPiece(pieces.splice(0,1)[0]);
+
+  for(var i = 0; i < pieces.length; i++){
+    pieces[i].bad = true;
+    currentTrack.pieces.push(pieces[i]);
+  }
+
+  drawCurrentTrack();
+}
+
 
 
 function drawGrid(canvas, size) {
@@ -218,6 +374,12 @@ function draw(track, canvas, size, x, y, layer) {
                 if(track.pieces[s].type == JUMP){
                   bufferImage(ctx2, track.pieces[s].dir,2+track.pieces[s].type);
                   context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
+                }
+
+                if(track.pieces[s].bad){
+                  context.globalAlpha = context.globalAlpha * 0.25;
+                  context.fillStyle = '#f00';
+                  context.fillRect(offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
                 }
             }
         }
@@ -565,6 +727,13 @@ function mouseTracking(e) {
       icon.style.display='inline-block';
       icon.style.top = (e.clientY-25)+'px';
       icon.style.left = (e.clientX-25)+'px';
+      if(currentTrack.pieces[selectedPieceIndex].dir[0]==1){
+        icon.style.transform = 'rotate(90deg)';
+      } else if(currentTrack.pieces[selectedPieceIndex].dir[0]==-1){
+        icon.style.transform = 'rotate(-90deg)';
+      } else if(currentTrack.pieces[selectedPieceIndex].dir[1]==1){
+        icon.style.transform = 'rotate(180deg)';
+      }
       dragging = true;
 
       clearAddPieMenu();
@@ -581,10 +750,10 @@ function mouseTracking(e) {
       selectedGridPieceX = Math.floor((e.clientX - (widthX-(widthX%gridSize)) - panX)/gridSize);
       selectedGridPieceY = Math.floor((e.clientY - (widthY-(widthY%gridSize)) - panY)/gridSize);
       var space = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
-      if(space >= 0){
-        icon.style.filter = 'sepia(100%) contrast(50%) saturate(500%) hue-rotate(330deg)';
+      if(space >= 0 && space != selectedPieceIndex){
+        icon.style.background = 'red';
       } else {
-        icon.style.filter = 'none'
+        icon.style.background = 'transparent';
       }
     }
 }
