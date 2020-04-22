@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <meta name="viewport" content="initial-scale=0.75, width=device-width, user-scalable=no" />
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
     <title>Track Builder</title>
   </head>
@@ -8,9 +9,10 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
   <style>
-    body{
-      height: 100vh;
-      width: 100vw;
+    html, body{
+      height: 100%;
+      width: 100%;
+      position: fixed;
       padding: 0;
       margin: 0;
       overflow: hidden;
@@ -18,7 +20,7 @@
     *{
       outline: none;
     }
-    body, input, button{
+    body, input, button, span, p{
       font-family: 'Antic';
     }
 
@@ -44,19 +46,35 @@
       display: none;
     }
     ._marquee._run p {
-      transform: translateX(100%);
+      -webkit-transform: translateX(100%);
+          -ms-transform: translateX(100%);
+              transform: translateX(100%);
       display: inline;
-      animation: scroll-left 10s linear infinite;
+      -webkit-animation: scroll-left 10s linear infinite;
+              animation: scroll-left 10s linear infinite;
     }
     ._marquee p:last-of-type{
-      animation-delay: 5s;
+      -webkit-animation-delay: 5s;
+              animation-delay: 5s;
+    }
+    @-webkit-keyframes scroll-left {
+      0% {
+        -webkit-transform: translateX(100%);
+                transform: translateX(100%);
+      }
+      100% {
+        -webkit-transform: translateX(-100%);
+                transform: translateX(-100%);
+      }
     }
     @keyframes scroll-left {
       0% {
-        transform: translateX(100%);
+        -webkit-transform: translateX(100%);
+                transform: translateX(100%);
       }
       100% {
-        transform: translateX(-100%);
+        -webkit-transform: translateX(-100%);
+                transform: translateX(-100%);
       }
     }
 
@@ -69,6 +87,7 @@
       position:absolute;
       visibility: hidden;
       opacity: 0;
+      padding: 0;
       font-size: 30px;
       height: 50px;
       width: 50px;
@@ -79,7 +98,10 @@
       border-top-right-radius:50% !important;
       border-bottom-left-radius:50% !important;
       border-bottom-right-radius:50% !important;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+      -webkit-transition: margin .1s, visibility .1s, opacity .1s;
+      -o-transition: margin .1s, visibility .1s, opacity .1s;
       transition: margin .1s, visibility .1s, opacity .1s;
     }
     ._pieButton i {
@@ -87,11 +109,14 @@
     }
     ._pieButton:active{
       background-color: darkorange;
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
     }
 
     ._diamond {
-      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+              transform: rotate(45deg);
     }
     ._diamond button{
       padding: 0;
@@ -102,23 +127,28 @@
     }
     ._diamond i{
       position: fixed;
-      transform: rotate(-45deg) translate(0px, -23px);
+      -webkit-transform: rotate(-45deg) translate(0px, -23px);
+          -ms-transform: rotate(-45deg) translate(0px, -23px);
+              transform: rotate(-45deg) translate(0px, -23px);
       height: 50px;
       width: 50px;
     }
 
     ._floatingButton input, ._floatingButton button{
+      padding:0px;
       background-color: orange;
       border: none;
       font-size: 25px;
       width: 50px;
       height: 50px;
       border-radius: 5px;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
     ._floatingButton input:active, ._floatingButton button:active{
       background-color: darkorange;
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
     }
 
     ._floatingButton button:active ._layer_cap{
@@ -127,6 +157,8 @@
 
     ._detail{
       position: relative;
+      -webkit-transition: width .1s;
+      -o-transition: width .1s;
       transition: width .1s;
     }
     ._detail:hover{
@@ -140,6 +172,8 @@
       position: absolute;
       left: 0;
       right:0;
+      -webkit-transition: opacity .2s,visabilty .2s;
+      -o-transition: opacity .2s,visabilty .2s;
       transition: opacity .2s,visabilty .2s;
     }
     ._detail:hover ._detail_label{
@@ -150,6 +184,8 @@
     ._detail i{
       opacity: 1;
       visibility: visible;
+      -webkit-transition: opacity .2s,visabilty .2s;
+      -o-transition: opacity .2s,visabilty .2s;
       transition: opacity .2s,visabilty .2s;
     }
     ._detail:hover i{
@@ -166,20 +202,38 @@
       height: 40px;
       border: solid 5px transparent;
       border-left: solid 5px lime;
-      animation: spin 1s linear infinite;
+      -webkit-animation: spin 1s linear infinite;
+              animation: spin 1s linear infinite;
     }
     ._detail:hover ._spinner{
       display: none !important;
     }
-    @keyframes spin {
+    @-webkit-keyframes spin {
       0% {
-        transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
       }
       50%{
-        transform: rotate(180deg);
+        -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
       }
       100% {
-        transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+      }
+    }
+    @keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+      }
+      50%{
+        -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
       }
     }
 
@@ -201,6 +255,8 @@
     }
 
     ._backdrop{
+      -webkit-transition: visibility .5s, opacity .5s;
+      -o-transition: visibility .5s, opacity .5s;
       transition: visibility .5s, opacity .5s;
       background-color: rgba(1,1,1,.25);
       position:absolute;
@@ -249,21 +305,25 @@
       background-color: transparent !important;
       padding: 2px;
       border: none;
-      box-shadow:none !important;
+      -webkit-box-shadow:none !important;
+              box-shadow:none !important;
     }
 
     ._red {
       background: red;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
     ._green {
       background: lime;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
     ._grey {
       background: dimgrey;
       color:white;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
     ._black {
       background: black;
@@ -277,21 +337,25 @@
     }
 
     ._red:active {
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
       background: darkred;
     }
     ._green:active {
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
       background: darkgreen;
     }
     ._grey:active {
       background: black;
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
       color:lightGrey;
     }
     ._black:active {
       line-height: 1.6em;
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
       font-size: 1.4em;
     }
 
@@ -323,13 +387,20 @@
     }
 
     ._flex{
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
     }
     ._column{
-      flex-direction: column;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column;
     }
     ._flex>span {
-      flex: 1 1 100%;
+      -webkit-box-flex: 1;
+          -ms-flex: 1 1 100%;
+              flex: 1 1 100%;
     }
     ._padded>div>img, ._padded>div>span>i {
       vertical-align: middle;
@@ -341,7 +412,9 @@
 
 
     ._btnGroup{
-      flex:1 1 100%;
+      -webkit-box-flex:1;
+          -ms-flex:1 1 100%;
+              flex:1 1 100%;
       text-align:center;
       font-size: 2em;
     }
@@ -369,14 +442,20 @@
       display: inline-block;
       height: 30px;
       width: 30px;
-      padding: 5px;
+      padding: 10px;
+    }
+    ._layer_ind:first-child{
+      padding-bottom: 0px;
     }
 
     ._layer_cap{
       position: absolute;
-      top:0px;
+      top:6px;
+      left:6px;
       margin: 7.5px;
       background: orange;
+      -webkit-transition: top .2s;
+      -o-transition: top .2s;
       transition: top .2s;
     }
 
@@ -386,26 +465,31 @@
 
     .ajs-button._red {
       background: red !important;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
     .ajs-button._green {
       background: lime !important;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
 
     .ajs-button._red:active {
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
       background: darkred !important;
     }
     .ajs-button._green:active {
-      box-shadow: inset 2px 2px 5px #0008;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
       background: darkgreen !important;
     }
 
     .alertify-notifier .ajs-message{
       color: black !important;
       text-shadow: none !important;
-      box-shadow: 2px 2px 5px #0008;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
     }
   </style>
   <!--  -->
@@ -421,8 +505,8 @@
       <button class="_roundtop _roundbottom _detail" onclick="uploadTrack()" id="btnLoad">
         <span class="_detail_label">Load&nbsp;Track</span><i class="fas fa-folder-open" aria-hidden="true"></i>
       </button><br>
-      <button class="_roundtop _roundbottom _detail" onclick="clearTrack()" id="btnNew">
-         <span class="_detail_label">New&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
+      <button class="_roundtop _roundbottom _detail" onclick="clearPrompt()" id="btnNew">
+         <span class="_detail_label">Delete&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
       </button><br>
       <button class="_roundtop _roundbottom _detail" id="btnClean">
         <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
@@ -696,7 +780,7 @@
           <div class="_header">
             Welcome to the CSC380 Group D Track Builder
           </div>
-          <div class="_body" style="max-height:350px; overflow-y:auto">
+          <div class="_body" style="max-height:300px; overflow-y:auto">
             <div class="_flex">
               <div style="min-width:600px; flex:1 1 100%; padding:5px;">
                 <ul type="none" style="list-style: none;">

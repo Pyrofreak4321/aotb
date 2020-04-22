@@ -42,6 +42,8 @@ var panX = 0;
 var panY = 0;
 
 // specifically for mouse panning
+var startingScale = 1;
+var startingWidth = 1;
 var startX = null;
 var startY = null;
 var originX = null;
@@ -52,6 +54,14 @@ var selectedGridPieceX = null;
 var selectedGridPieceY = null;
 var selectedPieceIndex = -1;
 var selectedTrackIndex = -1;
+
+CANTOUCH = ('ontouchstart' in document.documentElement);
+function updateTouchEvent(e){
+  e.clientX = (e.touches.item(0)||e.changedTouches.item(0)).clientX;
+  e.clientY = (e.touches.item(0)||e.changedTouches.item(0)).clientY;
+  e.isTouch = true;
+}
+screen.orientation.lock('landscape');
 
 //initalize
 function onload() {
@@ -66,8 +76,19 @@ function onload() {
     canvas.height = h;
     canvas.width = w;
     clearTrack();
-    canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
-    canvas.addEventListener("mousedown", doMouseDown);
+
+    if(CANTOUCH){
+      //Because !#$%&! apple
+      document.addEventListener('touchmove', function (event) {
+        if (event.scale && event.scale !== 1) { event.preventDefault(); }
+      }, { passive: false });
+
+      canvas.addEventListener('touchstart', doTouch, { passive: false })
+    } else {
+      canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
+      canvas.addEventListener("mousedown", doMouseDown);
+    }
+
     document.getElementById('genMenu').addEventListener("click", preventDef);
     document.getElementById('resMenu').addEventListener("click", preventDef);
     document.getElementById('partsList').addEventListener("click", preventDef);
@@ -84,6 +105,12 @@ function onload() {
         showHelpMenu();
       }
     }, 10);
+}
+
+function clearPrompt(){
+  alertify.confirm('Are you sure you want to delete this track?', function() {
+    clearTrack()
+  }).set('reverseButtons', true);
 }
 
 function clearTrack() {
@@ -403,7 +430,14 @@ function isStartPiece(xCoord,yCoord,zCoord){
   return flag;
 }
 
-
+function doTouch(e){
+  updateTouchEvent(e)
+  if(e.touches.length == 2){
+    startingScale = scale;
+    startingWidth = Math.sqrt(Math.pow(e.touches.item(0).clientX-e.touches.item(1).clientX,2)+Math.pow(e.touches.item(0).clientY-e.touches.item(1).clientY,2));
+  }
+  doMouseDown(e);
+}
 function doMouseDown(e) {
   var canvas = document.getElementById('canvas');
   var widthX = (canvas.width / 2);
@@ -428,12 +462,21 @@ function doMouseDown(e) {
 
     selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
 
-    canvas.addEventListener("mousemove", mouseTracking);
-    canvas.addEventListener("mouseup", endTracking);
-    canvas.addEventListener("mouseleave", endTracking);
+    if(e.isTouch){
+      canvas.addEventListener('touchmove', touchMoving);
+      canvas.addEventListener('touchend', endTouching);
+    } else {
+      canvas.addEventListener("mousemove", mouseTracking);
+      canvas.addEventListener("mouseup", endTracking);
+      canvas.addEventListener("mouseleave", endTracking);
+    }
   }
 }
 
+function endTouching(e){
+  updateTouchEvent(e)
+  endTracking(e);
+}
 function endTracking(e) {
     var consumed = false;
     var canvas = document.getElementById('canvas');
@@ -479,12 +522,33 @@ function endTracking(e) {
     }
 
     if(consumed){
-      canvas.removeEventListener("mousemove", mouseTracking);
-      canvas.removeEventListener("mouseup", endTracking);
-      canvas.removeEventListener("mouseleave", endTracking);
+      if(e.isTouch && e.touches.length < 1){
+        canvas.removeEventListener("touchmove", touchMoving);
+        canvas.removeEventListener("touchend", endTouching);
+      } else {
+        canvas.removeEventListener("mousemove", mouseTracking);
+        canvas.removeEventListener("mouseup", endTracking);
+        canvas.removeEventListener("mouseleave", endTracking);
+      }
     }
 }
 
+function touchMoving(e){
+  updateTouchEvent(e)
+  if(!dragging && selectedPieceIndex < 1){
+    var diffX = e.clientX - originX;
+    var diffY = e.clientY - originY;
+
+    if(e.touches.length == 2){
+      scale = startingScale * startingWidth / Math.sqrt(Math.pow(e.touches.item(0).clientX-e.touches.item(1).clientX,2)+Math.pow(e.touches.item(0).clientY-e.touches.item(1).clientY,2));
+      gridSize = defaultGridSize * scale;
+      halfGrid = gridSize/2;
+    }
+
+    pan(diffX, diffY);
+  }
+  mouseTracking(e);
+}
 function mouseTracking(e) {
     var canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
@@ -532,7 +596,7 @@ function switchLayer(){
     * fL 1 = Darken first layer
     */
     focusLayer = ((focusLayer + 1) % 2);
-    document.getElementById('layerCap').style.top = focusLayer?'40px':'0px';
+    document.getElementById('layerCap').style.top = focusLayer?'44px':'6px';
 
     drawCurrentTrack();
 }
@@ -555,7 +619,6 @@ function panButton(num){
     */
     pan(Math.cos((Math.PI/2)*num)*gridSize, Math.sin((Math.PI/2)*num)*gridSize);
 }
-
 
 function modScale(interval){
     if(scale + interval >= 0.2)
