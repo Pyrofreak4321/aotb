@@ -1,6 +1,7 @@
 var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
+var lastSend = Date.now();
 var consecLimit = [4,4,4,0,0,0,0];
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
@@ -220,7 +221,7 @@ function filter(item){
   }
   if(good){
     goodTracks.push(itemPath);
-    newTracks.push(JSON.stringify({pieces: item.pieces, path:itemPath}));
+    newTracks.push({pieces: [...item.pieces], path:itemPath});
     //postMessage({type: 0, tracks: item});
   }else {
     dupe++;
@@ -228,10 +229,11 @@ function filter(item){
 }
 
 function storeTrack(track){
-  //filter(track);
-  newTracks.push({pieces: [...track.pieces]});
-  if(newTracks.length >= 1000){
-    postMessage({type: 0, tracks: newTracks});
+  filter(track);
+  // newTracks.push({pieces: [...track.pieces]});
+  if(newTracks.length > 0 && Date.now()-lastSend > 1000){
+    lastSend = Date.now();
+    postMessage({type: 0, tracks: JSON.stringify(newTracks)});
     newTracks = [];
   }
 }

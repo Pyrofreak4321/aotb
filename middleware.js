@@ -1,6 +1,5 @@
-var goodTracks;
-var newTracks;
-var dead, dupe;
+var goodTracks = [];
+var newTracks = [];
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
@@ -63,39 +62,12 @@ function filter(item){
   }
 }
 
-var w;
-var working = false;
 onmessage = function(e) {
-  if(e.data == 'kill'){
-    w.terminate();
+  var tracks = JSON.parse(e.data.tracks);
+  for(i = 0; i < tracks.length; i++){
+    filter(tracks[i]);
   }
-  else if(!working){
-    goodTracks = [];
-    newTracks = [];
-    working = true;
-    if (typeof(w) == "undefined") {
-        w = new Worker("./generator.js");
-    }
-    w.postMessage(e.data);
 
-    w.onmessage = function(event){
-      if(event.data.type == 0){
-        for(i = 0; i < event.data.tracks.length; i++){
-          filter(event.data.tracks[i]);
-          if(newTracks.length >= 50){
-            postMessage({type: 0, tracks: newTracks});
-            newTracks = [];
-          }
-        }
-      }
-      else if(event.data.type == 1){
-        for(i = 0; i < event.data.tracks.length; i++){
-          filter(event.data.tracks[i]);
-        }
-        postMessage({type: 1, tracks: newTracks});
-        newTracks = [];
-        working = false;
-      }
-    };
-  }
-};
+  postMessage({type: e.data.type, tracks: JSON.stringify(newTracks)});
+  newTracks = [];
+}

@@ -17,7 +17,8 @@ var pieEditMenuOpen = false;
 var drawing = false;
 
 var working = false;
-var worker = null;
+var generatorThread = null;
+var filterThread = null;
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
@@ -876,8 +877,8 @@ function threadGen() {
     document.getElementById('workingSpinner').setAttribute("style",'display: inline-block;');
 
     function loadTracks(tracks){
-      for(var i = 0; i < event.data.tracks.length; i++){
-        var t = event.data.tracks[i];
+      for(var i = 0; i < tracks.length; i++){
+        var t = tracks[i];
         t.minx = 999;
         t.miny = 999;
         t.maxx = -999;
@@ -894,8 +895,11 @@ function threadGen() {
     }
 
     time = Date.now();
-    if (!worker) {
-        worker = new Worker("./middleware.js");
+    if (!generatorThread) {
+        generatorThread = new Worker("./generator.js");
+    }
+    if (!filterThread) {
+        filterThread = new Worker("./middleware.js");
     }
 
     var pool = [];
@@ -904,33 +908,40 @@ function threadGen() {
       pool.push(parseInt(document.getElementById(ctrlPrefix[i]+'counter').innerHTML));
       consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
     }
-    worker.postMessage([pool,consec]);
-    worker.onmessage = function (event) {
-        if (event.data.type == 0) {
-            loadTracks(event.data.tracks);
-            if(!hasDrawn){
-              drawGenTracks(trackIndex);
-              hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
-            }
-        }
-        else if (event.data.type == 1) {
-            loadTracks(event.data.tracks);
-            if(!hasDrawn){
-              drawGenTracks(trackIndex);
-              hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
-            }
-            endThread();
-        }
+    generatorThread.onmessage = function (ge) {
+      // filterThread.postMessage(ge.data);
+      var tracks = JSON.parse(ge.data.tracks);
+      loadTracks(tracks);
+      if(!hasDrawn){
+        drawGenTracks(trackIndex);
+        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      }
+      if (ge.data.type == 1) {
+        endThread();
+      }
     };
+    filterThread.onmessage = function(fe) {
+      var tracks = JSON.parse(fe.data.tracks);
+      loadTracks(tracks);
+      if(!hasDrawn){
+        drawGenTracks(trackIndex);
+        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      }
+      if (fe.data.type == 1) {
+        endThread();
+      }
+    }
+    generatorThread.postMessage([pool,consec]);
   }
 }
 function endThread(){
-  if(worker){
-    worker.postMessage("kill");
-    setTimeout(function () {
-      worker.terminate()
-      worker = null;
-    }, 10);
+  if(generatorThread){
+      generatorThread.terminate()
+      generatorThread = null;
+  }
+  if(filterThread){
+      filterThread.terminate()
+      filterThread = null;
   }
   working = false;
   document.getElementById('marquee').setAttribute("class","_marquee");
