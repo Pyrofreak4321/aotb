@@ -2,18 +2,21 @@ var goodTracks;
 var newTracks;
 var dead, dupe;
 
-var STRAIGHT = 2;
-var LEFT = 1;
+//changed these to consts and put them in number-order - caused errors, changed back to var
+var START = -1;
 var RIGHT = 0;
-var JUMP = 3;
+var LEFT = 1;
+var STRAIGHT = 2;
+var BOOST = 3;
 var RAMP = 4;
 var INTERSECTION = 5;
-var BOOST = 6;
+var JUMP = 6;
+
 
 function stringify(p){
   var s=' ';
   switch (p.type) {
-    case -1:
+    case START:
       s = 's';
       break;
     case STRAIGHT:
@@ -43,10 +46,10 @@ function stringify(p){
 
 function filter(item){
   var good = true;
-  var itemPath = item.path;
-  // for(var i = 0; i < item.pieces.length; i++){
-  //   itemPath += stringify(item.pieces[i]);
-  // }
+  var itemPath = '';
+  for(var i = 0; i < item.pieces.length; i++){
+    itemPath += stringify(item.pieces[i]);
+  }
   var path = itemPath+itemPath;
   for(var y = 0; y < goodTracks.length && good; y++){
     if(goodTracks[y].length == itemPath.length && path.includes(goodTracks[y]) ){
@@ -55,17 +58,18 @@ function filter(item){
   }
   if(good){
     goodTracks.push(itemPath);
-    newTracks.push(JSON.stringify({pieces: item.pieces, path:itemPath}));
+    newTracks.push({pieces: item.pieces, path:itemPath});
     //postMessage({type: 0, tracks: item});
-  }else {
-    dupe++;
   }
 }
 
 var w;
 var working = false;
 onmessage = function(e) {
-  if(!working){
+  if(e.data == 'kill'){
+    w.terminate();
+  }
+  else if(!working){
     goodTracks = [];
     newTracks = [];
     working = true;
@@ -77,15 +81,12 @@ onmessage = function(e) {
     w.onmessage = function(event){
       if(event.data.type == 0){
         for(i = 0; i < event.data.tracks.length; i++){
-          filter(JSON.parse(event.data.tracks[i]));
+          filter(event.data.tracks[i]);
+          if(newTracks.length >= 50){
+            postMessage({type: 0, tracks: newTracks});
+            newTracks = [];
+          }
         }
-        if(newTracks.length >= 500){
-          postMessage({type: 0, tracks: newTracks});
-          newTracks = [];
-        }
-        //trackIndex = goodTracks.length-1;
-        // goodTracks = goodTracks.concat(event.data.tracks);
-        console.log('tracks :' + goodTracks.length);
       }
       else if(event.data.type == 1){
         for(i = 0; i < event.data.tracks.length; i++){

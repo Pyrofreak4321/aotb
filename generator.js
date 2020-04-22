@@ -3,7 +3,7 @@ var goodTracks = [];
 var newTracks = [];
 var consecLimit = [4,4,4,0,0,0,0];
 
-//changed these to const - caused errors for having same consts in index AND generator
+//changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
 var RIGHT = 0;
 var LEFT = 1;
@@ -228,8 +228,9 @@ function filter(item){
 }
 
 function storeTrack(track){
-  filter(track);
-  if(newTracks.length >= 100){
+  //filter(track);
+  newTracks.push({pieces: [...track.pieces]});
+  if(newTracks.length >= 1000){
     postMessage({type: 0, tracks: newTracks});
     newTracks = [];
   }
