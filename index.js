@@ -910,13 +910,13 @@ function threadGen() {
     }
     generatorThread.onmessage = function (ge) {
       // filterThread.postMessage(ge.data);
-      var tracks = JSON.parse(ge.data.tracks);
-      loadTracks(tracks);
+      var msg = JSON.parse(ge.data);
+      loadTracks(msg.tracks);
       if(!hasDrawn){
         drawGenTracks(trackIndex);
         hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
       }
-      if (ge.data.type == 1) {
+      if (msg.type == 1) {
         endThread();
       }
     };

@@ -233,7 +233,7 @@ function storeTrack(track){
   // newTracks.push({pieces: [...track.pieces]});
   if(newTracks.length > 0 && Date.now()-lastSend > 1000){
     lastSend = Date.now();
-    postMessage({type: 0, tracks: JSON.stringify(newTracks)});
+    postMessage(JSON.stringify({type: 0, tracks: newTracks}));
     newTracks = [];
   }
 }

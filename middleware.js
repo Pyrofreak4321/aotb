@@ -63,11 +63,11 @@ function filter(item){
 }
 
 onmessage = function(e) {
-  var tracks = JSON.parse(e.data.tracks);
-  for(i = 0; i < tracks.length; i++){
-    filter(tracks[i]);
+  var msg = JSON.parse(e.data);
+  for(i = 0; i < msg.tracks.length; i++){
+    filter(msg.tracks[i]);
   }
 
-  postMessage({type: e.data.type, tracks: JSON.stringify(newTracks)});
+  postMessage(JSON.stringify({type: msg.type, tracks: newTracks}));
   newTracks = [];
 }
