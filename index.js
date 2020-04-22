@@ -17,7 +17,8 @@ var pieEditMenuOpen = false;
 var drawing = false;
 
 var working = false;
-var worker = null;
+var generatorThread = null;
+var filterThread = null;
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
@@ -368,7 +369,6 @@ function draw(track, canvas, size, x, y, layer) {
                   bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
                 }
 
-
                 context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
 
                 if(track.pieces[s].type == JUMP){
@@ -384,6 +384,45 @@ function draw(track, canvas, size, x, y, layer) {
             }
         }
     }
+}
+function lineTrack(track, canvas, size, x, y, layer){
+  var context = canvas.getContext('2d');
+  var offsetx = x;
+  var offsety = y;
+    context.lineWidth = size/2;
+    context.strokeStyle = '#000';
+    context.beginPath()
+  for (var s = 0; s < track.pieces.length; s++){
+    switch(track.pieces[s].type){
+      case START:
+      case STRAIGHT:
+      case RAMP:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)-(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)-(track.pieces[s].dir[1]*(size/2)));
+        break;
+      case INTERSECTION:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+size, offsety+(track.pieces[s].pos[1] * size)+(size/2));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size), offsety+(track.pieces[s].pos[1] * size)+(size/2));
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size)+size);
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size));
+        break;
+      case RIGHT:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.arcTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size)+(size/2),offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(right(track.pieces[s].dir)[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(right(track.pieces[s].dir)[1]*(size/2)), size/2);
+        break;
+      case LEFT:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.arcTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size)+(size/2),offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(left(track.pieces[s].dir)[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(left(track.pieces[s].dir)[1]*(size/2)), size/2);
+        break;
+      case JUMP:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)-(track.pieces[s].dir[0]*(size/2.5)), offsety+(track.pieces[s].pos[1] * size)+(size/2)-(track.pieces[s].dir[1]*(size/2.5)));
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)-(track.pieces[s].dir[0]*(size)), offsety+(track.pieces[s].pos[1] * size)+(size/2)-(track.pieces[s].dir[1]*(size)));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size)));
+        break;
+    }
+  }
+  context.stroke();
 }
 
 function drawCurrentTrack(track) {
@@ -917,6 +956,7 @@ function hideResMenu(save){
   menu.style.opacity = "0";
   drawCurrentTrack();
 }
+
 function trackIndexSet(val){
   trackIndex+=val;
   var rows = Math.trunc((goodTracks.length/tracksPerRow)-0.1);
@@ -940,13 +980,16 @@ function drawGenTracks(index){
   var yoffset = (h/tracksPerCol)/2;
   var sizeDim = Math.min((w/tracksPerRow),(h/tracksPerCol))
 
-
-  ctx.clearRect(0,0,w,h);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   var tIndex = 0
   for(var y = 0; y < tracksPerCol && tIndex < goodTracks.length; y++){
     for(var x = 0; x < tracksPerRow && tIndex < goodTracks.length; x++){
       tIndex = ((index+y)*tracksPerRow)+x;
       if(tIndex < goodTracks.length){
+        var size = sizeDim/10;
+        var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
+        var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
+        lineTrack(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
         if(selectedTrackIndex==tIndex){
           var tmp = ctx.strokeStyle
           ctx.strokeStyle = "orange";
@@ -959,11 +1002,6 @@ function drawGenTracks(index){
           ctx.stroke();
           ctx.strokeStyle = tmp;
         }
-
-        var size = sizeDim/10;
-        var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
-        var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
-        draw(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
       }
     }
   }
@@ -1008,8 +1046,8 @@ function threadGen() {
     document.getElementById('workingSpinner').setAttribute("style",'display: inline-block;');
 
     function loadTracks(tracks){
-      for(var i = 0; i < event.data.tracks.length; i++){
-        var t = JSON.parse(event.data.tracks[i]);
+      for(var i = 0; i < tracks.length; i++){
+        var t = tracks[i];
         t.minx = 999;
         t.miny = 999;
         t.maxx = -999;
@@ -1026,8 +1064,11 @@ function threadGen() {
     }
 
     time = Date.now();
-    if (!worker) {
-        worker = new Worker("./generator.js");
+    if (!generatorThread) {
+        generatorThread = new Worker("./generator.js");
+    }
+    if (!filterThread) {
+        filterThread = new Worker("./middleware.js");
     }
 
     var pool = [];
@@ -1036,29 +1077,41 @@ function threadGen() {
       pool.push(parseInt(document.getElementById(ctrlPrefix[i]+'counter').innerHTML));
       consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
     }
-    worker.postMessage([pool,consec]);
-    worker.onmessage = function (event) {
-        if (event.data.type == 0) {
-            loadTracks(event.data.tracks);
-            if(!hasDrawn){
-              drawGenTracks(0);
-              hasDrawn = true;
-            }
-        }
-        else if (event.data.type == 1) {
-            loadTracks(event.data.tracks);
-            if(!hasDrawn){
-              drawGenTracks(0);
-              hasDrawn = true;
-            }
-            endThread();
-        }
+    generatorThread.onmessage = function (ge) {
+      // filterThread.postMessage(ge.data);
+      var msg = JSON.parse(ge.data);
+      loadTracks(msg.tracks);
+      if(!hasDrawn){
+        drawGenTracks(trackIndex);
+        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      }
+      if (msg.type == 1) {
+        endThread();
+      }
     };
+    filterThread.onmessage = function(fe) {
+      var tracks = JSON.parse(fe.data.tracks);
+      loadTracks(tracks);
+      if(!hasDrawn){
+        drawGenTracks(trackIndex);
+        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      }
+      if (fe.data.type == 1) {
+        endThread();
+      }
+    }
+    generatorThread.postMessage([pool,consec]);
   }
 }
 function endThread(){
-  if(worker)worker.terminate();
-  worker = null;
+  if(generatorThread){
+      generatorThread.terminate()
+      generatorThread = null;
+  }
+  if(filterThread){
+      filterThread.terminate()
+      filterThread = null;
+  }
   working = false;
   document.getElementById('marquee').setAttribute("class","_marquee");
   document.getElementById('workingSpinner').style.display='none';
