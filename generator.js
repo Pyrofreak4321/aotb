@@ -435,5 +435,5 @@ onmessage = function(e) {
   }while(doGenRes >= 0);
 
   //send good tracks back
-  postMessage({type: 1, tracks: newTracks, dupes:dupe, invalid: dead});
+  postMessage(JSON.stringify({type: 1, tracks: newTracks, dupes:dupe, invalid: dead}));
 }
