@@ -1,123 +1,1002 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <meta name="viewport" content="initial-scale=0.75, width=device-width, user-scalable=no" />
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
-    <title>ANKI Track builder</title>
+    <title>Track Builder</title>
   </head>
-  <style media="screen">
-    body{
-      height: 100vh;
-      width: 100vw;
+  <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
+  <link rel="stylesheet" href="vender/alertify.min.css"/>
+  <link rel="stylesheet" href="vender/default.min.css"/>
+  <style>
+    html, body{
+      height: 100%;
+      width: 100%;
+      position: fixed;
       padding: 0;
       margin: 0;
+      overflow: hidden;
     }
+    *{
+      outline: none;
+    }
+    body, input, button, span, p{
+      font-family: 'Antic';
+    }
+
+    ._marquee {
+      overflow: hidden;
+      position: relative;
+      font-size: 1em;
+      height: 1em;
+      font-weight: bold;
+      padding: 5px;
+    }
+    ._marquee p, ._marquee span{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      line-height: 1em;
+    }
+    ._marquee span{
+      text-align: center;
+    }
+    ._marquee._run span, ._marquee p{
+      display: none;
+    }
+    ._marquee._run p {
+      -webkit-transform: translateX(100%);
+          -ms-transform: translateX(100%);
+              transform: translateX(100%);
+      display: inline;
+      -webkit-animation: scroll-left 10s linear infinite;
+              animation: scroll-left 10s linear infinite;
+    }
+    ._marquee p:last-of-type{
+      -webkit-animation-delay: 5s;
+              animation-delay: 5s;
+    }
+    @-webkit-keyframes scroll-left {
+      0% {
+        -webkit-transform: translateX(100%);
+                transform: translateX(100%);
+      }
+      100% {
+        -webkit-transform: translateX(-100%);
+                transform: translateX(-100%);
+      }
+    }
+    @keyframes scroll-left {
+      0% {
+        -webkit-transform: translateX(100%);
+                transform: translateX(100%);
+      }
+      100% {
+        -webkit-transform: translateX(-100%);
+                transform: translateX(-100%);
+      }
+    }
+
     ._floatingButton{
       position:fixed;
     }
     ._pieButton{
+      background-color: orange;
+      border: none;
       position:absolute;
-      display:none;
+      visibility: hidden;
+      opacity: 0;
+      padding: 0;
+      font-size: 30px;
       height: 50px;
       width: 50px;
+      margin:0px;
+      top:0;
+      left:0;
       border-top-left-radius:50% !important;
       border-top-right-radius:50% !important;
       border-bottom-left-radius:50% !important;
       border-bottom-right-radius:50% !important;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+      -webkit-transition: margin .1s, visibility .1s, opacity .1s;
+      -o-transition: margin .1s, visibility .1s, opacity .1s;
+      transition: margin .1s, visibility .1s, opacity .1s;
+    }
+    ._pieButton i {
+        margin-top: 5px;
+    }
+    ._pieButton:active{
+      background-color: darkorange;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
     }
 
     ._diamond {
-      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+              transform: rotate(45deg);
     }
     ._diamond button{
       padding: 0;
-      margin: 0 -2px;
+      margin: 0 -1.5px;
     }
     ._diamond div {
-      height: 40px;
+      height: 51px;
     }
-    ._diamond span{
+    ._diamond i{
       position: fixed;
-      transform: rotate(-45deg) translate(0px, -20px);
-      height: 40px;
-      width: 40px;
+      -webkit-transform: rotate(-45deg) translate(0px, -23px);
+          -ms-transform: rotate(-45deg) translate(0px, -23px);
+              transform: rotate(-45deg) translate(0px, -23px);
+      height: 50px;
+      width: 50px;
     }
 
     ._floatingButton input, ._floatingButton button{
+      padding:0px;
       background-color: orange;
       border: none;
-      font-weight: bold;
-      font-size: 20px;
-      min-width: 40px;
-      min-height: 40px;
+      font-size: 25px;
+      width: 50px;
+      height: 50px;
       border-radius: 5px;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
+    ._floatingButton input:active, ._floatingButton button:active{
+      background-color: darkorange;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+    }
+
+    ._floatingButton button:active ._layer_cap{
+      background-color: darkorange;
+    }
+
+    ._tooltipleft{
+      position: relative;
+    }
+
+    ._tooltipleft ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 30%;
+      right: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    ._tooltipleft ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent transparent black;
+    }
+
+    ._tooltipleft:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+
+    ._tooltipleftbutspecificallyforpanning{
+    }
+
+    ._tooltipleftbutspecificallyforpanning ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      -webkit-transform: rotate(-45deg) translate(-70px, 108px);
+      -ms-transform: rotate(-45deg) translate(-70px, 108px);
+      transform: rotate(-45deg) translate(-70px, 108px);
+      z-index: 1;
+      top: 30%;
+      right: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    ._tooltipleftbutspecificallyforpanning ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent transparent black;
+    }
+
+    ._tooltipleftbutspecificallyforpanning:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+
+    ._detail{
+      position: relative;
+      -webkit-transition: width .1s;
+      -o-transition: width .1s;
+      transition: width .1s;
+    }
+    ._detail:hover{
+      width: 200px;
+    }
+
+    ._detail ._detail_label{
+      opacity: 0;
+      visibility: hidden;
+      vertical-align: middle;
+      position: absolute;
+      left: 0;
+      right:0;
+      -webkit-transition: opacity .2s,visibilty .2s;
+      -o-transition: opacity .2s,visibilty .2s;
+      transition: opacity .2s,visibilty .2s;
+    }
+    ._detail:hover ._detail_label{
+      opacity: 1;
+      visibility: visible;
+    }
+
+    ._detail i{
+      opacity: 1;
+      visibility: visible;
+      -webkit-transition: opacity .2s,visibilty .2s;
+      -o-transition: opacity .2s,visibilty .2s;
+      transition: opacity .2s,visibilty .2s;
+    }
+    ._detail:hover i{
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    ._spinner{
+      position: absolute;
+      display: inline-block;
+      left: 0;
+      top: 0;
+      width: 40px;
+      height: 40px;
+      border: solid 5px transparent;
+      border-left: solid 5px lime;
+      -webkit-animation: spin 1s linear infinite;
+              animation: spin 1s linear infinite;
+    }
+    ._detail:hover ._spinner{
+      display: none !important;
+    }
+    @-webkit-keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+      }
+      50%{
+        -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+      }
+    }
+    @keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+      }
+      50%{
+        -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+      }
     }
 
     ._roundtop {
-      border-top-left-radius:50% !important;
-      border-top-right-radius:50% !important;
+      border-top-left-radius:25px !important;
+      border-top-right-radius:25px !important;
     }
     ._roundbottom {
-        border-bottom-left-radius:50% !important;
-        border-bottom-right-radius:50% !important;
+      border-bottom-left-radius:25px !important;
+      border-bottom-right-radius:25px !important;
+    }
+    ._sharptop {
+      border-top-left-radius:0 !important;
+      border-top-right-radius:0 !important;
+    }
+    ._sharpbottom {
+      border-bottom-left-radius:0 !important;
+      border-bottom-right-radius:0 !important;
     }
 
-    /*
-    input.visually-hidden:focus + label {
-  outline: thin dotted;
-}
-oncontextmenu="return false;"
-input.visually-hidden:focus-within + label {
-  outline: thin dotted;
-}*/
+    ._backdrop{
+      -webkit-transition: visibility .5s, opacity .5s;
+      -o-transition: visibility .5s, opacity .5s;
+      transition: visibility .5s, opacity .5s;
+      background-color: rgba(1,1,1,.25);
+      position:absolute;
+      top:0;
+      left:0;
+      bottom: 0;
+      right:0;
+    }
+
+    ._modal{
+      position: relative;
+      display: inline-block;
+      background-color: white;
+      border: solid 2px Grey;
+      border-radius:10px;
+    }
+
+    ._header{
+      background-color: orange;
+      border: none;
+      padding: 10px;
+      font-size: 1.25em;
+      border-radius: 10px 10px 0 0;
+    }
+    ._body{
+      background-color: white;
+      border: none;
+      padding: 10px;
+    }
+    ._footer{
+      background-color: lightGrey;
+      border: none;
+      padding: 10px;
+      border-radius: 0 0 10px 10px;
+    }
+    ._footer button, .ajs-footer button{
+      border-radius:10px;
+      border: none !important;
+      padding: 5px 10px;
+      font-weight: bold !important;
+      font-size: 1.25em;
+      min-height: unset !important;
+    }
+
+    ._clear {
+      background-color: transparent !important;
+      padding: 2px;
+      border: none;
+      -webkit-box-shadow:none !important;
+              box-shadow:none !important;
+    }
+
+    ._red {
+      background: red;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
+    ._green {
+      background: lime;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
+    ._grey {
+      background: dimgrey;
+      color:white;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
+    ._black {
+      background: black;
+    }
+
+    ._red:disabled {
+      background: lightcoral;
+    }
+    ._green:disabled {
+      background: lightgreen;
+    }
+
+    ._red:active {
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+      background: darkred;
+    }
+    ._green:active {
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+      background: darkgreen;
+    }
+    ._grey:active {
+      background: black;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+      color:lightGrey;
+    }
+    ._black:active {
+      line-height: 1.6em;
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+      font-size: 1.4em;
+    }
+
+    ._clear._red {
+      color: red;
+    }
+    ._clear._green {
+      color: lime;
+    }
+    ._clear._grey {
+      color: dimgrey;
+    }
+    ._clear._black {
+      color: black;
+    }
+
+    ._clear._red:active {
+      color: darkred;
+    }
+    ._clear._green:active {
+      color: darkgreen;
+    }
+    ._clear._grey:active {
+      color: black;
+    }
+    ._clear._black:active {
+      line-height: 1.6em;
+      font-size: 1.4em;
+    }
+
+    ._flex{
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+    }
+    ._column{
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column;
+    }
+    ._flex>span {
+      -webkit-box-flex: 1;
+          -ms-flex: 1 1 100%;
+              flex: 1 1 100%;
+    }
+    ._padded>div>img, ._padded>div>span>i {
+      vertical-align: middle;
+      padding: 5px 0
+    }
+    li{
+      padding-bottom: 5px;
+    }
+
+
+    ._btnGroup{
+      -webkit-box-flex:1;
+          -ms-flex:1 1 100%;
+              flex:1 1 100%;
+      text-align:center;
+      font-size: 2em;
+    }
+    ._btnGroup>span{
+      min-width: 40px;
+      display: inline-block;
+    }
+    ._btnGroup ._clear {
+      border: solid black 1px;
+      border-radius: 8px;
+    }
+
+    ._parts span span::after{
+      content: 'x';
+    }
+
+    ._padded>*{
+      padding: 0 2.5px;
+    }
+    ._paddedV>*{
+      margin: 2.5px 0;
+    }
+
+    ._layer_ind{
+      display: inline-block;
+      height: 30px;
+      width: 30px;
+      padding: 10px;
+    }
+    ._layer_ind:first-child{
+      padding-bottom: 0px;
+    }
+
+    ._layer_cap{
+      position: absolute;
+      top:6px;
+      left:6px;
+      margin: 7.5px;
+      background: orange;
+      -webkit-transition: top .2s;
+      -o-transition: top .2s;
+      transition: top .2s;
+    }
+
+    .ajs-header{
+      background: orange !important;
+    }
+
+    .ajs-button._red {
+      background: red !important;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
+    .ajs-button._green {
+      background: lime !important;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
+
+    .ajs-button._red:active {
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+      background: darkred !important;
+    }
+    .ajs-button._green:active {
+      -webkit-box-shadow: inset 2px 2px 5px #0008;
+              box-shadow: inset 2px 2px 5px #0008;
+      background: darkgreen !important;
+    }
+
+    .alertify-notifier .ajs-message{
+      color: black !important;
+      text-shadow: none !important;
+      -webkit-box-shadow: 2px 2px 5px #0008;
+              box-shadow: 2px 2px 5px #0008;
+    }
   </style>
-  <body id="body" onload="onload();" onkeydown="shift(event)">
+  <!--  -->
+  <body id="body" onload="onload();" onContextMenu="return false;">
     <canvas id="canvas"></canvas>
-    <span class="_floatingButton" style="top:10px; left:10px;">
-      <input type="button" class="_roundtop _roundbottom" onclick="console.log(JSON.parse(goodTracks[trackIndex]))" name="" value="Save" id="btnSave" />
-      <input type="button" class="_roundtop _roundbottom" onclick="uploadTrack()" name="" value="Load" id="btnLoad" />
-      <input type="button" class="_roundtop _roundbottom" name="" value="New" id="btnNew" />
-      <input type="button" class="_roundtop _roundbottom" name="" value="Clean" id="btnClean" />
-      <input type="button" class="_roundtop _roundbottom" onclick="threadGen()" name="" value="Generate" id="btnGen" />
+    <span class="_floatingButton _paddedV" style="top:15px; left:15px;">
+      <button class="_roundtop _roundbottom _detail" onclick="showHelpMenu()" id="btnHelp">
+        <span class="_detail_label">About</span><i class="fas fa-question" aria-hidden="true"></i>
+      </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="download()" id="btnSave">
+        <span class="_detail_label">Save&nbsp;Track</span><i class="fas fa-save" aria-hidden="true"></i>
+      </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="uploadTrack()" id="btnLoad">
+        <span class="_detail_label">Load&nbsp;Track</span><i class="fas fa-folder-open" aria-hidden="true"></i>
+      </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="clearPrompt()" id="btnNew">
+         <span class="_detail_label">Delete&nbsp;Track</span><i class="fas fa-trash-alt" aria-hidden="true"></i>
+      </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="cleanTrack()" id="btnClean">
+        <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
+      </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="showGenMenu()" id="btnGen">
+        <span class="_detail_label">Generate&nbsp;Tracks</span>
+        <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
+        <div id="workingSpinner" class="_spinner _roundtop _roundbottom" style="display:none;"></div>
+      </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="showPartsList()" id="btnParts">
+        <span class="_detail_label">Parts&nbsp;List</span><i class="fas fa-list" aria-hidden="true"></i>
+      </button><br>
     </span>
-    <input type="file" id="fileElem" style="display:none" onchange="handleFiles(this.files)">
-    <span class="_floatingButton" style="top:10px; right:10px; text-align:right;">
-      <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
+    <input type="file" id="fileElem" accept="application/json" style="display:none" onchange="handleFiles(this.files)">
+    <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
+      <div class="_tooltipleftbutspecificallyforpanning _diamond" style="padding-top: 20px; padding-right: 10px;">
+        <span class="_tooltiptext">Pan&nbsp;Track</span>
         <div class="">
-          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><span>&uarr;</span></button>
-          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><span>&rarr;</span></button>
+          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
         </div>
         <div class="">
-          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><span>&larr;</span></button>
-          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><span>&darr;</span></button>
+          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
         </div>
       </div>
-      <input type="button" name="" class="_roundtop" onclick="modScale(0.2)" value="+" id="btnZoomIn"/><br>
-      <input type="button" name="" class="" onclick="resetScale()" value="=" id="btnZoomReset"/><br>
-      <input type="button" name="" class="_roundbottom" onclick="modScale(-0.2)" value="-" id="btnZoomOut"/><br>
-      <input type="button" name="" class="_roundtop _roundbottom" value="L" id="btnLayer" onclick="switchLayer()" /><br>
+      <button class="_roundtop _sharpbottom _tooltipleft" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i>
+        <span class="_tooltiptext">Increase&nbsp;Zoom</span></button><br>
+      <button class="_sharptop _sharpbottom _tooltipleft" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i>
+      <span class="_tooltiptext">Reset&nbsp;Zoom</span></button><br>
+      <button class="_roundbottom _sharptop _tooltipleft" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i>
+      <span class="_tooltiptext">Decrease&nbsp;Zoom</span></button><br>
+      <button class="_roundtop _roundbottom _tooltipleft" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
+        <span class="_tooltiptext">Switch&nbsp;Layer</span>
+        <span class="_layer_ind _roundtop _roundbottom">2</span>
+        <i id="layerCap" class="fas fa-layer-group _roundtop _roundbottom _layer_cap" aria-hidden="true"></i>
+        <span class="_layer_ind _roundtop _roundbottom">1</span>
+      </button><br>
     </span>
-    <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(2)" id="STRIAGHT_button"/>
-    <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(1)" id="CORNER_button"/>
-    <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(3)" id="BOOST_button"/>
-    <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(4)" id="RAMP_button"/>
-    <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(5)" id="INTERSECTION_button"/>
-    <input type="image" src="images/jump1.png" name="" class="_pieButton" onclick="addTypeOfTrack(6)" id="JUMP_button"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"/>
-    <input type="image" src="images/straight.png" class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"/>
+    <!-- menu buttons -->
+    <span>
+      <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT)" id="STRIAGHT_button"/>
+      <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT)" id="CORNER_button"/>
+      <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST)" id="BOOST_button"/>
+      <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP)" id="RAMP_button"/>
+      <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION)" id="INTERSECTION_button"/>
+      <input type="image" src="images/jump_split.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
+      <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"><i class="fas fa-exchange-alt" aria-hidden="true"></i></button>
+      <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none; border-radius:5px;" id="dragIcon" />
+    </span>
     <!--Track piece images-->
-    <img src="images/start.png" style="display: none;" id="imgStart" />
-    <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
-    <img src="images/left corner.png" style="display: none;" id="imgCornerL" />
-    <img src="images/straight.png" style="display: none;" id="imgStraight" />
-    <img src="images/boost.png" style="display: none;" id="imgBoost" />
-    <img src="images/ramp.png" style="display: none;" id="imgRamp" />
-    <img src="images/intersection.png" style="display: none;" id="imgIntersection" />
-    <img src="images/jump1.png" style="display: none;" id="imgJumpLaunch" />
-    <img src="images/jump2.png" style="display: none;" id="imgJumpCatch" />
+    <span>
+      <img src="images/start.png" style="display: none;" id="imgStart" />
+      <img src="images/right corner.png" style="display: none;" id="imgCornerR" />
+      <img src="images/left corner.png" style="display: none;" id="imgCornerL" />
+      <img src="images/straight.png" style="display: none;" id="imgStraight" />
+      <img src="images/boost.png" style="display: none;" id="imgBoost" />
+      <img src="images/ramp.png" style="display: none;" id="imgRamp" />
+      <img src="images/intersection.png" style="display: none;" id="imgIntersection" />
+      <img src="images/jump1.png" style="display: none;" id="imgJumpLaunch" />
+      <img src="images/jump2.png" style="display: none;" id="imgJumpCatch" />
+    </span>
+    <!-- generation menu -->
+    <div id="genMenuBack" class="_backdrop _flex" onclick="hideGenMenu()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="genMenu" class="_modal">
+          <div class="_header">
+            Select Pieces for Auto Generation
+          </div>
+          <div class="_body">
+            <div class="_flex">
+              <img src="images/straight.png" width="150" height="150"/>
+              <img src="images/right corner.png" style="transform: rotate(90deg);" width="150" height="150"/>
+              <img src="images/ramp.png" width="150" height="150"/>
+              <img src="images/intersection.png" width="150" height="150"/>
+              <img src="images/jump_split.png" width="150" height="150"/>
+            </div>
+            <div class="_flex">
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(STRAIGHT,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="straight_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(STRAIGHT,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(LEFT,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="corner_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(LEFT,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(RAMP,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="ramp_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(RAMP,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(INTERSECTION,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="intersection_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(INTERSECTION,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span class="_btnGroup">
+                <button class="_clear _green" onclick="poolSet(JUMP,1)"  style="">
+                  <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                </button>
+                <span id="jump_counter">0</span>
+                <button class="_clear _red" onclick="poolSet(JUMP,-1)"  style="">
+                  <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span id="boost_counter" style="display:none;">0</span>
+            </div>
+            <div>
+              Maximum consecutive pieces:
+              <div class="_flex" >
+                <span class="_btnGroup">
+                  <button class="_clear _green" onclick="consecSet(STRAIGHT,1)"  style="">
+                    <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                  </button>
+                  <span id="straight_consec">4</span>
+                  <button class="_clear _red" onclick="consecSet(STRAIGHT,-1)"  style="">
+                    <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                  </button>
+                </span>
+                <span class="_btnGroup">
+                  <button class="_clear _green" onclick="consecSet(LEFT,1)"  style="">
+                    <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                  </button>
+                  <span id="corner_consec">4</span>
+                  <button class="_clear _red" onclick="consecSet(LEFT,-1)"  style="">
+                    <i class="fas fa-minus fa-2x" aria-hidden="true"></i>
+                  </button>
+                </span>
+                <span class="_btnGroup">
+                  <span id="ramp_consec" style="display:none;">9</span>
+                </span>
+                <span class="_btnGroup">
+                  <span id="intersection_consec" style="display:none;">9</span>
+                </span>
+                <span class="_btnGroup">
+                  <span id="jump_consec" style="display:none;">9</span>
+                </span>
+                <span id="boost_consec" style="display:none;">9</span>
+              </div>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <button class="_red" onclick="hideGenMenu()" style="flex: 1 0 150px;">
+              <i class="fas fa-times" aria-hidden="true"></i>&nbsp;CANCEL
+            </button>
+            <span></span>
+            <button class="_green" onclick="hideGenMenu();showResMenu();threadGen();"  style="flex: 1 0 150px;">
+              GO&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+    <div id="resMenuBack" class="_backdrop _flex" onclick="hideResMenu()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="resMenu" class="_modal">
+          <div class="_header">
+            Select a track
+          </div>
+          <div id="marquee" class="_marquee">
+            <p>...Generating tracks...</p>
+            <p>...Generating tracks...</p>
+            <span>All tracks generated</span>
+          </div>
+          <div class="_body" style="padding:0;">
+            <div class="_flex" style="position:relative">
+              <p id="trackCounter" style="position:absolute;top:5px;right:5px;margin:0;"></p>
+              <canvas id="trackContainer" width="600" height="400"></canvas>
+              <div class="_flex _column">
+                <button class="_clear _grey" style="" onclick="trackIndexSet(-1)">
+                  <i class="fas fa-angle-up fa-2x" aria-hidden="true"></i>
+                </button>
+                <button class="_clear _grey" style="" onclick="trackIndexSet(-tracksPerCol)">
+                  <i class="fas fa-angle-double-up fa-2x" aria-hidden="true"></i>
+                </button>
+                <span></span>
+                <button class="_clear _grey" style="" onclick="trackIndexSet(tracksPerCol)">
+                  <i class="fas fa-angle-double-down fa-2x" aria-hidden="true"></i>
+                </button>
+                <button class="_clear _grey" style="" onclick="trackIndexSet(1)">
+                  <i class="fas fa-angle-down fa-2x" aria-hidden="true"></i>
+                </button>
+              </div>
+              <canvas id="previewCanvas" width="300" height="400"></canvas>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <button class="_red" onclick="hideResMenu()" style="flex: 1 0 150px;">
+              <i class="fas fa-times" aria-hidden="true"></i>&nbsp;CANCEL
+            </button>
+            <span></span>
+            <button class="_grey" onclick="hideResMenu(); showGenMenu(true);"  style="flex: 1 0 225px;">
+              CHANGE&nbsp;SETTINGS&nbsp;<i class="fas fa-cog" aria-hidden="true"></i>
+            </button>
+            <span></span>
+            <button id="selectTrack" class="_green" onclick="hideResMenu(true)"  style="flex: 1 0 150px;">
+              SELECT&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+    <div id="partsListBack" class="_backdrop _flex" onclick="hidePartsList()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="partsList" class="_modal">
+          <div class="_header">
+            Pieces required for this track
+          </div>
+          <div class="_body">
+            <div class="_flex _padded">
+              <img src="images/start.png" width="125" height="125"/>
+              <img src="images/straight.png" width="125" height="125"/>
+              <img src="images/right corner.png" style="transform:rotate(90deg);" width="125" height="125"/>
+              <img src="images/boost.png" width="125" height="125"/>
+              <img src="images/intersection.png" width="125" height="125"/>
+              <img src="images/jump_split.png" width="125" height="125"/>
+              <P style="min-width:125px; text-align:center;">Risers</P>
+            </div>
+            <div class="_flex _parts" style="text-align:center;">
+              <span><span id="start_list">1</span></span>
+              <span><span id="straight_list">0</span></span>
+              <span><span id="corner_list">0</span></span>
+              <span><span id="jump_list">0</span></span>
+              <span><span id="boost_list">0</span></span>
+              <span><span id="intersection_list">0</span></span>
+              <span><span id="riser_list">0</span></span>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <span></span>
+            <button class="_green" onclick="hidePartsList();"  style="flex: 1 0 150px;">
+              OK&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+    <div id="helpMenuBack" class="_backdrop _flex" onclick="hideHelpMenu()" style="visibility:hidden; opacity:0">
+      <span></span>
+      <div class="_flex _column">
+        <span style="flex:1 1 50%"></span>
+        <div id="helpMenu" class="_modal">
+          <div class="_header">
+            Welcome to the CSC380 Group D Track Builder
+          </div>
+          <div class="_body" style="max-height:300px; overflow-y:auto">
+            <div class="_flex">
+              <div style="min-width:600px; flex:1 1 100%; padding:5px;">
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Editing your track -
+                  </b></li>
+                  <li>
+                    To add a new track piece, click the grid square you want to add it to and select the piece type from the context menu.
+                  </li>
+                  <li>
+                    To edit an existing piece, click on the piece and select the desired action from the context menu.
+                  </li>
+                  <li>
+                    To move an existing piece, click and drag the piece to where you want to move it.
+                  </li>
+                </ul>
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Viewing your track -
+                  </b></li>
+                  <li>
+                    To pan the view, either right click and drag or click the arrow buttons in the top right corner.
+                  </li>
+                  <li>
+                    To zoom the view in and out, scroll the mouse wheel or click the magnifying glasses on the right side of the screen.
+                  </li>
+                  <li>
+                    To reset the view, click the <i class="fas fa-expand" aria-hidden="true"></i> icon on the right, between the magnifying glasses.
+                  </li>
+                  <li>
+                    You can swap between layers using the <i class="fas fa-layer-group" aria-hidden="true"></i> icon on the right.
+                  </li>
+                </ul>
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Track Generator -
+                  </b></li>
+                  <li>
+                    Clicking the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon in the tool bar will bring up the Track Generator dialog.
+                    Here you can customize what pieces it will use to generate tracks. You can also set a limit to the number of consecutive straight and corner pieces it will use.
+                  </li>
+                    Once generation has started, tracks will appear in the Track Pool. Click a track to view it in more detail, then press "SELECT" to load that track into the design area.
+                  <li>
+                    After selecting a track the system will continue generating tracks, indicated by the green spinner on the <i class="fas fa-pencil-ruler" aria-hidden="true"></i> icon.
+                  </li>
+                  <li>
+                    If you click <i class="fas fa-pencil-ruler" aria-hidden="true"></i> again, it will reopen the Track Pool. From here you can either select another track or change the settings of the Track Generator.
+                  </li>
+                  <li>
+                    Note: intersections, layer transitions and jumps exponentially increase the number of options for the Track Generator and thus can increase the amount of time before valid tracks are generated.
+                  </li>
+                </ul>
+                <ul type="none" style="list-style: none;">
+                  <li style="margin-left:-1em"><b>
+                    Other features -
+                  </b></li>
+                  <li>
+                    To download your track to use later or share with others, click <i class="fas fa-save" aria-hidden="true"></i>.
+                  </li>
+                  <li>
+                    To load a saved track, click <i class="fas fa-folder-open" aria-hidden="true"></i>.
+                  </li>
+                  <li>
+                    To start over with a clean slate, click <i class="fas fa-trash-alt" aria-hidden="true"></i>.
+                  </li>
+                  <li>
+                    To remove any unconnected pieces, click <i class="fas fa-brush" aria-hidden="true"></i>.
+                  </li>
+                  <li>
+                    To get a list of all the parts used in the current track, click the <i class="fas fa-list" aria-hidden="true"></i> icon.
+                  </li>
+                </ul>
+              </div>
+              <div style="min-width:200px; flex:1 1 100%" class="_padded">
+                <p>Menu icons:</p>
+                <div>
+                  <span><i class="fas fa-trash-alt fa-2x" aria-hidden="true"></i></span>
+                  Remove Piece
+                </div>
+                <div>
+                  <span><i class="fas fa-exchange-alt fa-2x" aria-hidden="true"></i></span>
+                  Swap Piece
+                </div>
+                <div>
+                  <span><i class="fas fa-undo fa-2x" aria-hidden="true"></i></span>
+                  Rotate Left
+                </div>
+                <div>
+                  <span><i class="fas fa-redo fa-2x" aria-hidden="true"></i></span>
+                  Rotate Right
+                </div>
+                <p>Track icons:</p>
+                <div>
+                  <img src="images/start.png" width="50" height="50"/>
+                  Start
+                </div>
+                <div>
+                  <img src="images/right corner.png" width="50" height="50"/>
+                  Corner
+                </div>
+                <div>
+                  <img src="images/intersection.png" width="50" height="50"/>
+                  Intersection
+                </div>
+                <div>
+                  <img src="images/boost.png" width="50" height="50"/>
+                  Speed
+                </div>
+                <div>
+                  <img src="images/jump1.png" width="50" height="50"/>
+                  Jump
+                </div>
+                <div>
+                  <img src="images/ramp.png" width="50" height="50"/>
+                  Layer Transition
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="_footer _flex">
+            <span>Created By: Rudi Ugino, Trevor Primus, Anthony Mork, Sven Treu, Theresa Kamerman,</span>
+            <button class="_green" onclick="hideHelpMenu();"  style="flex: 1 0 150px;">
+              OK&nbsp;<i class="fas fa-angle-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <span></span>
+      </div>
+      <span></span>
+    </div>
+
   </body>
 
   <script type="text/javascript" src="index.js"></script>
   <script type="text/javascript" src="generator.js"></script>
+  <script src="vender/alertify.min.js"></script>
+  <script src="https://kit.fontawesome.com/0dce990a33.js" crossorigin="anonymous"></script>
 </html>

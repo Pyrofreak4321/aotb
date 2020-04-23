@@ -1,10 +1,10 @@
 var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
-var ready = true;
-var consecLimit = [2,2,2,0,0,0,0];
+var lastSend = Date.now();
+var consecLimit = [4,4,4,0,0,0,0];
 
-//changed these to const - caused errors for having same consts in index AND generator
+//changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
 var RIGHT = 0;
 var LEFT = 1;
@@ -221,7 +221,7 @@ function filter(item){
   }
   if(good){
     goodTracks.push(itemPath);
-    newTracks.push(JSON.stringify({pieces: item.pieces, path:itemPath}));
+    newTracks.push({pieces: [...item.pieces], path:itemPath});
     //postMessage({type: 0, tracks: item});
   }else {
     dupe++;
@@ -230,8 +230,10 @@ function filter(item){
 
 function storeTrack(track){
   filter(track);
-  if(newTracks.length >= 100){
-    postMessage({type: 0, tracks: newTracks});
+  // newTracks.push({pieces: [...track.pieces]});
+  if(newTracks.length > 0 && Date.now()-lastSend > 1000){
+    lastSend = Date.now();
+    postMessage(JSON.stringify({type: 0, tracks: newTracks}));
     newTracks = [];
   }
 }
@@ -401,15 +403,21 @@ function doGen(track,type){
 
 var doGenRes = 0;
 
+function start(e){
+
+}
+
 //when the worker gets the pool
 onmessage = function(e) {
   goodTracks = [];
   newTracks = [];
   dupe = 0; dead = 0;
 
+  consecLimit = e.data[1];
+
   var newTrack = {
     intersections : 0,
-    pool : e.data,
+    pool : e.data[0],
     pieces : [{
       type:-1,
       pos:[0,0,0],
@@ -427,5 +435,5 @@ onmessage = function(e) {
   }while(doGenRes >= 0);
 
   //send good tracks back
-  postMessage({type: 1, tracks: newTracks, dupes:dupe, invalid: dead});
-};
+  postMessage(JSON.stringify({type: 1, tracks: newTracks, dupes:dupe, invalid: dead}));
+}
