@@ -1,9 +1,10 @@
 var dead, dupe;
 var goodTracks = [];
 var newTracks = [];
+var lastSend = Date.now();
 var consecLimit = [4,4,4,0,0,0,0];
 
-//changed these to const - caused errors for having same consts in index AND generator
+//changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
 var RIGHT = 0;
 var LEFT = 1;
@@ -220,7 +221,7 @@ function filter(item){
   }
   if(good){
     goodTracks.push(itemPath);
-    newTracks.push(JSON.stringify({pieces: item.pieces, path:itemPath}));
+    newTracks.push({pieces: [...item.pieces], path:itemPath});
     //postMessage({type: 0, tracks: item});
   }else {
     dupe++;
@@ -229,8 +230,10 @@ function filter(item){
 
 function storeTrack(track){
   filter(track);
-  if(newTracks.length >= 100){
-    postMessage({type: 0, tracks: newTracks});
+  // newTracks.push({pieces: [...track.pieces]});
+  if(newTracks.length > 0 && Date.now()-lastSend > 1000){
+    lastSend = Date.now();
+    postMessage(JSON.stringify({type: 0, tracks: newTracks}));
     newTracks = [];
   }
 }

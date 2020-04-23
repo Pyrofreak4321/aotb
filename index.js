@@ -17,7 +17,8 @@ var pieEditMenuOpen = false;
 var drawing = false;
 
 var working = false;
-var worker = null;
+var generatorThread = null;
+var filterThread = null;
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
 var START = -1;
@@ -42,6 +43,8 @@ var panX = 0;
 var panY = 0;
 
 // specifically for mouse panning
+var startingScale = 1;
+var startingWidth = 1;
 var startX = null;
 var startY = null;
 var originX = null;
@@ -52,6 +55,13 @@ var selectedGridPieceX = null;
 var selectedGridPieceY = null;
 var selectedPieceIndex = -1;
 var selectedTrackIndex = -1;
+
+CANTOUCH = ('ontouchstart' in document.documentElement);
+function updateTouchEvent(e){
+  e.clientX = (e.touches.item(0)||e.changedTouches.item(0)).clientX;
+  e.clientY = (e.touches.item(0)||e.changedTouches.item(0)).clientY;
+  e.isTouch = true;
+}
 
 //initalize
 function onload() {
@@ -66,8 +76,19 @@ function onload() {
     canvas.height = h;
     canvas.width = w;
     clearTrack();
-    canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
-    canvas.addEventListener("mousedown", doMouseDown);
+
+    if(CANTOUCH){
+      //Because !#$%&! apple
+      document.addEventListener('touchmove', function (event) {
+        if (event.scale && event.scale !== 1) { event.preventDefault(); }
+      }, { passive: false });
+
+      canvas.addEventListener('touchstart', doTouch, { passive: false })
+    } else {
+      canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
+      canvas.addEventListener("mousedown", doMouseDown);
+    }
+
     document.getElementById('genMenu').addEventListener("click", preventDef);
     document.getElementById('resMenu').addEventListener("click", preventDef);
     document.getElementById('partsList').addEventListener("click", preventDef);
@@ -86,6 +107,12 @@ function onload() {
     }, 10);
 }
 
+function clearPrompt(){
+  alertify.confirm('Are you sure you want to delete this track?', function() {
+    clearTrack()
+  }).set('reverseButtons', true);
+}
+
 function clearTrack() {
     currentTrack = {
         pieces: [
@@ -96,6 +123,163 @@ function clearTrack() {
     focusLayer = 0;
     drawCurrentTrack();
 }
+
+function cleanTrack() {
+  for(var i = 0; i < currentTrack.pieces.length; i++){
+    currentTrack.pieces[i].bad = false;
+    currentTrack.pieces[i].crossed = false;
+    switch(currentTrack.pieces[i].type){
+      case STRAIGHT:
+      case BOOST:
+      case RAMP:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]-currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]-currentTrack.pieces[i].dir[1],1)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],1))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case RIGHT:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+right(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+right(currentTrack.pieces[i].dir)[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+right(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+right(currentTrack.pieces[i].dir)[1],1)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],1))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case LEFT:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+left(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+left(currentTrack.pieces[i].dir)[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+left(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+left(currentTrack.pieces[i].dir)[1],1)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],1))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case JUMP:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-(currentTrack.pieces[i].dir[0]*2),currentTrack.pieces[i].pos[1]-(currentTrack.pieces[i].dir[1]*2),0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+      case INTERSECTION:
+        if((0>isSpaceOccupied(currentTrack.pieces[i].pos[0]-currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+currentTrack.pieces[i].dir[0],currentTrack.pieces[i].pos[1]+currentTrack.pieces[i].dir[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+left(currentTrack.pieces[i].dir)[0],currentTrack.pieces[i].pos[1]+left(currentTrack.pieces[i].dir)[1],0)&&
+          0>isSpaceOccupied(currentTrack.pieces[i].pos[0]+right(currentTrack.pieces[i].dir).dir[0],currentTrack.pieces[i].pos[1]+right(currentTrack.pieces[i].dir)[1],0))){
+          currentTrack.pieces.splice(i,1);
+          i--;
+        }
+        break;
+    }
+  }
+
+  function processPiece(lastpiece){
+    console.log(lastpiece);
+    var flag = false;
+    for(var n = 0; n < pieces.length && !flag; n++){
+      switch(pieces[n].type){
+        case STRAIGHT:
+        case BOOST:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+            flag = true;
+          } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+            pieces[n].dir = lastpiece.dir;
+            flag = true;
+          } else flag = false;
+          break;
+        case RAMP:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1];
+
+            if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+              flag = true;
+            } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+              pieces[n].dir = lastpiece.dir;
+              flag = true;
+            } else flag = false;
+          break;
+        case RIGHT:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+            pieces[n].type = LEFT;
+            pieces[n].dir = right(pieces[n].dir);
+            flag = true;
+          }else if(flag && lastpiece.dir[0] == left(pieces[n].dir)[0] && lastpiece.dir[1] == left(pieces[n].dir)[1]){
+            flag = true;
+          }else flag = false;
+          break;
+        case LEFT:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+            pieces[n].type = RIGHT;
+            pieces[n].dir = left(pieces[n].dir);
+            flag = true;
+          }else if(flag && lastpiece.dir[0] == right(pieces[n].dir)[0] && lastpiece.dir[1] == right(pieces[n].dir)[1]){
+            flag = true;
+          }else flag = false;
+          break;
+        case JUMP:
+          flag = lastpiece.pos[0]+(lastpiece.dir[0]*2) == pieces[n].pos[0] &&
+            lastpiece.pos[1]+(lastpiece.dir[1]*2) == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+            if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+              flag = true;
+            } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+              pieces[n].dir = lastpiece.dir;
+              flag = true;
+            } else flag = false;
+          break;
+        case INTERSECTION:
+          flag = lastpiece.pos[0]+lastpiece.dir[0] == pieces[n].pos[0] &&
+            lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1] &&
+            lastpiece.pos[2] == pieces[n].pos[2];
+          break;
+      }
+
+      if(flag){
+        if(pieces[n].type == INTERSECTION){
+          pieces[n].dir = lastpiece.dir;
+          if(!pieces[n].crossed){
+            pieces[n].crossed = true
+            processPiece(pieces[n]);
+          } else {
+            currentTrack.pieces.push(pieces[n]);
+            var nextPiece = pieces.splice(n,1)[0];
+            processPiece(nextPiece);
+          }
+        } else {
+          currentTrack.pieces.push(pieces[n]);
+          var nextPiece = pieces.splice(n,1)[0];
+          processPiece(nextPiece);
+        }
+      }
+    }
+  }
+  var pieces = currentTrack.pieces;
+  currentTrack.pieces = [];
+
+  currentTrack.pieces.push(pieces[0]);
+  processPiece(pieces.splice(0,1)[0]);
+
+  for(var i = 0; i < pieces.length; i++){
+    pieces[i].bad = true;
+    currentTrack.pieces.push(pieces[i]);
+  }
+
+  drawCurrentTrack();
+}
+
 
 
 function drawGrid(canvas, size) {
@@ -185,16 +369,60 @@ function draw(track, canvas, size, x, y, layer) {
                   bufferImage(ctx2, track.pieces[s].dir, 1+track.pieces[s].type);
                 }
 
-
                 context.drawImage(c2, offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
 
                 if(track.pieces[s].type == JUMP){
                   bufferImage(ctx2, track.pieces[s].dir,2+track.pieces[s].type);
                   context.drawImage(c2, offsetx + ((track.pieces[s].pos[0] - track.pieces[s].dir[0]) * size), offsety + ((track.pieces[s].pos[1] - track.pieces[s].dir[1]) * size), size, size);
                 }
+
+                if(track.pieces[s].bad){
+                  context.globalAlpha = context.globalAlpha * 0.25;
+                  context.fillStyle = '#f00';
+                  context.fillRect(offsetx + (track.pieces[s].pos[0] * size), offsety + (track.pieces[s].pos[1] * size), size, size);
+                }
             }
         }
     }
+}
+function lineTrack(track, canvas, size, x, y, layer){
+  var context = canvas.getContext('2d');
+  var offsetx = x;
+  var offsety = y;
+    context.lineWidth = size/2;
+    context.strokeStyle = '#000';
+    context.beginPath()
+  for (var s = 0; s < track.pieces.length; s++){
+    switch(track.pieces[s].type){
+      case START:
+      case STRAIGHT:
+      case RAMP:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)-(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)-(track.pieces[s].dir[1]*(size/2)));
+        break;
+      case INTERSECTION:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+size, offsety+(track.pieces[s].pos[1] * size)+(size/2));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size), offsety+(track.pieces[s].pos[1] * size)+(size/2));
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size)+size);
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size));
+        break;
+      case RIGHT:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.arcTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size)+(size/2),offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(right(track.pieces[s].dir)[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(right(track.pieces[s].dir)[1]*(size/2)), size/2);
+        break;
+      case LEFT:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.arcTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2), offsety+(track.pieces[s].pos[1] * size)+(size/2),offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(left(track.pieces[s].dir)[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(left(track.pieces[s].dir)[1]*(size/2)), size/2);
+        break;
+      case JUMP:
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size/2)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size/2)));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)-(track.pieces[s].dir[0]*(size/2.5)), offsety+(track.pieces[s].pos[1] * size)+(size/2)-(track.pieces[s].dir[1]*(size/2.5)));
+        context.moveTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)-(track.pieces[s].dir[0]*(size)), offsety+(track.pieces[s].pos[1] * size)+(size/2)-(track.pieces[s].dir[1]*(size)));
+        context.lineTo(offsetx+(track.pieces[s].pos[0] * size)+(size/2)+(track.pieces[s].dir[0]*(size)), offsety+(track.pieces[s].pos[1] * size)+(size/2)+(track.pieces[s].dir[1]*(size)));
+        break;
+    }
+  }
+  context.stroke();
 }
 
 function drawCurrentTrack(track) {
@@ -403,7 +631,14 @@ function isStartPiece(xCoord,yCoord,zCoord){
   return flag;
 }
 
-
+function doTouch(e){
+  updateTouchEvent(e)
+  if(e.touches.length == 2){
+    startingScale = scale;
+    startingWidth = Math.sqrt(Math.pow(e.touches.item(0).clientX-e.touches.item(1).clientX,2)+Math.pow(e.touches.item(0).clientY-e.touches.item(1).clientY,2));
+  }
+  doMouseDown(e);
+}
 function doMouseDown(e) {
   var canvas = document.getElementById('canvas');
   var widthX = (canvas.width / 2);
@@ -428,12 +663,21 @@ function doMouseDown(e) {
 
     selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
 
-    canvas.addEventListener("mousemove", mouseTracking);
-    canvas.addEventListener("mouseup", endTracking);
-    canvas.addEventListener("mouseleave", endTracking);
+    if(e.isTouch){
+      canvas.addEventListener('touchmove', touchMoving);
+      canvas.addEventListener('touchend', endTouching);
+    } else {
+      canvas.addEventListener("mousemove", mouseTracking);
+      canvas.addEventListener("mouseup", endTracking);
+      canvas.addEventListener("mouseleave", endTracking);
+    }
   }
 }
 
+function endTouching(e){
+  updateTouchEvent(e)
+  endTracking(e);
+}
 function endTracking(e) {
     var consumed = false;
     var canvas = document.getElementById('canvas');
@@ -479,12 +723,33 @@ function endTracking(e) {
     }
 
     if(consumed){
-      canvas.removeEventListener("mousemove", mouseTracking);
-      canvas.removeEventListener("mouseup", endTracking);
-      canvas.removeEventListener("mouseleave", endTracking);
+      if(e.isTouch && e.touches.length < 1){
+        canvas.removeEventListener("touchmove", touchMoving);
+        canvas.removeEventListener("touchend", endTouching);
+      } else {
+        canvas.removeEventListener("mousemove", mouseTracking);
+        canvas.removeEventListener("mouseup", endTracking);
+        canvas.removeEventListener("mouseleave", endTracking);
+      }
     }
 }
 
+function touchMoving(e){
+  updateTouchEvent(e)
+  if(!dragging && selectedPieceIndex < 1){
+    var diffX = e.clientX - originX;
+    var diffY = e.clientY - originY;
+
+    if(e.touches.length == 2){
+      scale = startingScale * startingWidth / Math.sqrt(Math.pow(e.touches.item(0).clientX-e.touches.item(1).clientX,2)+Math.pow(e.touches.item(0).clientY-e.touches.item(1).clientY,2));
+      gridSize = defaultGridSize * scale;
+      halfGrid = gridSize/2;
+    }
+
+    pan(diffX, diffY);
+  }
+  mouseTracking(e);
+}
 function mouseTracking(e) {
     var canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
@@ -501,6 +766,13 @@ function mouseTracking(e) {
       icon.style.display='inline-block';
       icon.style.top = (e.clientY-25)+'px';
       icon.style.left = (e.clientX-25)+'px';
+      if(currentTrack.pieces[selectedPieceIndex].dir[0]==1){
+        icon.style.transform = 'rotate(90deg)';
+      } else if(currentTrack.pieces[selectedPieceIndex].dir[0]==-1){
+        icon.style.transform = 'rotate(-90deg)';
+      } else if(currentTrack.pieces[selectedPieceIndex].dir[1]==1){
+        icon.style.transform = 'rotate(180deg)';
+      }
       dragging = true;
 
       clearAddPieMenu();
@@ -517,10 +789,10 @@ function mouseTracking(e) {
       selectedGridPieceX = Math.floor((e.clientX - (widthX-(widthX%gridSize)) - panX)/gridSize);
       selectedGridPieceY = Math.floor((e.clientY - (widthY-(widthY%gridSize)) - panY)/gridSize);
       var space = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
-      if(space >= 0){
-        icon.style.filter = 'sepia(100%) contrast(50%) saturate(500%) hue-rotate(330deg)';
+      if(space >= 0 && space != selectedPieceIndex){
+        icon.style.background = 'red';
       } else {
-        icon.style.filter = 'none'
+        icon.style.background = 'transparent';
       }
     }
 }
@@ -532,7 +804,7 @@ function switchLayer(){
     * fL 1 = Darken first layer
     */
     focusLayer = ((focusLayer + 1) % 2);
-    document.getElementById('layerCap').style.top = focusLayer?'40px':'0px';
+    document.getElementById('layerCap').style.top = focusLayer?'44px':'6px';
 
     drawCurrentTrack();
 }
@@ -555,7 +827,6 @@ function panButton(num){
     */
     pan(Math.cos((Math.PI/2)*num)*gridSize, Math.sin((Math.PI/2)*num)*gridSize);
 }
-
 
 function modScale(interval){
     if(scale + interval >= 0.2)
@@ -685,6 +956,7 @@ function hideResMenu(save){
   menu.style.opacity = "0";
   drawCurrentTrack();
 }
+
 function trackIndexSet(val){
   trackIndex+=val;
   var rows = Math.trunc((goodTracks.length/tracksPerRow)-0.1);
@@ -708,13 +980,16 @@ function drawGenTracks(index){
   var yoffset = (h/tracksPerCol)/2;
   var sizeDim = Math.min((w/tracksPerRow),(h/tracksPerCol))
 
-
-  ctx.clearRect(0,0,w,h);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   var tIndex = 0
   for(var y = 0; y < tracksPerCol && tIndex < goodTracks.length; y++){
     for(var x = 0; x < tracksPerRow && tIndex < goodTracks.length; x++){
       tIndex = ((index+y)*tracksPerRow)+x;
       if(tIndex < goodTracks.length){
+        var size = sizeDim/10;
+        var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
+        var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
+        lineTrack(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
         if(selectedTrackIndex==tIndex){
           var tmp = ctx.strokeStyle
           ctx.strokeStyle = "orange";
@@ -727,11 +1002,6 @@ function drawGenTracks(index){
           ctx.stroke();
           ctx.strokeStyle = tmp;
         }
-
-        var size = sizeDim/10;
-        var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
-        var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
-        draw(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
       }
     }
   }
@@ -776,8 +1046,8 @@ function threadGen() {
     document.getElementById('workingSpinner').setAttribute("style",'display: inline-block;');
 
     function loadTracks(tracks){
-      for(var i = 0; i < event.data.tracks.length; i++){
-        var t = JSON.parse(event.data.tracks[i]);
+      for(var i = 0; i < tracks.length; i++){
+        var t = tracks[i];
         t.minx = 999;
         t.miny = 999;
         t.maxx = -999;
@@ -794,8 +1064,11 @@ function threadGen() {
     }
 
     time = Date.now();
-    if (!worker) {
-        worker = new Worker("./generator.js");
+    if (!generatorThread) {
+        generatorThread = new Worker("./generator.js");
+    }
+    if (!filterThread) {
+        filterThread = new Worker("./middleware.js");
     }
 
     var pool = [];
@@ -804,29 +1077,41 @@ function threadGen() {
       pool.push(parseInt(document.getElementById(ctrlPrefix[i]+'counter').innerHTML));
       consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
     }
-    worker.postMessage([pool,consec]);
-    worker.onmessage = function (event) {
-        if (event.data.type == 0) {
-            loadTracks(event.data.tracks);
-            if(!hasDrawn){
-              drawGenTracks(0);
-              hasDrawn = true;
-            }
-        }
-        else if (event.data.type == 1) {
-            loadTracks(event.data.tracks);
-            if(!hasDrawn){
-              drawGenTracks(0);
-              hasDrawn = true;
-            }
-            endThread();
-        }
+    generatorThread.onmessage = function (ge) {
+      // filterThread.postMessage(ge.data);
+      var msg = JSON.parse(ge.data);
+      loadTracks(msg.tracks);
+      if(!hasDrawn){
+        drawGenTracks(trackIndex);
+        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      }
+      if (msg.type == 1) {
+        endThread();
+      }
     };
+    filterThread.onmessage = function(fe) {
+      var tracks = JSON.parse(fe.data.tracks);
+      loadTracks(tracks);
+      if(!hasDrawn){
+        drawGenTracks(trackIndex);
+        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      }
+      if (fe.data.type == 1) {
+        endThread();
+      }
+    }
+    generatorThread.postMessage([pool,consec]);
   }
 }
 function endThread(){
-  if(worker)worker.terminate();
-  worker = null;
+  if(generatorThread){
+      generatorThread.terminate()
+      generatorThread = null;
+  }
+  if(filterThread){
+      filterThread.terminate()
+      filterThread = null;
+  }
   working = false;
   document.getElementById('marquee').setAttribute("class","_marquee");
   document.getElementById('workingSpinner').style.display='none';
