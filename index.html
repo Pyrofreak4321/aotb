@@ -154,6 +154,82 @@
     ._floatingButton button:active ._layer_cap{
       background-color: darkorange;
     }
+    
+    ._tooltipleft{
+      position: relative;
+    }
+    
+    ._tooltipleft ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 30%;
+      right: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    ._tooltipleft ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent transparent black;
+    }
+    
+    ._tooltipleft:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    ._tooltipleftbutspecificallyforpanning{
+    }
+    
+    ._tooltipleftbutspecificallyforpanning ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      -webkit-transform: rotate(-45deg) translate(-70px, 108px);
+      -ms-transform: rotate(-45deg) translate(-70px, 108px);
+      transform: rotate(-45deg) translate(-70px, 108px);
+      z-index: 1;
+      top: 30%;
+      right: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    ._tooltipleftbutspecificallyforpanning ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent transparent black;
+    }
+    
+    ._tooltipleftbutspecificallyforpanning:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
 
     ._detail{
       position: relative;
@@ -172,9 +248,9 @@
       position: absolute;
       left: 0;
       right:0;
-      -webkit-transition: opacity .2s,visabilty .2s;
-      -o-transition: opacity .2s,visabilty .2s;
-      transition: opacity .2s,visabilty .2s;
+      -webkit-transition: opacity .2s,visibilty .2s;
+      -o-transition: opacity .2s,visibilty .2s;
+      transition: opacity .2s,visibilty .2s;
     }
     ._detail:hover ._detail_label{
       opacity: 1;
@@ -184,9 +260,9 @@
     ._detail i{
       opacity: 1;
       visibility: visible;
-      -webkit-transition: opacity .2s,visabilty .2s;
-      -o-transition: opacity .2s,visabilty .2s;
-      transition: opacity .2s,visabilty .2s;
+      -webkit-transition: opacity .2s,visibilty .2s;
+      -o-transition: opacity .2s,visibilty .2s;
+      transition: opacity .2s,visibilty .2s;
     }
     ._detail:hover i{
       opacity: 0;
@@ -522,7 +598,8 @@
     </span>
     <input type="file" id="fileElem" accept="application/json" style="display:none" onchange="handleFiles(this.files)">
     <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
-      <div class="_diamond" style="padding-top: 20px; padding-right: 10px;">
+      <div class="_tooltipleftbutspecificallyforpanning _diamond" style="padding-top: 20px; padding-right: 10px;">
+        <span class="_tooltiptext">Pan&nbsp;Track</span>
         <div class="">
           <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
           <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
@@ -532,10 +609,14 @@
           <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
         </div>
       </div>
-      <button class="_roundtop _sharpbottom" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i></button><br>
-      <button class="_sharptop _sharpbottom" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i></button><br>
-      <button class="_roundbottom _sharptop" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i></button><br>
-      <button class="_roundtop _roundbottom" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
+      <button class="_roundtop _sharpbottom _tooltipleft" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i>
+        <span class="_tooltiptext">Increase&nbsp;Zoom</span></button><br>
+      <button class="_sharptop _sharpbottom _tooltipleft" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i>
+      <span class="_tooltiptext">Reset&nbsp;Zoom</span></button><br>
+      <button class="_roundbottom _sharptop _tooltipleft" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i>
+      <span class="_tooltiptext">Decrease&nbsp;Zoom</span></button><br>
+      <button class="_roundtop _roundbottom _tooltipleft" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
+        <span class="_tooltiptext">Switch&nbsp;Layer</span>
         <span class="_layer_ind _roundtop _roundbottom">2</span>
         <i id="layerCap" class="fas fa-layer-group _roundtop _roundbottom _layer_cap" aria-hidden="true"></i>
         <span class="_layer_ind _roundtop _roundbottom">1</span>
