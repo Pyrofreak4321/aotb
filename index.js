@@ -1079,7 +1079,7 @@ function threadGen() {
     }
     generatorThread.onmessage = function (ge) {
       // filterThread.postMessage(ge.data);
-      var msg = JSON.parse(ge.data);
+      var msg = ge.data;
       loadTracks(msg.tracks);
       if(!hasDrawn){
         drawGenTracks(trackIndex);
