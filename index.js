@@ -9,7 +9,7 @@ var tracksPerCol = 5;
 var trackIndex = 0;
 var trackInterval;
 
-
+var jumpFlag = false;
 var rightClick = false;
 var dragging = false;
 var pieAddMenuOpen = false;
@@ -471,6 +471,14 @@ function displayAddPieMenu(){
   showMenuButton(intersectionButton).style.margin = '0 -50px';
   showMenuButton(boostButton).style.margin = '50px -25px';
   showMenuButton(jumpButton).style.margin = '50px 30px';
+  if(jumpFlag == true){
+    jumpButton.disabled = true;
+    jumpButton.style.filter = "grayscale(100%)";
+  }
+  else {
+    jumpButton.disabled = false;
+    jumpButton.style.filter = "grayscale(0%)";
+  }
 }
 
 function clearAddPieMenu(){
@@ -481,6 +489,7 @@ function clearAddPieMenu(){
   hideMenuButton(document.getElementById('INTERSECTION_button'));
   hideMenuButton(document.getElementById('BOOST_button'));
   hideMenuButton(document.getElementById('JUMP_button'));
+  jumpFlag = false;
 }
 
 function displayEditPieMenu(pieceType){
@@ -539,7 +548,7 @@ function addTypeOfTrack(trackPiece){
     case JUMP:
       currentTrack.pieces.push({
         type:trackPiece,
-        pos:[selectedGridPieceX,selectedGridPieceY,focusLayer],
+        pos:[selectedGridPieceX+inbound.dir[0],selectedGridPieceY+inbound.dir[1],focusLayer],
         dir:inbound.dir,
       });
       break;
@@ -604,10 +613,62 @@ function getInbound(xCoord,yCoord,zCoord){
     (currentTrack.pieces[index].pos[1]+currentTrack.pieces[index].dir[1] == yCoord) &&
     (currentTrack.pieces[index].pos[2] == zCoord)){
       selectedDir = currentTrack.pieces[index].dir;
-    }else if((currentTrack.pieces[index].pos[0]-currentTrack.pieces[index].dir[0] == xCoord) &&
-    (currentTrack.pieces[index].pos[1]-currentTrack.pieces[index].dir[1] == yCoord) &&
-    (currentTrack.pieces[index].pos[2] == zCoord)){
-      selectedDir = left(left(currentTrack.pieces[index].dir));
+    }else{
+      switch(currentTrack.pieces[index].type){
+        case JUMP:
+        if((currentTrack.pieces[index].pos[0]-(currentTrack.pieces[index].dir[0]*2) == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-(currentTrack.pieces[index].dir[1]*2) == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+          selectedDir = left(left(currentTrack.pieces[index].dir));
+        }
+        break;
+        case RIGHT:
+        if((currentTrack.pieces[index].pos[0]-right(currentTrack.pieces[index].dir)[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-right(currentTrack.pieces[index].dir)[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = right(currentTrack.pieces[index].dir);
+        }else if((currentTrack.pieces[index].pos[0]-left(currentTrack.pieces[index].dir)[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-left(currentTrack.pieces[index].dir)[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = right(currentTrack.pieces[index].dir);
+        }
+        break;
+        case LEFT:
+        if((currentTrack.pieces[index].pos[0]-left(currentTrack.pieces[index].dir)[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-left(currentTrack.pieces[index].dir)[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = left(currentTrack.pieces[index].dir);
+        }else if((currentTrack.pieces[index].pos[0]-right(currentTrack.pieces[index].dir)[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-right(currentTrack.pieces[index].dir)[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = left(currentTrack.pieces[index].dir);
+        }
+        break;
+        case INTERSECTION:
+        if((currentTrack.pieces[index].pos[0]-left(currentTrack.pieces[index].dir)[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-left(currentTrack.pieces[index].dir)[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = right(currentTrack.pieces[index].dir);
+        }else if((currentTrack.pieces[index].pos[0]-right(currentTrack.pieces[index].dir)[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-right(currentTrack.pieces[index].dir)[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = left(currentTrack.pieces[index].dir);
+        }else if((currentTrack.pieces[index].pos[0]-currentTrack.pieces[index].dir[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-currentTrack.pieces[index].dir[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = left(left(currentTrack.pieces[index].dir));
+        }
+        break;
+        case BOOST:
+        case STRAIGHT:
+        case RAMP:
+        if((currentTrack.pieces[index].pos[0]-currentTrack.pieces[index].dir[0] == xCoord) &&
+          (currentTrack.pieces[index].pos[1]-currentTrack.pieces[index].dir[1] == yCoord) &&
+          (currentTrack.pieces[index].pos[2] == zCoord)){
+            selectedDir = left(left(currentTrack.pieces[index].dir));
+        }
+        break;
+      }
     }
   }
   return {dir:selectedDir||[0,-1]};
@@ -617,7 +678,11 @@ function isSpaceOccupied(xCoord,yCoord,zCoord){
   var selectedIndex = -1;
   for(var index = 0; index < currentTrack.pieces.length; index++){
     if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord) && (currentTrack.pieces[index].pos[2] == zCoord)){
-      flag = true;
+      selectedIndex = index;
+    }else if((currentTrack.pieces[index].pos[0]-currentTrack.pieces[index].dir[0] == xCoord) &&
+    (currentTrack.pieces[index].pos[1]-currentTrack.pieces[index].dir[1] == yCoord) &&
+    (currentTrack.pieces[index].pos[2] == zCoord) && (currentTrack.pieces[index].type == JUMP))
+    {
       selectedIndex = index;
     }
   }
