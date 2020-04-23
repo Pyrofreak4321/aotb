@@ -75,7 +75,6 @@ function onload() {
     canvas.height = h;
     canvas.width = w;
     clearTrack();
-
     if(CANTOUCH){
       //Because !#$%&! apple
       document.addEventListener('touchmove', function (event) {
@@ -87,24 +86,43 @@ function onload() {
       canvas.addEventListener("wheel", wheelZoom); // scroll zoom event listener
       canvas.addEventListener("mousedown", doMouseDown);
     }
-
     document.getElementById('genMenu').addEventListener("click", preventDef);
     document.getElementById('resMenu').addEventListener("click", preventDef);
     document.getElementById('partsList').addEventListener("click", preventDef);
     document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
-    alertify.defaults.glossary.title = 'Track Builder';
-    alertify.defaults.theme.cancel = '_red';
-    alertify.defaults.theme.ok = '_green';
-    alertify.defaults.transition = 'fade';
+
     setTimeout(function () {
       if(!localStorage.getItem("firstTime")){
         localStorage.setItem("firstTime", "true");
         showHelpMenu();
       }
     }, 10);
+
+    recover();
+
+    setInterval(function () {
+      if(currentTrack!=null){
+      localStorage.setItem("currentTrack", JSON.stringify(currentTrack));}
+    }, 3000);
+
+    alertify.defaults.glossary.title = 'Track Builder';
+    alertify.defaults.theme.cancel = '_red';
+    alertify.defaults.theme.ok = '_green';
+    alertify.defaults.transition = 'fade';
 }
+function recover(){
+  var recoveredTrack = localStorage.getItem("currentTrack");
+  var parsedTrack = JSON.parse(recoveredTrack);
+  if(parsedTrack!=null){
+    if(parsedTrack.hasOwnProperty('pieces')){
+      currentTrack = parsedTrack;
+      drawCurrentTrack();
+    }
+  }
+}
+
 
 function clearPrompt(){
   alertify.confirm('Are you sure you want to delete this track?', function() {
@@ -399,7 +417,6 @@ function drawCurrentTrack(track) {
         drawing = false;
     }
 }
-
 
 function hideMenuButton(e){
   e.style.visibility = "hidden";
