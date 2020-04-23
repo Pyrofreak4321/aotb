@@ -6,8 +6,8 @@
     <title>Track Builder</title>
   </head>
   <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
+  <link rel="stylesheet" href="vender/alertify.min.css"/>
+  <link rel="stylesheet" href="vender/default.min.css"/>
   <style>
     html, body{
       height: 100%;
@@ -154,11 +154,11 @@
     ._floatingButton button:active ._layer_cap{
       background-color: darkorange;
     }
-    
+
     ._tooltipleft{
       position: relative;
     }
-    
+
     ._tooltipleft ._tooltiptext{
       visibility: hidden;
       width: 150px;
@@ -175,7 +175,7 @@
       opacity: 0;
       transition: opacity 0.2s;
     }
-    
+
     ._tooltipleft ._tooltiptext::after {
       content: "";
       position: absolute;
@@ -186,15 +186,15 @@
       border-style: solid;
       border-color: transparent transparent transparent black;
     }
-    
+
     ._tooltipleft:hover ._tooltiptext{
       visibility: visible;
       opacity: 1;
     }
-    
+
     ._tooltipleftbutspecificallyforpanning{
     }
-    
+
     ._tooltipleftbutspecificallyforpanning ._tooltiptext{
       visibility: hidden;
       width: 150px;
@@ -214,7 +214,7 @@
       opacity: 0;
       transition: opacity 0.2s;
     }
-    
+
     ._tooltipleftbutspecificallyforpanning ._tooltiptext::after {
       content: "";
       position: absolute;
@@ -225,7 +225,7 @@
       border-style: solid;
       border-color: transparent transparent transparent black;
     }
-    
+
     ._tooltipleftbutspecificallyforpanning:hover ._tooltiptext{
       visibility: visible;
       opacity: 1;
@@ -997,6 +997,6 @@
 
   <script type="text/javascript" src="index.js"></script>
   <script type="text/javascript" src="generator.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+  <script src="vender/alertify.min.js"></script>
   <script src="https://kit.fontawesome.com/0dce990a33.js" crossorigin="anonymous"></script>
 </html>
