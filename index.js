@@ -123,7 +123,7 @@ function recover(){
       }
     }
   }catch(err){
-    alertify.error('Invalid local storage item.');
+    console.log('Invalid local storage item.');
   }
 }
 
