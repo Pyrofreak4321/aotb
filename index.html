@@ -152,6 +152,9 @@
       -webkit-box-shadow: inset 2px 2px 5px #0008;
               box-shadow: inset 2px 2px 5px #0008;
     }
+    ._floatingButton ._active{
+      background-color: lime !important;
+    }
 
     ._floatingButton button:active ._layer_cap{
       background-color: darkorange;
@@ -589,6 +592,9 @@
       <button class="_roundtop _roundbottom _detail" onclick="cleanTrack()" id="btnClean">
         <span class="_detail_label">Clean&nbsp;Track</span><i class="fas fa-brush" aria-hidden="true"></i>
       </button><br>
+      <button class="_roundtop _roundbottom _detail" onclick="setChainAdd()" id="btnChain">
+        <span class="_detail_label">Chain&nbsp;Add</span><i class="fas fa-link" aria-hidden="true"></i>
+      </button><br>
       <button class="_roundtop _roundbottom _detail" onclick="showGenMenu()" id="btnGen">
         <span class="_detail_label">Generate&nbsp;Tracks</span>
         <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
@@ -626,12 +632,12 @@
     </span>
     <!-- menu buttons -->
     <span>
-      <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT)" id="STRIAGHT_button"/>
-      <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT)" id="CORNER_button"/>
-      <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST)" id="BOOST_button"/>
-      <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP)" id="RAMP_button"/>
-      <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION)" id="INTERSECTION_button"/>
-      <input type="image" src="images/jump_split.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP)" id="JUMP_button"/>
+      <input type="image" src="images/straight.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT,true)" id="STRIAGHT_button"/>
+      <input type="image" src="images/right corner.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT,true)" id="CORNER_button"/>
+      <input type="image" src="images/boost.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST,true)" id="BOOST_button"/>
+      <input type="image" src="images/ramp.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP,true)" id="RAMP_button"/>
+      <input type="image" src="images/intersection.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION,true)" id="INTERSECTION_button"/>
+      <input type="image" src="images/jump_split.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP,true)" id="JUMP_button"/>
       <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
