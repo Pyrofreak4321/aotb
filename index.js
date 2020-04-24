@@ -56,6 +56,8 @@ var selectedGridPieceY = null;
 var selectedPieceIndex = -1;
 var selectedTrackIndex = -1;
 
+var canChainAdd = false;
+
 CANTOUCH = ('ontouchstart' in document.documentElement);
 function updateTouchEvent(e){
   e.clientX = (e.touches.item(0)||e.changedTouches.item(0)).clientX;
@@ -537,7 +539,7 @@ function clearEditPieMenu(){
 }
 
 
-function addTypeOfTrack(trackPiece){
+function addTypeOfTrack(trackPiece, shouldChainAdd){
   if(selectedPieceIndex >= 0){
     currentTrack.pieces.splice(selectedPieceIndex,1);
   }
@@ -598,6 +600,25 @@ function addTypeOfTrack(trackPiece){
   }
   clearAddPieMenu();
   drawCurrentTrack();
+
+  if(shouldChainAdd && canChainAdd){
+    var last = currentTrack.pieces[currentTrack.pieces.length-1];
+    if(-1 == isSpaceOccupied(last.pos[0]+last.dir[0],last.pos[1]+last.dir[1],focusLayer)){
+      selectedTrackPieceX += gridSize*last.dir[0];
+      selectedTrackPieceY += gridSize*last.dir[1];
+      selectedGridPieceX += last.dir[0];
+      selectedGridPieceY += last.dir[1];
+      if(last.type == JUMP){
+        selectedTrackPieceX += gridSize*last.dir[0];
+        selectedTrackPieceY += gridSize*last.dir[1];
+        selectedGridPieceX += last.dir[0];
+        selectedGridPieceY += last.dir[1];
+      }
+      setTimeout(function () {
+        displayAddPieMenu();
+      }, 10);
+    }
+  }
 }
 
 function editTrackPiece(trackPiece){
@@ -883,6 +904,10 @@ function mouseTracking(e) {
     }
 }
 
+function setcanChainAdd(){
+  canChainAdd = !canChainAdd;
+  document.getElementById('btnChain').setAttribute('class',canChainAdd?'_roundtop _roundbottom _detail _active':'_roundtop _roundbottom _detail');
+}
 
 function switchLayer(){
     /*
