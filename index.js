@@ -114,12 +114,16 @@ function onload() {
 }
 function recover(){
   var recoveredTrack = localStorage.getItem("currentTrack");
-  var parsedTrack = JSON.parse(recoveredTrack);
-  if(parsedTrack!=null){
-    if(parsedTrack.hasOwnProperty('pieces')){
-      currentTrack = parsedTrack;
-      drawCurrentTrack();
+  try{
+    var parsedTrack = JSON.parse(recoveredTrack);
+    if(parsedTrack!=null){
+      if(parsedTrack.hasOwnProperty('pieces')){
+        currentTrack = parsedTrack;
+        drawCurrentTrack();
+      }
     }
+  }catch(err){
+    alertify.error('Invalid local storage item.');
   }
 }
 
