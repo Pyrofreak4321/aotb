@@ -12,8 +12,7 @@ var trackInterval;
 var jumpFlag = false;
 var rightClick = false;
 var dragging = false;
-var pieAddMenuOpen = false;
-var pieEditMenuOpen = false;
+var pieMenuOpen = false;
 var drawing = false;
 
 var working = false;
@@ -178,7 +177,6 @@ function cleanTrack() {
   }
 
   function processPiece(lastpiece){
-    console.log(lastpiece);
     var flag = false;
     for(var n = 0; n < pieces.length && !flag; n++){
       switch(pieces[n].type){
@@ -199,8 +197,10 @@ function cleanTrack() {
             lastpiece.pos[1]+lastpiece.dir[1] == pieces[n].pos[1];
 
             if(flag && lastpiece.dir[0] == pieces[n].dir[0] && lastpiece.dir[1] == pieces[n].dir[1]){
+              pieces[n].pos[2] = (lastpiece.pos[2]+1)%2;
               flag = true;
             } else if(flag && lastpiece.dir[0] == -pieces[n].dir[0] && lastpiece.dir[1] == -pieces[n].dir[1]){
+              pieces[n].pos[2] = (lastpiece.pos[2]+1)%2;
               pieces[n].dir = lastpiece.dir;
               flag = true;
             } else flag = false;
@@ -268,9 +268,13 @@ function cleanTrack() {
   }
   var pieces = currentTrack.pieces;
   currentTrack.pieces = [];
+  var startIndex = -1;
+  for(var n = 0; n < pieces.length && startIndex==-1; n++){
+    if(pieces[n].type==START) startIndex = n;
+  }
+  currentTrack.pieces.push(pieces[startIndex]);
 
-  currentTrack.pieces.push(pieces[0]);
-  processPiece(pieces.splice(0,1)[0]);
+  processPiece(pieces.splice(startIndex,1)[0]);
 
   for(var i = 0; i < pieces.length; i++){
     pieces[i].bad = true;
@@ -279,8 +283,6 @@ function cleanTrack() {
 
   drawCurrentTrack();
 }
-
-
 
 function drawGrid(canvas, size) {
     var h = canvas.height;
@@ -446,7 +448,6 @@ function hideMenuButton(e){
   e.style.opacity = "0";
   return e;
 }
-
 function showMenuButton(e){
   e.style.left = selectedTrackPieceX - 25  + 'px';
   e.style.top = selectedTrackPieceY - 25 + 'px';
@@ -454,10 +455,32 @@ function showMenuButton(e){
   e.style.opacity = "1";
   return e;
 }
+function disableMenuButton(e){
+  e.disabled = true;
+  e.style.filter = "grayscale(100%)";
+  return e
+}
+function enableMenuButton(e){
+  e.disabled = false;
+  e.style.filter = "grayscale(0%)";
+  return e
+}
+
+function clearPieMenus(){
+  clearAddPieMenu();
+  clearEditPieMenu();
+  clearSelectPieceMenu();
+}
 
 
+function addAtLayer(newlayer){
+  selectedPieceIndex = -1;
+  switchLayer(newlayer);
+  clearSelectPieceMenu();
+  displayAddPieMenu();
+}
 function displayAddPieMenu(){
-  pieAddMenuOpen = true;
+  pieMenuOpen = true;
   var straightButton = document.getElementById('STRIAGHT_button');
   var rampButton = document.getElementById('RAMP_button');
   var cornerButton = document.getElementById('CORNER_button');
@@ -480,9 +503,8 @@ function displayAddPieMenu(){
     jumpButton.style.filter = "grayscale(0%)";
   }
 }
-
 function clearAddPieMenu(){
-  pieAddMenuOpen = false;
+  pieMenuOpen = false;
   hideMenuButton(document.getElementById('STRIAGHT_button'));
   hideMenuButton(document.getElementById('RAMP_button'));
   hideMenuButton(document.getElementById('CORNER_button'));
@@ -493,28 +515,74 @@ function clearAddPieMenu(){
 }
 
 function displayEditPieMenu(pieceType){
-  pieEditMenuOpen = true;
+  pieMenuOpen = true;
   var rotateRightButton = document.getElementById('ROTATERIGHT');
   var rotateLeftButton = document.getElementById('ROTATELEFT');
   var deleteButton = document.getElementById('DELETE');
+  var swapButton = document.getElementById('SWAP');
   var switchButton = document.getElementById('SWITCH');
-  showMenuButton(rotateRightButton).style.margin = ' 0 -50px';
-  showMenuButton(rotateLeftButton).style.margin = ' 0 50px';
+  showMenuButton(rotateRightButton).style.margin = '-15px -48px';
+  showMenuButton(rotateLeftButton).style.margin = '-15px 48px';
   showMenuButton(deleteButton).style.margin = '-50px 0';
-  showMenuButton(switchButton).style.margin = '50px 0';
-}
+  showMenuButton(swapButton).style.margin = '40px 30px';
+  showMenuButton(switchButton).style.margin = '40px -30px';
 
+  if(pieceType==START){
+    disableMenuButton(swapButton);
+    disableMenuButton(deleteButton);
+  }
+}
 function clearEditPieMenu(){
-  pieEditMenuOpen = false;
+  pieMenuOpen = false;
   hideMenuButton(document.getElementById('ROTATERIGHT'));
   hideMenuButton(document.getElementById('ROTATELEFT'));
-  hideMenuButton(document.getElementById('DELETE'));
+  hideMenuButton(enableMenuButton(document.getElementById('DELETE')));
+  hideMenuButton(enableMenuButton(document.getElementById('SWAP')));
   hideMenuButton(document.getElementById('SWITCH'));
-  document.getElementById('SWITCH').disabled = false;
-  document.getElementById('SWITCH').src = "images/straight.png";
-  document.getElementById('SWITCH').style.filter = "grayscale(0%)";
 }
 
+function displaySelectPieceMenu(pieces){
+  pieMenuOpen = true;
+  var topLayer = document.getElementById('top_layer_add'),
+   bottomLayer = document.getElementById('bottom_layer_add'), rampLayer;
+
+  function setClick(e,piece){
+    e.onclick = function(){
+      selectedPieceIndex = piece.index;
+      switchLayer(piece.pos[2]);
+      clearSelectPieceMenu();
+      displayEditPieMenu(piece.type);
+    }
+  }
+
+  for(var i = 0; i < pieces.length; i++){
+    if(pieces[i].type == RAMP){
+      rampLayer = document.getElementById('ramp_layer_sel');
+      rampLayer.src = IMAGES[pieces[i].type+1].src;
+      setClick(rampLayer,pieces[i]);
+    } else if(pieces[i].pos[2]==0){
+      bottomLayer = document.getElementById('bottom_layer_sel');
+      bottomLayer.src = IMAGES[pieces[i].type+1].src;
+      setClick(bottomLayer,pieces[i]);
+    } else if(pieces[i].pos[2]==1){
+      topLayer = document.getElementById('top_layer_sel');
+      topLayer.src = IMAGES[pieces[i].type+1].src;
+      setClick(topLayer,pieces[i]);
+    }
+  }
+
+  if(topLayer)showMenuButton(topLayer).style.margin = '-50px -25px';
+  if(rampLayer)showMenuButton(rampLayer).style.margin = '0 -50px';
+  if(bottomLayer)showMenuButton(bottomLayer).style.margin = '50px -25px';
+}
+function clearSelectPieceMenu(){
+  pieMenuOpen = false;
+  hideMenuButton(document.getElementById('top_layer_sel'));
+  hideMenuButton(document.getElementById('ramp_layer_sel'));
+  hideMenuButton(document.getElementById('bottom_layer_sel'));
+  hideMenuButton(document.getElementById('top_layer_add'));
+  hideMenuButton(document.getElementById('bottom_layer_add'));
+}
 
 function addTypeOfTrack(trackPiece){
   if(selectedPieceIndex >= 0){
@@ -524,6 +592,7 @@ function addTypeOfTrack(trackPiece){
   var inbound = getInbound(selectedGridPieceX,selectedGridPieceY,focusLayer);
 
   switch(trackPiece){
+    case START:
     case STRAIGHT:
       currentTrack.pieces.push({
         type:trackPiece,
@@ -578,7 +647,6 @@ function addTypeOfTrack(trackPiece){
   clearAddPieMenu();
   drawCurrentTrack();
 }
-
 function editTrackPiece(trackPiece){
   var hide = false;
   switch(trackPiece){
@@ -597,6 +665,12 @@ function editTrackPiece(trackPiece){
       break;
     case 3:
       displayAddPieMenu();
+      hide = true;
+      //switch from ramp to straight or vice versa
+      break;
+    case 4:
+      currentTrack.pieces[selectedPieceIndex].pos[2] = ((currentTrack.pieces[selectedPieceIndex].pos[2]+ 1) % 2);
+      switchLayer(currentTrack.pieces[selectedPieceIndex].pos[2])
       hide = true;
       //switch from ramp to straight or vice versa
       break;
@@ -673,7 +747,6 @@ function getInbound(xCoord,yCoord,zCoord){
   }
   return {dir:selectedDir||[0,-1]};
 }
-
 function isSpaceOccupied(xCoord,yCoord,zCoord){
   var selectedIndex = -1;
   for(var index = 0; index < currentTrack.pieces.length; index++){
@@ -688,13 +761,22 @@ function isSpaceOccupied(xCoord,yCoord,zCoord){
   }
   return selectedIndex;
 }
-
-function isStartPiece(xCoord,yCoord,zCoord){
-  var flag = false;
-  if((xCoord == 0) && (yCoord == 0) && (zCoord == 0))
-      flag = true;
-  return flag;
+function getAllPiecesAt(xCoord,yCoord){
+  var pieces = [];
+  for(var index = 0; index < currentTrack.pieces.length; index++){
+    if((currentTrack.pieces[index].pos[0] == xCoord) && (currentTrack.pieces[index].pos[1] == yCoord)){
+      currentTrack.pieces[index].index = index;
+      pieces.push(currentTrack.pieces[index]);
+    }else if((currentTrack.pieces[index].pos[0]-currentTrack.pieces[index].dir[0] == xCoord) &&
+    (currentTrack.pieces[index].pos[1]-currentTrack.pieces[index].dir[1] == yCoord) && (currentTrack.pieces[index].type == JUMP))
+    {
+      currentTrack.pieces[index].index = index;
+      pieces.push(currentTrack.pieces[index]);
+    }
+  }
+  return pieces;
 }
+
 
 function doTouch(e){
   updateTouchEvent(e)
@@ -722,8 +804,7 @@ function doMouseDown(e) {
     originY = e.clientY;
     if(e.button == 2){
       rightClick = true;
-      clearAddPieMenu();
-      clearEditPieMenu();
+      clearPieMenus();
     }
 
     selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
@@ -746,26 +827,24 @@ function endTouching(e){
 function endTracking(e) {
     var consumed = false;
     var canvas = document.getElementById('canvas');
-    var startCheck = isStartPiece(selectedGridPieceX,selectedGridPieceY,focusLayer);
-    if(pieAddMenuOpen == false && pieEditMenuOpen == false && rightClick == false && startCheck == false && dragging == false){
-      selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
+    if(pieMenuOpen == false && rightClick == false && dragging == false){
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
-        if(selectedPieceIndex == -1){
+        var allPieces = getAllPiecesAt(selectedGridPieceX,selectedGridPieceY);
+        if(allPieces.length > 1 || (allPieces.length == 1 && (allPieces[0].pos[2] != focusLayer || allPieces[0].type == RAMP))){
+          consumed = true;
+          displaySelectPieceMenu(allPieces);
+        }else if(allPieces.length == 1){
+          consumed = true;
+          displayEditPieMenu(allPieces[0].type);
+        }else{
           consumed = true;
           displayAddPieMenu();
-        }else if (pieEditMenuOpen == false){
-          consumed = true;
-          displayEditPieMenu(currentTrack.pieces[selectedPieceIndex].type);
         }
       }
     }
-    else if(pieAddMenuOpen == true){
+    else if(pieMenuOpen == true){
       consumed = true;
-      clearAddPieMenu();
-    }
-    else if(pieEditMenuOpen == true){
-      consumed = true;
-      clearEditPieMenu();
+      clearPieMenus();
     }
     else if(dragging == true && e.button != 2){
       var widthX = (canvas.width / 2);
@@ -825,7 +904,7 @@ function mouseTracking(e) {
     originX = e.clientX;
     originY = e.clientY;
 
-    if(!rightClick && selectedPieceIndex >= 0 && currentTrack.pieces[selectedPieceIndex].type!=START && !dragging && ((Math.abs(startX-e.clientX) > (gridSize/2.5)) || (Math.abs(startY-e.clientY) > (gridSize/2.5)))){
+    if(!rightClick && selectedPieceIndex >= 0 && !dragging && ((Math.abs(startX-e.clientX) > (gridSize/2.5)) || (Math.abs(startY-e.clientY) > (gridSize/2.5)))){
       var icon =document.getElementById('dragIcon');
       icon.src = IMAGES[currentTrack.pieces[selectedPieceIndex].type+1].src;
       icon.style.display='inline-block';
@@ -840,8 +919,7 @@ function mouseTracking(e) {
       }
       dragging = true;
 
-      clearAddPieMenu();
-      clearEditPieMenu();
+      clearPieMenus();
     }
 
     if(dragging){
@@ -863,17 +941,16 @@ function mouseTracking(e) {
 }
 
 
-function switchLayer(){
+function switchLayer(force){
     /*
     * fL 0 = Darken second layer
     * fL 1 = Darken first layer
     */
-    focusLayer = ((focusLayer + 1) % 2);
+    focusLayer = force!=null?force:((focusLayer + 1) % 2);
     document.getElementById('layerCap').style.top = focusLayer?'44px':'6px';
 
     drawCurrentTrack();
 }
-
 
 function pan(x,y){
     panX += x;
@@ -881,7 +958,6 @@ function pan(x,y){
     drawGrid(document.getElementById('canvas'), gridSize);
     drawCurrentTrack();
 }
-
 function panButton(num){
     /*
     * Cosine functions return X-axis values, Sine functions return Y-axis values
@@ -902,13 +978,11 @@ function modScale(interval){
     halfGrid = gridSize/2;
     drawCurrentTrack();
 }
-
 function resetScale(){
     panX = 0;
     panY = 0;
     modScale(1 - scale);
 }
-
 function wheelZoom(e){
     /*
     * e is of type WheelEvent

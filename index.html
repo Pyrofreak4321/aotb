@@ -80,6 +80,7 @@
 
     ._floatingButton{
       position:fixed;
+      pointer-events: none;
     }
     ._pieButton{
       background-color: orange;
@@ -135,6 +136,7 @@
     }
 
     ._floatingButton input, ._floatingButton button{
+      pointer-events: auto;
       padding:0px;
       background-color: orange;
       border: none;
@@ -633,8 +635,17 @@
       <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
       <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(3)" id="SWITCH"><i class="fas fa-exchange-alt" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(3)" id="SWAP"><i class="fas fa-random" aria-hidden="true"></i></button>
+      <button class="_pieButton" onclick="editTrackPiece(4)" id="SWITCH"><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i></button>
       <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none; border-radius:5px;" id="dragIcon" />
+
+
+      <input id="top_layer_sel" type="image" src="" class="_pieButton"/>
+      <button id="top_layer_add" class="_pieButton" onclick="addAtLayer(1)"><i class="fas fa-plus" aria-hidden="true"></i></button>
+      <input id="ramp_layer_sel" type="image" src="" class="_pieButton"/>
+      <input id="bottom_layer_sel" type="image" src="" class="_pieButton"/>
+      <button id="bottom_layer_add" class="_pieButton" onclick="addAtLayer(0)"><i class="fas fa-plus" aria-hidden="true"></i></button>
+
     </span>
     <!--Track piece images-->
     <span>
