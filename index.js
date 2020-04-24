@@ -904,7 +904,7 @@ function mouseTracking(e) {
     }
 }
 
-function setcanChainAdd(){
+function setChainAdd(){
   canChainAdd = !canChainAdd;
   document.getElementById('btnChain').setAttribute('class',canChainAdd?'_roundtop _roundbottom _detail _active':'_roundtop _roundbottom _detail');
 }
