@@ -33,6 +33,10 @@ var IMAGES = [document.getElementById("imgStart"),document.getElementById("imgCo
   document.getElementById("imgBoost"), document.getElementById("imgRamp"), document.getElementById("imgIntersection"),
   document.getElementById("imgJumpCatch"), document.getElementById("imgJumpLaunch")];
 
+var ICONS = ["images/StartIcon.png" ,"images/CornerIcon.png","images/CornerIcon.png",'images/StraightIcon.png',
+  "images/BoostIcon.png" , "images/RampIcon.png" , "images/IntersectionIcon.png" ,
+  "images/JumpIcon.png"];
+
 var ctrlPrefix = ['corner_','corner_','straight_','boost_','ramp_','intersection_','jump_'];
 
 //transform controls
@@ -581,15 +585,15 @@ function displaySelectPieceMenu(pieces){
   for(var i = 0; i < pieces.length; i++){
     if(pieces[i].type == RAMP){
       rampLayer = document.getElementById('ramp_layer_sel');
-      rampLayer.src = IMAGES[pieces[i].type+1].src;
+      rampLayer.src = ICONS[pieces[i].type+1];
       setClick(rampLayer,pieces[i]);
     } else if(pieces[i].pos[2]==0){
       bottomLayer = document.getElementById('bottom_layer_sel');
-      bottomLayer.src = IMAGES[pieces[i].type+1].src;
+      bottomLayer.src = ICONS[pieces[i].type+1];
       setClick(bottomLayer,pieces[i]);
     } else if(pieces[i].pos[2]==1){
       topLayer = document.getElementById('top_layer_sel');
-      topLayer.src = IMAGES[pieces[i].type+1].src;
+      topLayer.src = ICONS[pieces[i].type+1];
       setClick(topLayer,pieces[i]);
     }
   }
