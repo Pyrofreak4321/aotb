@@ -85,7 +85,7 @@
     ._pieButton{
       background-color: #f08833;
       border: none;
-      position:absolute;
+      position:absolute !important;
       visibility: hidden;
       opacity: 0;
       padding: 0;
@@ -198,6 +198,120 @@
     }
 
     ._tooltipleft:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    ._tooltipright{
+      position: relative;
+    }
+
+    ._tooltipright ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 30%;
+      left: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltipright ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent black transparent transparent;
+    }
+
+    ._tooltipright:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    ._tooltipup{
+      position: relative;
+    }
+
+    ._tooltipup ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      bottom: 115%;
+      left: -103%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltipup ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 115%;
+      left: 48%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: black transparent transparent transparent;
+    }
+
+    ._tooltipup:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    ._tooltipdown{
+      position: relative;
+    }
+
+    ._tooltipdown ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 110%;
+      left: -103%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltipdown ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 48%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent black transparent;
+    }
+
+    ._tooltipdown:hover ._tooltiptext{
       visibility: visible;
       opacity: 1;
     }
@@ -644,19 +758,26 @@
       <input type="image" src="images/RampIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP,true)" id="RAMP_button"/>
       <input type="image" src="images/IntersectionIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION,true)" id="INTERSECTION_button"/>
       <input type="image" src="images/JumpIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP,true)" id="JUMP_button"/>
-      <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(3)" id="SWAP"><i class="fas fa-random" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(4)" id="SWITCH"><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i></button>
+      <button class="_pieButton _tooltipleft" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i>
+        <span class="_tooltiptext">Rotate&nbsp;Right</span></button>
+      <button class="_pieButton _tooltipright" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i>
+        <span class="_tooltiptext">Rotate&nbsp;Left</span></button>
+      <button class="_pieButton _tooltipup" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i>
+        <span class="_tooltiptext">Delete&nbsp;Piece</span></button>
+      <button class="_pieButton _tooltipright" onclick="editTrackPiece(3)" id="SWAP"><i class="fas fa-random" aria-hidden="true"></i>
+        <span class="_tooltiptext">Swap&nbsp;Piece</span></button>
+      <button class="_pieButton _tooltipleft" onclick="editTrackPiece(4)" id="SWITCH"><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i>
+        <span class="_tooltiptext">Change&nbsp;Layer</span></button>
       <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none; border-radius:5px;" id="dragIcon" />
 
 
       <input id="top_layer_sel" type="image" src="" class="_pieButton"/>
-      <button id="top_layer_add" class="_pieButton" onclick="addAtLayer(1)"><i class="fas fa-plus" aria-hidden="true"></i></button>
+      <button id="top_layer_add" class="_pieButton _tooltipup" onclick="addAtLayer(1)"><i class="fas fa-plus" aria-hidden="true"></i>
+        <span class="_tooltiptext">Add&nbsp;to&nbsp;Top</span></button>
       <input id="ramp_layer_sel" type="image" src="" class="_pieButton"/>
       <input id="bottom_layer_sel" type="image" src="" class="_pieButton"/>
-      <button id="bottom_layer_add" class="_pieButton" onclick="addAtLayer(0)"><i class="fas fa-plus" aria-hidden="true"></i></button>
+      <button id="bottom_layer_add" class="_pieButton _tooltipdown" onclick="addAtLayer(0)"><i class="fas fa-plus" aria-hidden="true"></i>
+        <span class="_tooltiptext">Add&nbsp;to&nbsp;Bottom</span></button>
 
     </span>
     <!--Track piece images-->

@@ -108,7 +108,17 @@ function onload() {
     document.getElementById('btnZoomReset').addEventListener("mouseenter", detachHide);
     document.getElementById('btnLayer').addEventListener("click", attachHide);
     document.getElementById('btnLayer').addEventListener("mouseenter", detachHide);
-    //document.getElementById('divPan').addEventListener("mouseenter", detachHide); //Randomly undoes tooltip, feels dumb.
+    document.getElementById('SWITCH').addEventListener("click", attachHide);
+    document.getElementById('SWITCH').addEventListener("mouseenter", detachHide);
+    document.getElementById('ROTATERIGHT').addEventListener("click", attachHide);
+    document.getElementById('ROTATERIGHT').addEventListener("mouseenter", detachHide);
+    document.getElementById('ROTATELEFT').addEventListener("click", attachHide);
+    document.getElementById('ROTATELEFT').addEventListener("mouseenter", detachHide);
+    document.getElementById('SWAP').addEventListener("click", attachHide);
+    document.getElementById('SWAP').addEventListener("mouseenter", detachHide);
+    document.getElementById('DELETE').addEventListener("click", attachHide);
+    document.getElementById('DELETE').addEventListener("mouseenter", detachHide);
+    document.getElementById('divPan').addEventListener("mouseenter", detachHide);
     document.getElementById('btnPanUp').addEventListener("click", attachHide);
     document.getElementById('btnPanDown').addEventListener("click", attachHide);
     document.getElementById('btnPanLeft').addEventListener("click", attachHide);
@@ -1064,7 +1074,7 @@ function wheelZoom(e){
 }
 
 function attachHide(){
-  var matches = document.querySelectorAll("._tooltipleft, ._tooltipleftbutspecificallyforpanning");
+  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltipright,._tooltipup,._tooltipdown");
   //console.log(matches);
   matches.forEach(function(element) {
     element.classList.add("_hidetooltip");
@@ -1072,7 +1082,7 @@ function attachHide(){
 }
 
 function detachHide(){
-    var matches = document.querySelectorAll("._tooltipleft, ._tooltipleftbutspecificallyforpanning");
+  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltipright,._tooltipup,._tooltipdown");
   //console.log(matches);
   matches.forEach(function(element) {
     element.classList.remove("_hidetooltip");
