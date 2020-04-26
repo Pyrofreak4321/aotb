@@ -62,6 +62,7 @@ var selectedTrackIndex = -1;
 var canChainAdd = false;
 
 CANTOUCH = ('ontouchstart' in document.documentElement);
+
 function updateTouchEvent(e){
   e.clientX = (e.touches.item(0)||e.changedTouches.item(0)).clientX;
   e.clientY = (e.touches.item(0)||e.changedTouches.item(0)).clientY;
@@ -98,6 +99,20 @@ function onload() {
     document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
+    
+    document.getElementById('btnZoomIn').addEventListener("click", attachHide);
+    document.getElementById('btnZoomIn').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnZoomOut').addEventListener("click", attachHide);
+    document.getElementById('btnZoomOut').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnZoomReset').addEventListener("click", attachHide);
+    document.getElementById('btnZoomReset').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnLayer').addEventListener("click", attachHide);
+    document.getElementById('btnLayer').addEventListener("mouseenter", detachHide);
+    //document.getElementById('divPan').addEventListener("mouseenter", detachHide); //Randomly undoes tooltip, feels dumb.
+    document.getElementById('btnPanUp').addEventListener("click", attachHide);
+    document.getElementById('btnPanDown').addEventListener("click", attachHide);
+    document.getElementById('btnPanLeft').addEventListener("click", attachHide);
+    document.getElementById('btnPanRight').addEventListener("click", attachHide);
 
     setTimeout(function () {
       if(!localStorage.getItem("firstTime")){
@@ -508,7 +523,7 @@ function addAtLayer(newlayer){
 }
 function displayAddPieMenu(){
   pieMenuOpen = true;
-  var straightButton = document.getElementById('STRIAGHT_button');
+  var straightButton = document.getElementById('STRAIGHT_button');
   var rampButton = document.getElementById('RAMP_button');
   var cornerButton = document.getElementById('CORNER_button');
   var intersectionButton = document.getElementById('INTERSECTION_button');
@@ -532,7 +547,7 @@ function displayAddPieMenu(){
 }
 function clearAddPieMenu(){
   pieMenuOpen = false;
-  hideMenuButton(document.getElementById('STRIAGHT_button'));
+  hideMenuButton(document.getElementById('STRAIGHT_button'));
   hideMenuButton(document.getElementById('RAMP_button'));
   hideMenuButton(document.getElementById('CORNER_button'));
   hideMenuButton(document.getElementById('INTERSECTION_button'));
@@ -1048,6 +1063,21 @@ function wheelZoom(e){
     // No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
 }
 
+function attachHide(){
+  var matches = document.querySelectorAll("._tooltipleft, ._tooltipleftbutspecificallyforpanning");
+  //console.log(matches);
+  matches.forEach(function(element) {
+    element.classList.add("_hidetooltip");
+  })
+}
+
+function detachHide(){
+    var matches = document.querySelectorAll("._tooltipleft, ._tooltipleftbutspecificallyforpanning");
+  //console.log(matches);
+  matches.forEach(function(element) {
+    element.classList.remove("_hidetooltip");
+  })
+}
 
 function preventDef(event){
   event.preventDefault();

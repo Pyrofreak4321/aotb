@@ -159,6 +159,10 @@
     ._floatingButton button:active ._layer_cap{
       background-color: #c66b21;
     }
+    
+    ._hidetooltip ._tooltiptext{
+      opacity: 0 !important;
+    }
 
     ._tooltipleft{
       position: relative;
@@ -179,6 +183,7 @@
       right: 110%;
       opacity: 0;
       transition: opacity 0.2s;
+      transition-delay: 1s;
     }
 
     ._tooltipleft ._tooltiptext::after {
@@ -195,9 +200,6 @@
     ._tooltipleft:hover ._tooltiptext{
       visibility: visible;
       opacity: 1;
-    }
-
-    ._tooltipleftbutspecificallyforpanning{
     }
 
     ._tooltipleftbutspecificallyforpanning ._tooltiptext{
@@ -218,6 +220,7 @@
       right: 110%;
       opacity: 0;
       transition: opacity 0.2s;
+      transition-delay: 1s;
     }
 
     ._tooltipleftbutspecificallyforpanning ._tooltiptext::after {
@@ -608,13 +611,13 @@
     <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
       <div class="_tooltipleftbutspecificallyforpanning _diamond" style="padding-top: 20px; padding-right: 10px;">
         <span class="_tooltiptext">Pan&nbsp;Track</span>
-        <div class="">
-          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
-          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
+        <div class="" id="divPan">
+          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnPanUp"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnPanRight"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
         </div>
         <div class="">
-          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
-          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnPanLeft"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnPanDown"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
         </div>
       </div>
       <button class="_roundtop _sharpbottom _tooltipleft" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i>
@@ -624,15 +627,18 @@
       <button class="_roundbottom _sharptop _tooltipleft" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i>
       <span class="_tooltiptext">Decrease&nbsp;Zoom</span></button><br>
       <button class="_roundtop _roundbottom _tooltipleft" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
-        <span class="_tooltiptext">Switch&nbsp;Layer</span>
         <span class="_layer_ind _roundtop _roundbottom">2</span>
         <i id="layerCap" class="fas fa-layer-group _roundtop _roundbottom _layer_cap" aria-hidden="true"></i>
         <span class="_layer_ind _roundtop _roundbottom">1</span>
+        <span class="_tooltiptext">Switch&nbsp;Layer</span>
       </button><br>
     </span>
     <!-- menu buttons -->
     <span>
-      <input type="image" src="images/StraightIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT,true)" id="STRIAGHT_button"/>
+      <span id="spanTest" class="tooltipleft">
+        <input type="image" src="images/StraightIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT,true)" id="STRAIGHT_button"/>
+        <span class="_tooltiptext">test</span>
+      </span>
       <input type="image" src="images/CornerIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT,true)" id="CORNER_button"/>
       <input type="image" src="images/BoostIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST,true)" id="BOOST_button"/>
       <input type="image" src="images/RampIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP,true)" id="RAMP_button"/>
