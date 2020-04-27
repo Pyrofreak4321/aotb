@@ -5,9 +5,6 @@
     <meta charset="utf-8" http-equiv="Cache-control" content="no-cache">
     <title>Track Builder</title>
   </head>
-  <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
-  <link rel="stylesheet" href="vender/alertify.min.css"/>
-  <link rel="stylesheet" href="vender/default.min.css"/>
   <style>
     html, body{
       height: 100%;
@@ -274,6 +271,29 @@
       visibility: hidden;
     }
 
+
+    #trackSortBtn{
+      position:relative;
+      min-width:30px;
+      min-height:40px
+    }
+    ._filtering ._filter_spinner{
+      display: inline-block !important;
+      -webkit-animation: spin 1s linear infinite;
+              animation: spin 1s linear infinite;
+    }
+    ._filtering ._filter_button{
+      display: none;
+    }
+    ._filter_spinner{
+      display:none !important;
+      position:absolute;
+      top: 5px;
+      right: 2px;
+      text-shadow: none;
+    }
+
+
     ._spinner{
       position: absolute;
       display: inline-block;
@@ -386,8 +406,12 @@
       background-color: transparent !important;
       padding: 2px;
       border: none;
+      text-shadow: 2px 2px 4px #0008;
       -webkit-box-shadow:none !important;
               box-shadow:none !important;
+    }
+    ._clear:active{
+      text-shadow: none;
     }
 
     ._red {
@@ -573,6 +597,9 @@
               box-shadow: 2px 2px 5px #0008;
     }
   </style>
+  <link href='https://fonts.googleapis.com/css?family=Antic' rel='stylesheet'>
+  <link rel="stylesheet" href="vender/alertify.min.css"/>
+  <link rel="stylesheet" href="vender/default.min.css"/>
   <!--  -->
   <body id="body" onload="onload();" onContextMenu="return false;">
     <canvas id="canvas"></canvas>
@@ -796,6 +823,10 @@
               <p id="trackCounter" style="position:absolute;top:5px;right:5px;margin:0;"></p>
               <canvas id="trackContainer" width="600" height="400"></canvas>
               <div class="_flex _column">
+                <button class="_clear _grey" style="" onclick="sortTracks()" id="trackSortBtn">
+                  <i class="fas fa-sort-amount-up fa-2x _filter_button" aria-hidden="true"></i>
+                  <i class="far fa-hourglass fa-2x _filter_spinner" aria-hidden="true"></i>
+                </button>
                 <button class="_clear _grey" style="" onclick="trackIndexSet(-1)">
                   <i class="fas fa-angle-up fa-2x" aria-hidden="true"></i>
                 </button>
