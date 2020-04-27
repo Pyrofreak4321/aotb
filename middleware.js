@@ -86,7 +86,6 @@ function weigh(item){
 }
 
 onmessage = function(e) {
-  self.importScripts('strcomp.js');
   var newTracks = [];
   var msg = JSON.parse(e.data);
   for(i = 0; i < msg.tracks.length; i++){
