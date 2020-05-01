@@ -2,6 +2,7 @@ var defaultGridSize = 90;
 var gridSize = defaultGridSize;
 var halfGrid = gridSize/2;
 var goodTracks = [];
+var newTracks = [];
 var currentTrack;
 
 var tracksPerRow = 6;
@@ -15,8 +16,9 @@ var dragging = false;
 var pieMenuOpen = false;
 var drawing = false;
 
-var working = false;
+var generating = false;
 var generatorThread = null;
+var sorting = false;
 var filterThread = null;
 
 //changed these to consts and put them in number-order - caused errors, changed back to var
@@ -1252,24 +1254,41 @@ function selectTrack(e){
   drawSelectedTrack();
 }
 function drawSelectedTrack(){
+  canvas = document.getElementById('previewCanvas');
+  canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
   if(selectedTrackIndex < goodTracks.length && selectedTrackIndex >= 0){
-    canvas = document.getElementById('previewCanvas');
-    canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
     var size = canvas.width/Math.max(Math.abs(goodTracks[selectedTrackIndex].minx)+goodTracks[selectedTrackIndex].maxx+1,Math.abs(goodTracks[selectedTrackIndex].miny)+goodTracks[selectedTrackIndex].maxy+1);
     var width = size*(goodTracks[selectedTrackIndex].minx+goodTracks[selectedTrackIndex].maxx+1)/2;
     var height = size*(goodTracks[selectedTrackIndex].miny+goodTracks[selectedTrackIndex].maxy+1)/2;
     draw(goodTracks[selectedTrackIndex],canvas, size, (canvas.width/2)-width, (canvas.height/2)-height, 0);
-    document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
-    drawGenTracks(trackIndex);
   }
+  document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
+  drawGenTracks(trackIndex);
 }
 
+function loadTracks(tracks){
+  for(var i = 0; i < tracks.length; i++){
+    var t = tracks[i];
+    t.minx = 999;
+    t.miny = 999;
+    t.maxx = -999;
+    t.maxy = -999;
+    for(var p = 0; p < t.pieces.length; p++){
+      if(t.pieces[p].pos[0]<t.minx)t.minx=t.pieces[p].pos[0];
+      if(t.pieces[p].pos[0]>t.maxx)t.maxx=t.pieces[p].pos[0];
+      if(t.pieces[p].pos[1]<t.miny)t.miny=t.pieces[p].pos[1];
+      if(t.pieces[p].pos[1]>t.maxy)t.maxy=t.pieces[p].pos[1];
+    }
+    goodTracks.push(t);
+  }
+  document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
+}
 function threadGen() {
   var time;
-  if (!working) {
+  if (!generating) {
     goodTracks = [];
     processingTracks = [];
-    working = true;
+    generating = true;
     trackIndex = 0;
     selectedTrackIndex = -1;
     var hasDrawn = false;
@@ -1278,30 +1297,9 @@ function threadGen() {
     document.getElementById('marquee').setAttribute("class","_marquee _run");
     document.getElementById('workingSpinner').setAttribute("style",'display: inline-block;');
 
-    function loadTracks(tracks){
-      for(var i = 0; i < tracks.length; i++){
-        var t = tracks[i];
-        t.minx = 999;
-        t.miny = 999;
-        t.maxx = -999;
-        t.maxy = -999;
-        for(var p = 0; p < t.pieces.length; p++){
-          if(t.pieces[p].pos[0]<t.minx)t.minx=t.pieces[p].pos[0];
-          if(t.pieces[p].pos[0]>t.maxx)t.maxx=t.pieces[p].pos[0];
-          if(t.pieces[p].pos[1]<t.miny)t.miny=t.pieces[p].pos[1];
-          if(t.pieces[p].pos[1]>t.maxy)t.maxy=t.pieces[p].pos[1];
-        }
-        goodTracks.push(t);
-      }
-      document.getElementById('trackCounter').innerHTML = (selectedTrackIndex+1)+'/'+goodTracks.length;
-    }
-
     time = Date.now();
     if (!generatorThread) {
         generatorThread = new Worker("./generator.js");
-    }
-    if (!filterThread) {
-        filterThread = new Worker("./middleware.js");
     }
 
     var pool = [];
@@ -1311,28 +1309,22 @@ function threadGen() {
       consec.push(parseInt(document.getElementById(ctrlPrefix[i]+'consec').innerHTML));
     }
     generatorThread.onmessage = function (ge) {
-      // filterThread.postMessage(ge.data);
       var msg = JSON.parse(ge.data);
-      loadTracks(msg.tracks);
-      if(!hasDrawn){
-        drawGenTracks(trackIndex);
-        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+      if(!sorting){
+        loadTracks(msg.tracks);
+        if(!hasDrawn){
+          drawGenTracks(trackIndex);
+          hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
+        }
+      } else {
+        newTracks = newTracks.concat(msg.tracks);
       }
+
       if (msg.type == 1) {
         endThread();
       }
     };
-    filterThread.onmessage = function(fe) {
-      var tracks = JSON.parse(fe.data.tracks);
-      loadTracks(tracks);
-      if(!hasDrawn){
-        drawGenTracks(trackIndex);
-        hasDrawn = goodTracks.length > (tracksPerRow*tracksPerCol);
-      }
-      if (fe.data.type == 1) {
-        endThread();
-      }
-    }
+
     generatorThread.postMessage([pool,consec]);
   }
 }
@@ -1341,14 +1333,37 @@ function endThread(){
       generatorThread.terminate()
       generatorThread = null;
   }
-  if(filterThread){
-      filterThread.terminate()
-      filterThread = null;
-  }
-  working = false;
+  generating = false;
   document.getElementById('marquee').setAttribute("class","_marquee");
   document.getElementById('workingSpinner').style.display='none';
 }
+function sortTracks(){
+  if(!sorting){
+    sorting = true;
+    document.getElementById('trackSortBtn').classList.add("_filtering");
+    if (!filterThread) {
+        filterThread = new Worker("./middleware.js");
+    }
+    filterThread.onmessage = function(fe) {
+      var tracks = JSON.parse(fe.data).tracks;
+      goodTracks = tracks;
+      sorting = false;
+      if(newTracks.length > 0){
+        loadTracks(newTracks);
+      }
+      newTracks=[];
+
+      trackIndex = 0;
+      drawGenTracks(trackIndex);
+      filterThread.terminate()
+      filterThread = null;
+      document.getElementById('trackSortBtn').classList.remove("_filtering");
+
+    }
+    filterThread.postMessage(JSON.stringify({tracks:goodTracks}));
+  }
+}
+
 
 function uploadTrack(){
   var fileElem = document.getElementById("fileElem");
