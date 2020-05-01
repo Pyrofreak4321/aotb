@@ -64,6 +64,7 @@ var selectedTrackIndex = -1;
 var canChainAdd = false;
 
 CANTOUCH = ('ontouchstart' in document.documentElement);
+
 function updateTouchEvent(e){
   e.clientX = (e.touches.item(0)||e.changedTouches.item(0)).clientX;
   e.clientY = (e.touches.item(0)||e.changedTouches.item(0)).clientY;
@@ -100,6 +101,30 @@ function onload() {
     document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
+    
+    document.getElementById('btnZoomIn').addEventListener("click", attachHide);
+    document.getElementById('btnZoomIn').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnZoomOut').addEventListener("click", attachHide);
+    document.getElementById('btnZoomOut').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnZoomReset').addEventListener("click", attachHide);
+    document.getElementById('btnZoomReset').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnLayer').addEventListener("click", attachHide);
+    document.getElementById('btnLayer').addEventListener("mouseenter", detachHide);
+    document.getElementById('SWITCH').addEventListener("click", attachHide);
+    document.getElementById('SWITCH').addEventListener("mouseenter", detachHide);
+    document.getElementById('ROTATERIGHT').addEventListener("click", attachHide);
+    document.getElementById('ROTATERIGHT').addEventListener("mouseenter", detachHide);
+    document.getElementById('ROTATELEFT').addEventListener("click", attachHide);
+    document.getElementById('ROTATELEFT').addEventListener("mouseenter", detachHide);
+    document.getElementById('SWAP').addEventListener("click", attachHide);
+    document.getElementById('SWAP').addEventListener("mouseenter", detachHide);
+    document.getElementById('DELETE').addEventListener("click", attachHide);
+    document.getElementById('DELETE').addEventListener("mouseenter", detachHide);
+    document.getElementById('divPan').addEventListener("mouseenter", detachHide);
+    document.getElementById('btnPanUp').addEventListener("click", attachHide);
+    document.getElementById('btnPanDown').addEventListener("click", attachHide);
+    document.getElementById('btnPanLeft').addEventListener("click", attachHide);
+    document.getElementById('btnPanRight').addEventListener("click", attachHide);
 
     setTimeout(function () {
       if(!localStorage.getItem("firstTime")){
@@ -510,12 +535,12 @@ function addAtLayer(newlayer){
 }
 function displayAddPieMenu(){
   pieMenuOpen = true;
-  var straightButton = document.getElementById('STRIAGHT_button');
-  var rampButton = document.getElementById('RAMP_button');
-  var cornerButton = document.getElementById('CORNER_button');
-  var intersectionButton = document.getElementById('INTERSECTION_button');
-  var boostButton = document.getElementById('BOOST_button');
-  var jumpButton = document.getElementById('JUMP_button');
+  var straightButton = document.getElementById('STRAIGHT_span');
+  var rampButton = document.getElementById('RAMP_span');
+  var cornerButton = document.getElementById('CORNER_span');
+  var intersectionButton = document.getElementById('INTERSECTION_span');
+  var boostButton = document.getElementById('BOOST_span');
+  var jumpButton = document.getElementById('JUMP_span');
 
   showMenuButton(straightButton).style.margin = ' 0 50px';
   showMenuButton(rampButton).style.margin = '-50px 30px';
@@ -534,12 +559,12 @@ function displayAddPieMenu(){
 }
 function clearAddPieMenu(){
   pieMenuOpen = false;
-  hideMenuButton(document.getElementById('STRIAGHT_button'));
-  hideMenuButton(document.getElementById('RAMP_button'));
-  hideMenuButton(document.getElementById('CORNER_button'));
-  hideMenuButton(document.getElementById('INTERSECTION_button'));
-  hideMenuButton(document.getElementById('BOOST_button'));
-  hideMenuButton(document.getElementById('JUMP_button'));
+  hideMenuButton(document.getElementById('STRAIGHT_span'));
+  hideMenuButton(document.getElementById('RAMP_span'));
+  hideMenuButton(document.getElementById('CORNER_span'));
+  hideMenuButton(document.getElementById('INTERSECTION_span'));
+  hideMenuButton(document.getElementById('BOOST_span'));
+  hideMenuButton(document.getElementById('JUMP_span'));
   jumpFlag = false;
 }
 
@@ -573,7 +598,8 @@ function clearEditPieMenu(){
 function displaySelectPieceMenu(pieces){
   pieMenuOpen = true;
   var topLayer = document.getElementById('top_layer_add'),
-   bottomLayer = document.getElementById('bottom_layer_add'), rampLayer;
+   bottomLayer = document.getElementById('bottom_layer_add'), rampLayer,
+   rampImg, topImg, bottomImg;
 
   function setClick(e,piece){
     e.onclick = function(){
@@ -586,16 +612,19 @@ function displaySelectPieceMenu(pieces){
 
   for(var i = 0; i < pieces.length; i++){
     if(pieces[i].type == RAMP){
-      rampLayer = document.getElementById('ramp_layer_sel');
-      rampLayer.src = ICONS[pieces[i].type+1];
+      rampLayer = document.getElementById('ramp_layer_span');
+      rampImg = document.getElementById('ramp_layer_sel');
+      rampImg.src = ICONS[pieces[i].type+1];
       setClick(rampLayer,pieces[i]);
     } else if(pieces[i].pos[2]==0){
-      bottomLayer = document.getElementById('bottom_layer_sel');
-      bottomLayer.src = ICONS[pieces[i].type+1];
+      bottomLayer = document.getElementById('bottom_layer_span');
+      bottomImg = document.getElementById('bottom_layer_sel');
+      bottomImg.src = ICONS[pieces[i].type+1];
       setClick(bottomLayer,pieces[i]);
     } else if(pieces[i].pos[2]==1){
-      topLayer = document.getElementById('top_layer_sel');
-      topLayer.src = ICONS[pieces[i].type+1];
+      topLayer = document.getElementById('top_layer_span');
+      topImg = document.getElementById('top_layer_sel');
+      topImg.src = ICONS[pieces[i].type+1];
       setClick(topLayer,pieces[i]);
     }
   }
@@ -606,9 +635,9 @@ function displaySelectPieceMenu(pieces){
 }
 function clearSelectPieceMenu(){
   pieMenuOpen = false;
-  hideMenuButton(document.getElementById('top_layer_sel'));
-  hideMenuButton(document.getElementById('ramp_layer_sel'));
-  hideMenuButton(document.getElementById('bottom_layer_sel'));
+  hideMenuButton(document.getElementById('top_layer_span'));
+  hideMenuButton(document.getElementById('ramp_layer_span'));
+  hideMenuButton(document.getElementById('bottom_layer_span'));
   hideMenuButton(document.getElementById('top_layer_add'));
   hideMenuButton(document.getElementById('bottom_layer_add'));
 }
@@ -1050,6 +1079,21 @@ function wheelZoom(e){
     // No else case just so if something happens to trigger WheelEvent with delta of 0 we don't scale
 }
 
+function attachHide(){
+  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltipright,._tooltipup,._tooltipdown");
+  //console.log(matches);
+  matches.forEach(function(element) {
+    element.classList.add("_hidetooltip");
+  })
+}
+
+function detachHide(){
+  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltipright,._tooltipup,._tooltipdown");
+  //console.log(matches);
+  matches.forEach(function(element) {
+    element.classList.remove("_hidetooltip");
+  })
+}
 
 function preventDef(event){
   event.preventDefault();

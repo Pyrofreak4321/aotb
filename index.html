@@ -79,10 +79,11 @@
       position:fixed;
       pointer-events: none;
     }
+    
     ._pieButton{
       background-color: #f08833;
       border: none;
-      position:absolute;
+      position:absolute !important;
       visibility: hidden;
       opacity: 0;
       padding: 0;
@@ -109,6 +110,15 @@
       background-color: #c66b21;
       -webkit-box-shadow: inset 2px 2px 5px #0008;
               box-shadow: inset 2px 2px 5px #0008;
+    }
+    
+    ._inputSize{
+      height: 50px;
+      width: 50px;
+      border-top-left-radius:50% !important;
+      border-top-right-radius:50% !important;
+      border-bottom-left-radius:50% !important;
+      border-bottom-right-radius:50% !important;
     }
 
     ._diamond {
@@ -156,6 +166,10 @@
     ._floatingButton button:active ._layer_cap{
       background-color: #c66b21;
     }
+    
+    ._hidetooltip ._tooltiptext{
+      opacity: 0 !important;
+    }
 
     ._tooltipleft{
       position: relative;
@@ -165,17 +179,18 @@
       visibility: hidden;
       width: 150px;
       background-color: black;
-      color: #fff;
+      color: #f08833;
       text-align: center;
       font-size: 18px;
       border-radius: 6px;
       padding: 5px 0;
       position: absolute;
       z-index: 1;
-      top: 30%;
+      top: 18%;
       right: 110%;
       opacity: 0;
       transition: opacity 0.2s;
+      transition-delay: 1s;
     }
 
     ._tooltipleft ._tooltiptext::after {
@@ -193,15 +208,164 @@
       visibility: visible;
       opacity: 1;
     }
+    
+    ._tooltipright{
+      position: relative;
+    }
 
-    ._tooltipleftbutspecificallyforpanning{
+    ._tooltipright ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #f08833;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 18%;
+      left: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltipright ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent black transparent transparent;
+    }
+
+    ._tooltipright:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    ._tooltipup{
+      position: relative;
+    }
+
+    ._tooltipup ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #f08833;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      bottom: 115%;
+      left: -103%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltipup ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 115%;
+      left: 48%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: black transparent transparent transparent;
+    }
+
+    ._tooltipup:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    ._tooltipdown{
+      position: relative;
+    }
+
+    ._tooltipdown ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #f08833;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 110%;
+      left: -103%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltipdown ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 48%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent black transparent;
+    }
+
+    ._tooltipdown:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
+    }
+
+    ._tooltiplefttransform{
+      position: relative;
+    }
+
+    ._tooltiplefttransform ._tooltiptext{
+      visibility: hidden;
+      width: 150px;
+      background-color: black;
+      color: #f08833;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      top: 30%;
+      right: 110%;
+      opacity: 0;
+      transition: opacity 0.2s;
+      transition-delay: 1s;
+    }
+
+    ._tooltiplefttransform ._tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent transparent black;
+    }
+
+    ._tooltiplefttransform:hover ._tooltiptext{
+      visibility: visible;
+      opacity: 1;
     }
 
     ._tooltipleftbutspecificallyforpanning ._tooltiptext{
       visibility: hidden;
       width: 150px;
       background-color: black;
-      color: #fff;
+      color: #f08833;
       text-align: center;
       font-size: 18px;
       border-radius: 6px;
@@ -215,6 +379,7 @@
       right: 110%;
       opacity: 0;
       transition: opacity 0.2s;
+      transition-delay: 1s;
     }
 
     ._tooltipleftbutspecificallyforpanning ._tooltiptext::after {
@@ -635,49 +800,84 @@
     <span class="_floatingButton" style="top:15px; right:15px; text-align:right;">
       <div class="_tooltipleftbutspecificallyforpanning _diamond" style="padding-top: 20px; padding-right: 10px;">
         <span class="_tooltiptext">Pan&nbsp;Track</span>
-        <div class="">
-          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnUpArrow"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
-          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnRightArrow"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
+        <div class="" id="divPan">
+          <button type="button" class="" onclick="panButton(3)" name="" style="" id="btnPanUp"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(0)" name="" style="" id="btnPanRight"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
         </div>
         <div class="">
-          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnLeftArrow"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
-          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnDownArrow"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(2)" name="" style="" id="btnPanLeft"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
+          <button type="button" class="" onclick="panButton(1)" name="" style="" id="btnPanDown"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
         </div>
       </div>
-      <button class="_roundtop _sharpbottom _tooltipleft" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i>
+      <button class="_roundtop _sharpbottom _tooltiplefttransform" onclick="modScale(0.2)" value="+" id="btnZoomIn"><i class="fas fa-search-plus" aria-hidden="true"></i>
         <span class="_tooltiptext">Increase&nbsp;Zoom</span></button><br>
-      <button class="_sharptop _sharpbottom _tooltipleft" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i>
+      <button class="_sharptop _sharpbottom _tooltiplefttransform" onclick="resetScale()" value="=" id="btnZoomReset"><i class="fas fa-expand" aria-hidden="true"></i>
       <span class="_tooltiptext">Reset&nbsp;Zoom</span></button><br>
-      <button class="_roundbottom _sharptop _tooltipleft" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i>
+      <button class="_roundbottom _sharptop _tooltiplefttransform" onclick="modScale(-0.2)" value="-" id="btnZoomOut"><i class="fas fa-search-minus" aria-hidden="true"></i>
       <span class="_tooltiptext">Decrease&nbsp;Zoom</span></button><br>
-      <button class="_roundtop _roundbottom _tooltipleft" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
-        <span class="_tooltiptext">Switch&nbsp;Layer</span>
+      <button class="_roundtop _roundbottom _tooltiplefttransform" style="margin-top: 10px; height:unset; position:relative" value="L" id="btnLayer" onclick="switchLayer()">
         <span class="_layer_ind _roundtop _roundbottom">2</span>
         <i id="layerCap" class="fas fa-layer-group _roundtop _roundbottom _layer_cap" aria-hidden="true"></i>
         <span class="_layer_ind _roundtop _roundbottom">1</span>
+        <span class="_tooltiptext">Switch&nbsp;Layer</span>
       </button><br>
     </span>
     <!-- menu buttons -->
     <span>
-      <input type="image" src="images/StraightIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(STRAIGHT,true)" id="STRIAGHT_button"/>
-      <input type="image" src="images/CornerIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(RIGHT,true)" id="CORNER_button"/>
-      <input type="image" src="images/BoostIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(BOOST,true)" id="BOOST_button"/>
-      <input type="image" src="images/RampIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(RAMP,true)" id="RAMP_button"/>
-      <input type="image" src="images/IntersectionIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(INTERSECTION,true)" id="INTERSECTION_button"/>
-      <input type="image" src="images/JumpIcon.png" name="" class="_pieButton" onclick="addTypeOfTrack(JUMP,true)" id="JUMP_button"/>
-      <button class="_pieButton" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(3)" id="SWAP"><i class="fas fa-random" aria-hidden="true"></i></button>
-      <button class="_pieButton" onclick="editTrackPiece(4)" id="SWITCH"><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i></button>
+      <span id="STRAIGHT_span" class="_pieButton _tooltipright">
+        <input type="image" src="images/StraightIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(STRAIGHT,true)" id="STRAIGHT_button"/>
+        <span class="_tooltiptext">Straight</span>
+      </span>
+      <span id="CORNER_span" class="_pieButton _tooltipup">
+        <input type="image" src="images/CornerIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(RIGHT,true)" id="CORNER_button"/>
+        <span class="_tooltiptext">Corner</span>
+      </span>
+      <span id="BOOST_span" class="_pieButton _tooltipdown">
+        <input type="image" src="images/BoostIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(BOOST,true)" id="BOOST_button"/>
+        <span class="_tooltiptext">Boost</span>
+      </span>
+      <span id="RAMP_span" class="_pieButton _tooltipup">
+        <input type="image" src="images/RampIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(RAMP,true)" id="RAMP_button"/>
+        <span class="_tooltiptext">Ramp</span>
+      </span>
+      <span id="INTERSECTION_span" class="_pieButton _tooltipleft">
+        <input type="image" src="images/IntersectionIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(INTERSECTION,true)" id="INTERSECTION_button"/>
+        <span class="_tooltiptext">Intersection</span>
+      </span>
+      <span id="JUMP_span" class="_pieButton _tooltipdown">
+        <input type="image" src="images/JumpIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(JUMP,true)" id="JUMP_button"/>
+        <span class="_tooltiptext">Jump</span>
+      </span>
+      
+      <button class="_pieButton _tooltipleft" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i>
+        <span class="_tooltiptext">Rotate&nbsp;Right</span></button>
+      <button class="_pieButton _tooltipright" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i>
+        <span class="_tooltiptext">Rotate&nbsp;Left</span></button>
+      <button class="_pieButton _tooltipup" onclick="editTrackPiece(0)" id="DELETE"><i class="fas fa-trash-alt" aria-hidden="true"></i>
+        <span class="_tooltiptext">Delete&nbsp;Piece</span></button>
+      <button class="_pieButton _tooltipright" onclick="editTrackPiece(3)" id="SWAP"><i class="fas fa-random" aria-hidden="true"></i>
+        <span class="_tooltiptext">Swap&nbsp;Piece</span></button>
+      <button class="_pieButton _tooltipleft" onclick="editTrackPiece(4)" id="SWITCH"><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i>
+        <span class="_tooltiptext">Change&nbsp;Layer</span></button>
       <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none; border-radius:5px;" id="dragIcon" />
 
 
-      <input id="top_layer_sel" type="image" src="" class="_pieButton"/>
-      <button id="top_layer_add" class="_pieButton" onclick="addAtLayer(1)"><i class="fas fa-plus" aria-hidden="true"></i></button>
-      <input id="ramp_layer_sel" type="image" src="" class="_pieButton"/>
-      <input id="bottom_layer_sel" type="image" src="" class="_pieButton"/>
-      <button id="bottom_layer_add" class="_pieButton" onclick="addAtLayer(0)"><i class="fas fa-plus" aria-hidden="true"></i></button>
+      <span id="top_layer_span" class="_pieButton _tooltipup">
+        <input id="top_layer_sel" type="image" src="" class="_inputSize"/>
+        <span class="_tooltiptext">Select&nbsp;Top&nbsp;Piece</span>
+      </span>
+      <button id="top_layer_add" class="_pieButton _tooltipup" onclick="addAtLayer(1)"><i class="fas fa-plus" aria-hidden="true"></i>
+        <span class="_tooltiptext">Insert&nbsp;Piece&nbsp;Above</span></button>
+      <span id="ramp_layer_span" class="_pieButton _tooltipleft">
+        <input id="ramp_layer_sel" type="image" src="" class="_inputSize"/>
+        <span class="_tooltiptext">Select&nbsp;Ramp</span>
+      </span>
+      <span id="bottom_layer_span" class="_pieButton _tooltipdown">
+        <input id="bottom_layer_sel" type="image" src="" class="_inputSize"/>
+        <span class="_tooltiptext">Select&nbsp;Bottom&nbsp;Piece</span>
+      </span>
+      <button id="bottom_layer_add" class="_pieButton _tooltipdown" onclick="addAtLayer(0)"><i class="fas fa-plus" aria-hidden="true"></i>
+        <span class="_tooltiptext">Insert&nbsp;Piece&nbsp;Below</span></button>
 
     </span>
     <!--Track piece images-->
