@@ -79,9 +79,8 @@
       position:fixed;
       pointer-events: none;
     }
-    
+
     ._pieButton{
-      background-color: #f08833;
       border: none;
       position:absolute !important;
       visibility: hidden;
@@ -103,6 +102,9 @@
       -o-transition: margin .1s, visibility .1s, opacity .1s;
       transition: margin .1s, visibility .1s, opacity .1s;
     }
+    ._pieButton input, button._pieButton{
+      background-color: #f08833;
+    }
     ._pieButton i {
         margin-top: 5px;
     }
@@ -111,7 +113,7 @@
       -webkit-box-shadow: inset 2px 2px 5px #0008;
               box-shadow: inset 2px 2px 5px #0008;
     }
-    
+
     ._inputSize{
       height: 50px;
       width: 50px;
@@ -166,9 +168,13 @@
     ._floatingButton button:active ._layer_cap{
       background-color: #c66b21;
     }
-    
+
     ._hidetooltip ._tooltiptext{
       opacity: 0 !important;
+    }
+
+    ._tooltiptext{
+      pointer-events: none;
     }
 
     ._tooltipleft{
@@ -208,7 +214,7 @@
       visibility: visible;
       opacity: 1;
     }
-    
+
     ._tooltipright{
       position: relative;
     }
@@ -246,7 +252,7 @@
       visibility: visible;
       opacity: 1;
     }
-    
+
     ._tooltipup{
       position: relative;
     }
@@ -284,7 +290,7 @@
       visibility: visible;
       opacity: 1;
     }
-    
+
     ._tooltipdown{
       position: relative;
     }
@@ -848,7 +854,7 @@
         <input type="image" src="images/JumpIcon.png" name="" class="_inputSize" onclick="addTypeOfTrack(JUMP,true)" id="JUMP_button"/>
         <span class="_tooltiptext">Jump</span>
       </span>
-      
+
       <button class="_pieButton _tooltipleft" onclick="editTrackPiece(1)" id="ROTATERIGHT"><i class="fas fa-redo" aria-hidden="true"></i>
         <span class="_tooltiptext">Rotate&nbsp;Right</span></button>
       <button class="_pieButton _tooltipright" onclick="editTrackPiece(2)" id="ROTATELEFT"><i class="fas fa-undo" aria-hidden="true"></i>
@@ -860,7 +866,6 @@
       <button class="_pieButton _tooltipleft" onclick="editTrackPiece(4)" id="SWITCH"><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i>
         <span class="_tooltiptext">Change&nbsp;Layer</span></button>
       <img src="" height="50" width="50" style="display: none; opacity:.75; position:absolute; pointer-events: none; border-radius:5px;" id="dragIcon" />
-
 
       <span id="top_layer_span" class="_pieButton _tooltipup">
         <input id="top_layer_sel" type="image" src="" class="_inputSize"/>

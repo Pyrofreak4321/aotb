@@ -60,6 +60,7 @@ var selectedGridPieceX = null;
 var selectedGridPieceY = null;
 var selectedPieceIndex = -1;
 var selectedTrackIndex = -1;
+var piecesAtLoc = [];
 
 var canChainAdd = false;
 
@@ -101,7 +102,7 @@ function onload() {
     document.getElementById('helpMenu').addEventListener("click", preventDef);
     document.getElementById('trackContainer').addEventListener("click", selectTrack);
     document.getElementById('trackContainer').addEventListener("wheel", wheelTracks);
-    
+
     document.getElementById('btnZoomIn').addEventListener("click", attachHide);
     document.getElementById('btnZoomIn').addEventListener("mouseenter", detachHide);
     document.getElementById('btnZoomOut').addEventListener("click", attachHide);
@@ -535,26 +536,30 @@ function addAtLayer(newlayer){
 }
 function displayAddPieMenu(){
   pieMenuOpen = true;
-  var straightButton = document.getElementById('STRAIGHT_span');
-  var rampButton = document.getElementById('RAMP_span');
-  var cornerButton = document.getElementById('CORNER_span');
-  var intersectionButton = document.getElementById('INTERSECTION_span');
-  var boostButton = document.getElementById('BOOST_span');
-  var jumpButton = document.getElementById('JUMP_span');
+  var blocked = false;
+  for(var i = 0; i < piecesAtLoc.length; i++){
+    if(piecesAtLoc[i].type == RAMP || piecesAtLoc[i].type == JUMP)
+      blocked = true;
+  }
 
-  showMenuButton(straightButton).style.margin = ' 0 50px';
-  showMenuButton(rampButton).style.margin = '-50px 30px';
-  showMenuButton(cornerButton).style.margin = '-50px -25px';
-  showMenuButton(intersectionButton).style.margin = '0 -50px';
-  showMenuButton(boostButton).style.margin = '50px -25px';
-  showMenuButton(jumpButton).style.margin = '50px 30px';
+  showMenuButton(document.getElementById('STRAIGHT_span')).style.margin = ' 0 50px';
+  showMenuButton(document.getElementById('RAMP_span')).style.margin = '-50px 30px';
+  showMenuButton(document.getElementById('CORNER_span')).style.margin = '-50px -25px';
+  showMenuButton(document.getElementById('INTERSECTION_span')).style.margin = '0 -50px';
+  showMenuButton(document.getElementById('BOOST_span')).style.margin = '50px -25px';
+  showMenuButton(document.getElementById('JUMP_span')).style.margin = '50px 30px';
+
   if(jumpFlag == true){
-    jumpButton.disabled = true;
-    jumpButton.style.filter = "grayscale(100%)";
+    disableMenuButton(document.querySelector('#JUMP_span input'));
   }
   else {
-    jumpButton.disabled = false;
-    jumpButton.style.filter = "grayscale(0%)";
+    enableMenuButton(document.querySelector('#JUMP_span input'));
+  }
+  if(blocked == true){
+    disableMenuButton(document.querySelector('#RAMP_span input'));
+  }
+  else {
+    enableMenuButton(document.querySelector('#RAMP_span input'));
   }
 }
 function clearAddPieMenu(){
@@ -570,6 +575,7 @@ function clearAddPieMenu(){
 
 function displayEditPieMenu(pieceType){
   pieMenuOpen = true;
+
   var rotateRightButton = document.getElementById('ROTATERIGHT');
   var rotateLeftButton = document.getElementById('ROTATELEFT');
   var deleteButton = document.getElementById('DELETE');
@@ -580,6 +586,12 @@ function displayEditPieMenu(pieceType){
   showMenuButton(deleteButton).style.margin = '-50px 0';
   showMenuButton(swapButton).style.margin = '40px 30px';
   showMenuButton(switchButton).style.margin = '40px -30px';
+
+  if(piecesAtLoc.length > 1){
+    disableMenuButton(switchButton);
+  } else {
+    enableMenuButton(switchButton);
+  }
 
   if(pieceType==START){
     disableMenuButton(swapButton);
@@ -707,21 +719,30 @@ function addTypeOfTrack(trackPiece, shouldChainAdd){
 
   if(shouldChainAdd && canChainAdd){
     var last = currentTrack.pieces[currentTrack.pieces.length-1];
-    if(-1 == isSpaceOccupied(last.pos[0]+last.dir[0],last.pos[1]+last.dir[1],focusLayer)){
       selectedTrackPieceX += gridSize*last.dir[0];
       selectedTrackPieceY += gridSize*last.dir[1];
       selectedGridPieceX += last.dir[0];
       selectedGridPieceY += last.dir[1];
-      if(last.type == JUMP){
-        selectedTrackPieceX += gridSize*last.dir[0];
-        selectedTrackPieceY += gridSize*last.dir[1];
-        selectedGridPieceX += last.dir[0];
-        selectedGridPieceY += last.dir[1];
-      }
-      setTimeout(function () {
-        displayAddPieMenu();
-      }, 10);
+    if(last.type == JUMP){
+      selectedTrackPieceX += gridSize*last.dir[0];
+      selectedTrackPieceY += gridSize*last.dir[1];
+      selectedGridPieceX += last.dir[0];
+      selectedGridPieceY += last.dir[1];
     }
+    piecesAtLoc = getAllPiecesAt(selectedGridPieceX,selectedGridPieceY);
+    setTimeout(function () {
+      if(piecesAtLoc.length > 1 || (piecesAtLoc.length == 1 && (piecesAtLoc[0].pos[2] != focusLayer || piecesAtLoc[0].type == RAMP))){
+        consumed = true;
+        displaySelectPieceMenu(piecesAtLoc);
+      }else if(piecesAtLoc.length == 1){
+        consumed = true;
+        selectedPieceIndex = isSpaceOccupied(selectedGridPieceX,selectedGridPieceY,focusLayer);
+        displayEditPieMenu(piecesAtLoc[0].type);
+      }else{
+        consumed = true;
+        displayAddPieMenu();
+      }
+    }, 10);
   }
 }
 function editTrackPiece(trackPiece){
@@ -906,13 +927,13 @@ function endTracking(e) {
     var canvas = document.getElementById('canvas');
     if(pieMenuOpen == false && rightClick == false && dragging == false){
       if((Math.abs(startX-e.clientX) < (gridSize/1.5)) && (Math.abs(startY-e.clientY) < (gridSize/1.5))){
-        var allPieces = getAllPiecesAt(selectedGridPieceX,selectedGridPieceY);
-        if(allPieces.length > 1 || (allPieces.length == 1 && (allPieces[0].pos[2] != focusLayer || allPieces[0].type == RAMP))){
+        piecesAtLoc = getAllPiecesAt(selectedGridPieceX,selectedGridPieceY);
+        if(piecesAtLoc.length > 1 || (piecesAtLoc.length == 1 && (piecesAtLoc[0].pos[2] != focusLayer || piecesAtLoc[0].type == RAMP))){
           consumed = true;
-          displaySelectPieceMenu(allPieces);
-        }else if(allPieces.length == 1){
+          displaySelectPieceMenu(piecesAtLoc);
+        }else if(piecesAtLoc.length == 1){
           consumed = true;
-          displayEditPieMenu(allPieces[0].type);
+          displayEditPieMenu(piecesAtLoc[0].type);
         }else{
           consumed = true;
           displayAddPieMenu();
