@@ -1125,7 +1125,17 @@
                     To add a new track piece, click the grid square you want to add it to and select the piece type from the context menu.
                   </li>
                   <li>
+                    To add multiple pieces in a row, click <i class="fas fa-link" aria-hidden="true"></i> before selecting a grid square. 
+                    Click <i class="fas fa-link" aria-hidden="true"></i> again to turn this mode off.
+                  </li>
+                  <li>
                     To edit an existing piece, click on the piece and select the desired action from the context menu.
+                  </li>
+                  <li>
+                    To edit an existing piece when the same space is filled by pieces on multiple levels, click the grid square the pieces are on and select the piece to be edited.
+                  </li>
+                  <li>
+                    To edit an existing piece when the current layer isn’t the same as the one the piece is on, click the grid square and select the piece from the context menu. 
                   </li>
                   <li>
                     To move an existing piece, click and drag the piece to where you want to move it.
@@ -1181,10 +1191,10 @@
                     To start over with a clean slate, click <i class="fas fa-trash-alt" aria-hidden="true"></i>.
                   </li>
                   <li>
-                    To remove any unconnected pieces, click <i class="fas fa-brush" aria-hidden="true"></i>.
+                    To highlight any unconnected track sections or remove stray pieces, click <i class="fas fa-brush" aria-hidden="true"></i>.
                   </li>
                   <li>
-                    To get a list of all the parts used in the current track, click the <i class="fas fa-list" aria-hidden="true"></i> icon.
+                    To get a list of all the parts used in the current track, click <i class="fas fa-list" aria-hidden="true"></i>.
                   </li>
                 </ul>
               </div>
@@ -1195,8 +1205,12 @@
                   Remove Piece
                 </div>
                 <div>
-                  <span><i class="fas fa-exchange-alt fa-2x" aria-hidden="true"></i></span>
+                  <span><i class="fas fa-random" aria-hidden="true"></i></span>
                   Swap Piece
+                </div>
+                <div>
+                  <span><i class="fas fa-exchange-alt" style="transform: rotate(90deg);" aria-hidden="true"></i></span>
+                  Change Layer
                 </div>
                 <div>
                   <span><i class="fas fa-undo fa-2x" aria-hidden="true"></i></span>
@@ -1212,7 +1226,7 @@
                   Start
                 </div>
                 <div>
-                  <img src="images/right corner.png" width="50" height="50"/>
+                  <img src="images/right corner.png" style="transform:rotate(90deg);" width="50" height="50"/>
                   Corner
                 </div>
                 <div>
