@@ -1095,7 +1095,7 @@ function wheelZoom(e){
 }
 
 function attachHide(){
-  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltipright,._tooltipup,._tooltipdown");
+  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltiplefttransform,._tooltipright,._tooltipup,._tooltipdown");
   //console.log(matches);
   matches.forEach(function(element) {
     element.classList.add("_hidetooltip");
@@ -1103,7 +1103,7 @@ function attachHide(){
 }
 
 function detachHide(){
-  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltipright,._tooltipup,._tooltipdown");
+  var matches = document.querySelectorAll("._tooltipleft,._tooltipleftbutspecificallyforpanning,._tooltiplefttransform,._tooltipright,._tooltipup,._tooltipdown");
   //console.log(matches);
   matches.forEach(function(element) {
     element.classList.remove("_hidetooltip");
