@@ -476,7 +476,7 @@ function lineTrack(track, canvas, size, x, y){
   context.stroke();
 }
 
-function drawCurrentTrack(track) {
+function drawCurrentTrack() {
     if (!drawing) {
         drawing = true;
         var canvas = document.getElementById('canvas')
@@ -485,7 +485,7 @@ function drawCurrentTrack(track) {
         var offsety = (canvas.height / 2);
         offsetx = offsetx - (offsetx % gridSize) + panX;
         offsety = offsety - (offsety % gridSize) + panY;
-        draw(track||currentTrack, canvas, gridSize, offsetx, offsety, focusLayer);
+        draw(currentTrack, canvas, gridSize, offsetx, offsety, focusLayer);
         drawing = false;
     }
 }
