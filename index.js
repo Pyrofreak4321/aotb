@@ -21,7 +21,7 @@ var generatorThread = null;
 var sorting = false;
 var filterThread = null;
 
-//changed these to consts and put them in number-order - caused errors, changed back to var
+//changed these to consts and put gthem in number-order - caused errors, changed back to var
 var START = -1;
 var RIGHT = 0;
 var LEFT = 1;
@@ -1238,7 +1238,7 @@ function drawGenTracks(index){
         var size = sizeDim/10;
         var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
         var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
-        lineTrack(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
+        lineTrack(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height);
         if(selectedTrackIndex==tIndex){
           var tmp = ctx.strokeStyle
           ctx.strokeStyle = "orange";
