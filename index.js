@@ -378,7 +378,6 @@ function draw(track, canvas, size, x, y, layer) {
     var context = canvas.getContext('2d');
     var offsetx = x;
     var offsety = y;
-    var curImage;
     var c2 = document.createElement("canvas");
     var ctx2 = c2.getContext("2d");
     c2.width = size;
@@ -437,7 +436,7 @@ function draw(track, canvas, size, x, y, layer) {
         }
     }
 }
-function lineTrack(track, canvas, size, x, y, layer){
+function lineTrack(track, canvas, size, x, y){
   var context = canvas.getContext('2d');
   var offsetx = x;
   var offsety = y;
