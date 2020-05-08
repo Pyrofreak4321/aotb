@@ -21,7 +21,7 @@ var generatorThread = null;
 var sorting = false;
 var filterThread = null;
 
-//changed these to consts and put them in number-order - caused errors, changed back to var
+//changed these to consts and put gthem in number-order - caused errors, changed back to var
 var START = -1;
 var RIGHT = 0;
 var LEFT = 1;
@@ -378,7 +378,6 @@ function draw(track, canvas, size, x, y, layer) {
     var context = canvas.getContext('2d');
     var offsetx = x;
     var offsety = y;
-    var curImage;
     var c2 = document.createElement("canvas");
     var ctx2 = c2.getContext("2d");
     c2.width = size;
@@ -437,7 +436,7 @@ function draw(track, canvas, size, x, y, layer) {
         }
     }
 }
-function lineTrack(track, canvas, size, x, y, layer){
+function lineTrack(track, canvas, size, x, y){
   var context = canvas.getContext('2d');
   var offsetx = x;
   var offsety = y;
@@ -477,7 +476,7 @@ function lineTrack(track, canvas, size, x, y, layer){
   context.stroke();
 }
 
-function drawCurrentTrack(track) {
+function drawCurrentTrack() {
     if (!drawing) {
         drawing = true;
         var canvas = document.getElementById('canvas')
@@ -486,7 +485,7 @@ function drawCurrentTrack(track) {
         var offsety = (canvas.height / 2);
         offsetx = offsetx - (offsetx % gridSize) + panX;
         offsety = offsety - (offsety % gridSize) + panY;
-        draw(track||currentTrack, canvas, gridSize, offsetx, offsety, focusLayer);
+        draw(currentTrack, canvas, gridSize, offsetx, offsety, focusLayer);
         drawing = false;
     }
 }
@@ -1239,7 +1238,7 @@ function drawGenTracks(index){
         var size = sizeDim/10;
         var width = size*(goodTracks[tIndex].minx+goodTracks[tIndex].maxx+1)/2;
         var height = size*(goodTracks[tIndex].miny+goodTracks[tIndex].maxy+1)/2;
-        lineTrack(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height, 2);
+        lineTrack(goodTracks[tIndex], canvas, size, (x*(xoffset*2))+xoffset-width, (y*(yoffset*2))+yoffset-height);
         if(selectedTrackIndex==tIndex){
           var tmp = ctx.strokeStyle
           ctx.strokeStyle = "orange";
